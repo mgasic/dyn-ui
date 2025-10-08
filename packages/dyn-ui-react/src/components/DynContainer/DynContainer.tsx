@@ -67,3 +67,5 @@ export const DynContainer = React.forwardRef<DynContainerRef, DynContainerProps>
 );
 
 DynContainer.displayName = 'DynContainer';
+
+export default DynContainer;
