@@ -1,4 +1,6 @@
-// Standardized exports for DynListView component
+// Standardized exports for DynListView
 export { DynListView } from './DynListView';
 export { default } from './DynListView';
-export type { DynListViewProps, ListViewItem, ListViewTemplate } from './DynListView.types';
+export type { DynListViewProps } from './DynListView.types';
+
+export type { ListViewItem, ListViewTemplate } from './DynListView.types';

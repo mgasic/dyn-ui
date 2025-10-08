@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { DynTreeViewProps, DynTreeNode } from './DynTreeView.types';
 import styles from './DynTreeView.module.css';
 
-const DynTreeView: React.FC<DynTreeViewProps> = ({
+export const DynTreeView: React.FC<DynTreeViewProps> = ({
   treeData = [],
   checkable = false,
   selectable = true,

@@ -242,3 +242,5 @@ export const DynGrid: React.FC<DynGridProps> = ({
 };
 
 DynGrid.displayName = 'DynGrid';
+
+export default DynGrid;

@@ -7,7 +7,7 @@ import styles from './DynListView.module.css';
 // import DynButton from '../DynButton';
 // import DynIcon from '../DynIcon';
 
-const DynListView: React.FC<DynListViewProps> = ({
+export const DynListView: React.FC<DynListViewProps> = ({
   data = [],
   actions = [],
   loading = false,

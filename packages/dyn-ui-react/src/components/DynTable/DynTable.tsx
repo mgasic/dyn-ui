@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { DynTableProps, DynTableColumn, TableSortDirection } from './DynTable.types';
 import styles from './DynTable.module.css';
 
-const DynTable: React.FC<DynTableProps> = ({
+export const DynTable: React.FC<DynTableProps> = ({
   data = [],
   columns = [],
   actions = [],

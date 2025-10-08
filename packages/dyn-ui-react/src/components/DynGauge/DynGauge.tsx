@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { DynGaugeProps } from './DynGauge.types';
 import styles from './DynGauge.module.css';
 
-const DynGauge: React.FC<DynGaugeProps> = ({
+export const DynGauge: React.FC<DynGaugeProps> = ({
   value,
   min = 0,
   max = 100,

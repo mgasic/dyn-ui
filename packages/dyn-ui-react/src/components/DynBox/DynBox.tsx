@@ -7,3 +7,5 @@ export function DynBox({ sx, style, ...rest }: DynBoxProps) {
   const resolved = sxToStyle(sx);
   return <div style={{ ...resolved, ...style }} {...rest} />;
 }
+
+export default DynBox;

@@ -143,3 +143,5 @@ export const DynPage: React.FC<DynPageProps> = ({
 };
 
 DynPage.displayName = 'DynPage';
+
+export default DynPage;

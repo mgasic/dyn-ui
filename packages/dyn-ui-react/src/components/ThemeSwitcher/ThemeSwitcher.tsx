@@ -102,3 +102,5 @@ export function ThemeSwitcher({
 }
 
 ThemeSwitcher.displayName = 'ThemeSwitcher';
+
+export default ThemeSwitcher;
