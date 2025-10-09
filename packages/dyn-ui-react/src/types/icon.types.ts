@@ -1,22 +1,8 @@
-import { BaseComponentProps } from './theme';
-
-export interface DynIconProps extends BaseComponentProps {
-  /** Icon identifier - string (icon name) or React component */
-  icon: string | React.ReactNode;
-  
-  /** Icon size */
-  size?: string | number;
-  
-  /** Click event handler */
-  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
-}
-
-export interface IconDictionary {
-  [key: string]: string;
-}
-
-// Icon processing utility types
-export interface ProcessedIcon {
-  baseClass: string;
-  iconClass: string;
-}
+export type {
+  DynIconProps,
+  DynIconSizeToken,
+  DynIconTone,
+  IconDictionary,
+  ProcessedIcon,
+} from '../components/DynIcon/DynIcon.types';
+export { DYN_ICON_DEFAULT_PROPS } from '../components/DynIcon/DynIcon.types';

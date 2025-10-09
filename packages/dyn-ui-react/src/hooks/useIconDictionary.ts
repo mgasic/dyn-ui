@@ -1,6 +1,12 @@
-﻿import * as React from 'react';
+import { useContext } from 'react';
 import { IconDictionaryContext } from '../providers/IconDictionaryProvider';
 
 export const useIconDictionary = () => {
-  return React.useContext(IconDictionaryContext as unknown as React.Context<any>);
+  const context = useContext(IconDictionaryContext);
+
+  if (context === undefined) {
+    throw new Error('useIconDictionary must be used within IconDictionaryProvider');
+  }
+
+  return context;
 };

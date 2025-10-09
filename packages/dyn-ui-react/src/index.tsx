@@ -4,14 +4,14 @@ export type { DynButtonProps } from './components/DynButton';
 
 // Display Components - SCOPE 5
 export { DynBadge, DynAvatar, DynLabel, DynIcon } from './components';
-export type { 
-  DynBadgeProps, 
-  BadgeStatus, 
-  BadgeSize, 
-  DynAvatarProps, 
-  AvatarSize, 
+export type {
+  DynBadgeProps,
+  BadgeStatus,
+  BadgeSize,
+  DynAvatarProps,
+  AvatarSize,
   DynLabelProps,
-  DynIconPropsNew as DynIconProps
+  DynIconProps
 } from './components';
 export { DYN_COLOR_PALETTE, AVATAR_SIZES } from './components';
 

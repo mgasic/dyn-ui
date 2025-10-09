@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from '@storybook/react';
 import { DynBadge, type DynBadgeProps } from './DynBadge';
 
 const meta: Meta<typeof DynBadge> = {

@@ -1,9 +1,39 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DynIcon > matches snapshot 1`] = `
+exports[`DynIcon snapshots > matches default render 1`] = `
 <div>
   <span
-    class="_dyn-icon_760c34 _dyn-icon--empty_760c34"
+    aria-hidden="true"
+    class="_dynIcon_760c34 _dyn-icon-size-medium_760c34 dyn-icon dyn-icon-ok"
+    role="img"
   />
+</div>
+`;
+
+exports[`DynIcon snapshots > matches registry icon render 1`] = `
+<div>
+  <span
+    aria-hidden="true"
+    class="_dynIcon_760c34 _dyn-icon-size-large_760c34"
+    role="img"
+  >
+    <span
+      aria-hidden="true"
+      class="_dynIconSvg_760c34"
+    >
+      <svg
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M20 6L9 17l-5-5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </span>
+  </span>
 </div>
 `;

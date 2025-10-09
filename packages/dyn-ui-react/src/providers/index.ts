@@ -3,6 +3,9 @@
  * Updated to include IconDictionaryProvider - SCOPE 5
  */
 
-export { IconDictionaryProvider, IconDictionaryContext } from './IconDictionaryProvider';
-
-// Export types
+export {
+  IconDictionaryProvider,
+  IconDictionaryContext,
+  DEFAULT_ICON_DICTIONARY,
+} from './IconDictionaryProvider';
+export type { IconDictionaryContextValue } from './IconDictionaryProvider';

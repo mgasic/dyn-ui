@@ -1,10 +1,13 @@
 import { render, screen } from '@testing-library/react';
+import React, { useContext } from 'react';
 import { describe, it, expect } from 'vitest';
-import * as React  from 'react';
-import { IconDictionaryProvider, IconDictionaryContext } from './IconDictionaryProvider';
+import {
+  IconDictionaryProvider,
+  IconDictionaryContext,
+  DEFAULT_ICON_DICTIONARY,
+} from './IconDictionaryProvider';
 import { useIconDictionary } from '../hooks/useIconDictionary';
 
-// Test component that uses the hook
 const TestComponent: React.FC = () => {
   const dictionary = useIconDictionary();
   return (
@@ -16,9 +19,13 @@ const TestComponent: React.FC = () => {
   );
 };
 
-// Test component that consumes context directly
 const DirectContextComponent: React.FC = () => {
-  const dictionary = React.useContext(IconDictionaryContext);
+  const dictionary = useContext(IconDictionaryContext);
+
+  if (!dictionary) {
+    return <span data-testid="context-missing">missing</span>;
+  }
+
   return (
     <div>
       <span data-testid="context-ok">{dictionary['ok'] || 'not-found'}</span>
@@ -41,8 +48,8 @@ describe('IconDictionaryProvider', () => {
 
   it('merges custom dictionary with defaults', () => {
     const customDictionary = {
-      'custom': 'my-custom-icon',
-      'ok': 'override-ok-icon' // Override default
+      custom: 'my-custom-icon',
+      ok: 'override-ok-icon',
     };
 
     render(
@@ -67,8 +74,8 @@ describe('IconDictionaryProvider', () => {
   });
 
   it('updates dictionary when customDictionary prop changes', () => {
-    const initialCustom = { 'custom': 'initial-icon' };
-    const updatedCustom = { 'custom': 'updated-icon' };
+    const initialCustom = { custom: 'initial-icon' };
+    const updatedCustom = { custom: 'updated-icon' };
 
     const { rerender } = render(
       <IconDictionaryProvider customDictionary={initialCustom}>
@@ -90,11 +97,7 @@ describe('IconDictionaryProvider', () => {
   it('contains all default icons', () => {
     const IconChecker: React.FC = () => {
       const dictionary = useIconDictionary();
-      const expectedIcons = [
-        'user', 'home', 'settings', 'ok', 'close', 'warning', 'minus', 'plus',
-        'search', 'edit', 'delete', 'arrow-up', 'arrow-down', 'arrow-left',
-        'arrow-right', 'menu', 'info', 'calendar', 'clock', 'mail'
-      ];
+      const expectedIcons = Object.keys(DEFAULT_ICON_DICTIONARY);
 
       return (
         <div>
@@ -113,7 +116,6 @@ describe('IconDictionaryProvider', () => {
       </IconDictionaryProvider>
     );
 
-    // Check a few key icons
     expect(screen.getByTestId('icon-user')).toHaveTextContent('dyn-icon-user');
     expect(screen.getByTestId('icon-home')).toHaveTextContent('dyn-icon-home');
     expect(screen.getByTestId('icon-settings')).toHaveTextContent('dyn-icon-settings');
@@ -128,7 +130,6 @@ describe('useIconDictionary', () => {
       return <div>Should not render</div>;
     };
 
-    // Suppress console.error for this test
     const originalError = console.error;
     console.error = () => {};
 
@@ -161,5 +162,9 @@ describe('useIconDictionary', () => {
 
     expect(screen.getByTestId('has-ok')).toHaveTextContent('true');
     expect(screen.getByTestId('has-user')).toHaveTextContent('true');
+  });
+
+  it('exposes default dictionary constant', () => {
+    expect(DEFAULT_ICON_DICTIONARY.ok).toBe('dyn-icon-ok');
   });
 });

@@ -60,7 +60,8 @@ export { ThemeSwitcher } from './ThemeSwitcher';
 
 // Basic Component Types
 export type { DynButtonProps } from './DynButton/DynButton.types';
-export type { DynIconProps } from '../types/icon.types';
+export type { DynIconProps, DynIconSizeToken, DynIconTone } from '../types/icon.types';
+export { DYN_ICON_DEFAULT_PROPS } from '../types/icon.types';
 
 // Display Component Types - SCOPE 5
 export type { 

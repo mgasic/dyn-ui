@@ -1,11 +1,11 @@
 import { renderHook } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { describe, it, expect } from 'vitest';
-import { React } from 'react';
 import { useIconDictionary } from './useIconDictionary';
 import { IconDictionaryProvider } from '../providers/IconDictionaryProvider';
 
 const createWrapper = (customDictionary?: Record<string, string>) => {
-  return ({ children }: { children: React.ReactNode }) => (
+  return ({ children }: { children: ReactNode }) => (
     <IconDictionaryProvider customDictionary={customDictionary}>
       {children}
     </IconDictionaryProvider>
