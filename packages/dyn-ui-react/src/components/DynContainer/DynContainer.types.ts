@@ -1,13 +1,25 @@
-export interface DynContainerProps {
-  height?: number;
-  noBorder?: boolean;
-  noPadding?: boolean;
-  title?: string;
-  className?: string;
-  children?: React.ReactNode;
-  style?: React.CSSProperties;
+import type { HTMLAttributes } from 'react';
+
+import type {
+  DynContainerLayout,
+  DynContainerProps as LayoutDynContainerProps,
+} from '../../types/layout.types';
+
+export type { DynContainerLayout } from '../../types/layout.types';
+
+type NativeDivProps = Omit<
+  HTMLAttributes<HTMLDivElement>,
+  'children' | 'className' | 'style' | 'title' | 'id'
+>;
+
+type ContainerFocusOptions = Parameters<HTMLElement['focus']>[0];
+
+export interface DynContainerProps
+  extends LayoutDynContainerProps,
+    NativeDivProps {
+  layout?: DynContainerLayout;
 }
 
 export interface DynContainerRef {
-  focus(): void;
+  focus: (options?: ContainerFocusOptions) => void;
 }
