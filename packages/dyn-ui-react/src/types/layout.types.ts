@@ -3,7 +3,9 @@
  * Part of DYN UI Layout Components Group - SCOPE 7
  */
 
-import { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+
+import type { BaseComponentProps } from './theme';
 
 // Common layout types
 export type LayoutSize = 'small' | 'medium' | 'large';
@@ -12,23 +14,26 @@ export type LayoutDirection = 'horizontal' | 'vertical';
 export type LayoutAlignment = 'start' | 'center' | 'end' | 'stretch';
 export type LayoutJustify = 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
 
+export type DynContainerLayout = 'fluid' | 'fixed' | 'responsive';
+
 // DynContainer Props
-export interface DynContainerProps {
-  children: ReactNode;
-  title?: string;
-  subtitle?: string;
-  size?: LayoutSize;
+export interface DynContainerProps extends BaseComponentProps {
+  title?: ReactNode;
+  subtitle?: ReactNode;
+  size?: LayoutSize | DynContainerLayout;
   spacing?: LayoutSpacing;
   bordered?: boolean;
+  noBorder?: boolean;
   shadow?: boolean;
   background?: 'none' | 'surface' | 'card';
   direction?: LayoutDirection;
   align?: LayoutAlignment;
   justify?: LayoutJustify;
-  maxWidth?: string;
-  className?: string;
-  id?: string;
-  'data-testid'?: string;
+  maxWidth?: string | number;
+  height?: string | number;
+  layout?: DynContainerLayout;
+  noPadding?: boolean;
+  style?: CSSProperties;
 }
 
 // DynDivider Props
