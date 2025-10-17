@@ -35,10 +35,10 @@ export const DynStepper = forwardRef<DynStepperRef, DynStepperProps>(
       steps = [],
       // New API
       activeStep: controlledActiveStep,
-      defaultActiveStep = 0,
+      defaultActiveStep: uncontrolledDefaultActiveStep,
       // Legacy API - maintain backward compatibility
       value: controlledValue,
-      defaultValue = 0,
+      defaultValue: uncontrolledDefaultValue,
       // Common props
       linear = true,
       onChange,
@@ -64,7 +64,7 @@ export const DynStepper = forwardRef<DynStepperRef, DynStepperProps>(
     
     // Determine controlled state and initial value with proper priority:
     // 1. activeStep (new API) takes precedence
-    // 2. value (legacy API) as fallback  
+    // 2. value (legacy API) as fallback
     // 3. defaultActiveStep (new API default)
     // 4. defaultValue (legacy API default)
     const isControlledByActiveStep = controlledActiveStep !== undefined;
@@ -74,20 +74,44 @@ export const DynStepper = forwardRef<DynStepperRef, DynStepperProps>(
     const getInitialStep = () => {
       if (isControlledByActiveStep) return controlledActiveStep;
       if (isControlledByValue) return valueToIndex(controlledValue, steps);
-      if (defaultActiveStep !== 0) return defaultActiveStep;
-      return valueToIndex(defaultValue, steps);
+      if (uncontrolledDefaultActiveStep !== undefined) {
+        return clamp(uncontrolledDefaultActiveStep, 0, Math.max(steps.length - 1, 0));
+      }
+      if (uncontrolledDefaultValue !== undefined) {
+        return valueToIndex(uncontrolledDefaultValue, steps);
+      }
+      return 0;
     };
     
     const [internalActiveStep, setInternalActiveStep] = useState(getInitialStep);
-    
+
     // Get current active step with proper priority
     const getCurrentActiveStep = () => {
       if (isControlledByActiveStep) return controlledActiveStep as number;
       if (isControlledByValue) return valueToIndex(controlledValue, steps);
       return internalActiveStep;
     };
-    
+
     const activeStep = getCurrentActiveStep();
+
+    useEffect(() => {
+      if (isControlled) return;
+
+      if (uncontrolledDefaultActiveStep !== undefined) {
+        const nextIndex = clamp(uncontrolledDefaultActiveStep, 0, Math.max(steps.length - 1, 0));
+        if (nextIndex !== internalActiveStep) {
+          setInternalActiveStep(nextIndex);
+        }
+        return;
+      }
+
+      if (uncontrolledDefaultValue !== undefined) {
+        const nextIndex = valueToIndex(uncontrolledDefaultValue, steps);
+        if (nextIndex !== internalActiveStep) {
+          setInternalActiveStep(nextIndex);
+        }
+      }
+    }, [isControlled, internalActiveStep, uncontrolledDefaultActiveStep, uncontrolledDefaultValue, steps]);
     
     // Handle controlled value changes (both new and legacy API)
     useEffect(() => {
@@ -110,21 +134,35 @@ export const DynStepper = forwardRef<DynStepperRef, DynStepperProps>(
     const clampedActiveStep = clamp(activeStep, 0, maxIndex);
 
     // Enhanced change handler that supports both APIs
-    const notifyChange = useCallback((newIndex: number, step: StepItem) => {
-      // Call legacy onChange with both value formats
-      if (onChange) {
-        if (isControlledByValue && typeof controlledValue === 'string') {
-          // If controlled by string value, callback with step id
-          onChange(step.id, step, newIndex);
-        } else {
-          // Otherwise callback with numeric index  
-          onChange(newIndex, step, newIndex);
+    const notifyChange = useCallback(
+      (newIndex: number, step: StepItem) => {
+        const shouldEmitStepId =
+          (isControlledByValue && typeof controlledValue === 'string') ||
+          (!isControlled && typeof uncontrolledDefaultValue === 'string');
+
+        // Call legacy onChange with both value formats
+        if (onChange) {
+          if (shouldEmitStepId) {
+            // If controlled by string value, callback with step id
+            onChange(step.id, step, newIndex);
+          } else {
+            // Otherwise callback with numeric index
+            onChange(newIndex, step, newIndex);
+          }
         }
-      }
-      
-      // Call legacy onStepChange
-      onStepChange?.(newIndex, step);
-    }, [onChange, onStepChange, controlledValue, isControlledByValue]);
+
+        // Call legacy onStepChange
+        onStepChange?.(newIndex, step);
+      },
+      [
+        controlledValue,
+        isControlled,
+        isControlledByValue,
+        onChange,
+        onStepChange,
+        uncontrolledDefaultValue,
+      ]
+    );
 
     // Imperative API methods
     const nextStep = useCallback((): boolean => {
