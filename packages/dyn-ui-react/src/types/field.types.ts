@@ -6,6 +6,11 @@
 import type { ReactNode } from 'react';
 import type { BaseComponentProps } from './theme';
 export type { DynFieldContainerProps } from '../components/DynFieldContainer/DynFieldContainer.types';
+export type {
+  DynTextAreaProps,
+  DynTextAreaRef,
+  DynTextAreaResize,
+} from '../components/DynTextArea/DynTextArea.types';
 
 export interface ValidationRule {
   type: 'required' | 'email' | 'url' | 'pattern' | 'minLength' | 'maxLength' | 'custom';
