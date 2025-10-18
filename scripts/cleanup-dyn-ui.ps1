@@ -96,9 +96,35 @@ function Create-CentralizedExports {
 "@
 
     # Component exports
+    $valueExports = @()
+
     foreach ($folder in $componentFolders) {
         $componentName = $folder.Name
         $exportContent += "export { $componentName } from './$componentName';`n"
+
+        $typeFiles = Get-ChildItem -Path $folder.FullName -Filter '*.types.ts' -File -ErrorAction SilentlyContinue
+        foreach ($typeFile in $typeFiles) {
+            $fileContent = Get-Content -Path $typeFile.FullName -ErrorAction SilentlyContinue
+            foreach ($line in $fileContent) {
+                if ($line -match 'export\s+const\s+([A-Za-z0-9_]+)') {
+                    $constName = $matches[1]
+                    $relativePath = "./$componentName/$($typeFile.BaseName)"
+                    $valueExports += "$constName|$relativePath"
+                }
+            }
+        }
+    }
+
+    $valueExports = $valueExports | Sort-Object -Unique
+
+    if ($valueExports.Count -gt 0) {
+        $exportContent += "`n// Value exports`n"
+        foreach ($valueExport in $valueExports) {
+            $parts = $valueExport -split '\|', 2
+            if ($parts.Length -eq 2) {
+                $exportContent += "export { $($parts[0]) } from '$($parts[1])';`n"
+            }
+        }
     }
 
     $exportContent += "`n// Type exports`n"
