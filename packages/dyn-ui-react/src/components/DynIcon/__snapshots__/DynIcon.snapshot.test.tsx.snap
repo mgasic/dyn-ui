@@ -4,7 +4,7 @@ exports[`DynIcon snapshots > matches default render 1`] = `
 <div>
   <span
     aria-hidden="true"
-    class="_dynIcon_760c34 _dyn-icon-size-medium_760c34 dyn-icon dyn-icon-ok"
+    class="_dynIcon_398cbd _dyn-icon-size-medium_398cbd dyn-icon dyn-icon-ok"
     role="img"
   />
 </div>
@@ -14,12 +14,12 @@ exports[`DynIcon snapshots > matches registry icon render 1`] = `
 <div>
   <span
     aria-hidden="true"
-    class="_dynIcon_760c34 _dyn-icon-size-large_760c34"
+    class="_dynIcon_398cbd _dyn-icon-size-large_398cbd"
     role="img"
   >
     <span
       aria-hidden="true"
-      class="_dynIconSvg_760c34"
+      class="_dynIconSvg_398cbd"
     >
       <svg
         fill="none"
