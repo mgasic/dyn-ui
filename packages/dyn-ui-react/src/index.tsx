@@ -20,7 +20,7 @@ export type {
   DynLabelProps,
   DynIconProps
 } from './components';
-export { AVATAR_SIZES } from './components';
+export { AVATAR_SIZES } from './components/DynAvatar/DynAvatar.types';
 
 // Form Components - SCOPE 6
 export {

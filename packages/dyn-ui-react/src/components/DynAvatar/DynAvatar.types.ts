@@ -7,6 +7,17 @@ export type DynAvatarShape = 'circle' | 'square' | 'rounded';
 export type DynAvatarStatus = 'online' | 'offline' | 'away' | 'busy';
 
 /**
+ * Token-based avatar size map that mirrors CSS module sizing
+ */
+export const AVATAR_SIZES = {
+  xs: 'var(--dyn-spacing-2xl, 2rem)',
+  sm: 'var(--dyn-spacing-3xl, 3rem)',
+  md: '4rem',
+  lg: '5rem',
+  xl: '6rem',
+} as const satisfies Record<DynAvatarSize, string>;
+
+/**
  * Props interface for DynAvatar component
  * Clean TypeScript implementation without external namespace dependencies
  */
