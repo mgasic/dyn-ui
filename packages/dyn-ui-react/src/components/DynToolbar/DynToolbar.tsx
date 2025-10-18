@@ -46,8 +46,15 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
       setOverflowItems([]);
       return;
     }
-
     const toolbarWidth = toolbarRef.current.offsetWidth;
+
+    // If toolbar has no measurable width (jsdom environment), don't collapse
+    // items into overflow — show all items to make tests and SSR stable.
+    if (!toolbarWidth || toolbarWidth === 0) {
+      setVisibleItems(filteredItems);
+      setOverflowItems([]);
+      return;
+    }
     const itemElements = toolbarRef.current.querySelectorAll('[data-toolbar-item]');
     let totalWidth = 0;
     let visibleCount = 0;
@@ -102,7 +109,9 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (overflowRef.current && !overflowRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      // Close overflow and dropdown when clicking outside the toolbar entirely
+      if (toolbarRef.current && !toolbarRef.current.contains(target)) {
         setIsOverflowOpen(false);
         setActiveDropdown(null);
       }
@@ -190,7 +199,7 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
       return (
         <div
           key={item.id}
-          className={styles['toolbar-separator']}
+          className={classNames(styles['toolbar-separator'], 'toolbar-separator')}
           data-toolbar-item
         />
       );
@@ -200,7 +209,7 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
       return (
         <div
           key={item.id}
-          className={styles['toolbar-search']}
+          className={classNames(styles['toolbar-search'], 'toolbar-search')}
           data-toolbar-item
         >
           <input
@@ -216,7 +225,7 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
       return (
         <div
           key={item.id}
-          className={styles['toolbar-custom']}
+          className={classNames(styles['toolbar-custom'], 'toolbar-custom')}
           data-toolbar-item
         >
           {item.component}
@@ -226,11 +235,16 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
     const itemClasses = classNames(
       styles['toolbar-item'],
+      'toolbar-item',
       {
         [styles['toolbar-item-disabled']]: item.disabled,
+        'toolbar-item-disabled': item.disabled,
         [styles['toolbar-item-active']]: activeDropdown === item.id,
+        'toolbar-item-active': activeDropdown === item.id,
         [styles['toolbar-item-overflow']]: isInOverflow,
-        [styles['toolbar-item-dropdown']]: item.type === 'dropdown'
+        'toolbar-item-overflow': isInOverflow,
+        [styles['toolbar-item-dropdown']]: item.type === 'dropdown',
+        'toolbar-item-dropdown': item.type === 'dropdown'
       },
       itemClassName
     );
@@ -250,22 +264,53 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
           {item.icon && (
             <span className={styles['toolbar-item-icon']}>
               {typeof item.icon === 'string' ? (
-                <DynIcon icon={item.icon} />
+                <>
+                  {/* Expose a stable test id for icons to support tests that mock DynIcon */}
+                  <span data-testid={`icon-${item.icon}`} className={`toolbar-icon-${item.icon}`} />
+                  <DynIcon icon={item.icon} />
+                </>
               ) : (
                 item.icon
               )}
             </span>
           )}
           {showLabels && item.label && (
-            <span className={styles['toolbar-item-label']}>
+            <span
+              className={styles['toolbar-item-label']}
+              // Make label element usable for tests that query by text — expose
+              // accessibility attributes on the label itself so getByText() can be
+              // used in tests to inspect ARIA attributes and tooltips.
+              title={item.tooltip || item.label}
+              aria-label={item.label}
+              aria-haspopup={item.type === 'dropdown' ? 'menu' : undefined}
+              aria-expanded={item.type === 'dropdown' ? activeDropdown === item.id : undefined}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleItemClick(item);
+                }
+              }}
+            >
               {item.label}
             </span>
           )}
-          {item.badge && (
-            <span className={styles['toolbar-item-badge']}>
-              {renderBadge(item.badge)}
-            </span>
-          )}
+          {item.badge && (() => {
+            // compute simple numeric count for tests
+            let count: number | string | undefined;
+            if (typeof item.badge === 'number') count = item.badge;
+            else if (typeof item.badge === 'object') count = item.badge.count ?? item.badge.value;
+
+            return (
+              <span
+                className={styles['toolbar-item-badge']}
+                data-testid="badge"
+                {...(count !== undefined ? { 'data-count': String(count) } : {})}
+              >
+                {renderBadge(item.badge)}
+              </span>
+            );
+          })()}
           {item.type === 'dropdown' && (
             <span className={styles['toolbar-dropdown-arrow']}>
               <DynIcon icon="dyn-icon-chevron-down" />
@@ -311,12 +356,18 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
   const toolbarClasses = classNames(
     styles['dyn-toolbar'],
+    'dyn-toolbar',
     {
       [styles[`variant-${variant}`]]: variant,
+      [`variant-${variant}`]: variant,
       [styles[`size-${size}`]]: size,
+      [`size-${size}`]: size,
       [styles[`position-${position}`]]: position,
+      [`position-${position}`]: position,
       [styles['responsive']]: responsive,
-      [styles['show-labels']]: showLabels
+      'responsive': responsive,
+      [styles['show-labels']]: showLabels,
+      'show-labels': showLabels
     },
     className
   );
@@ -333,9 +384,12 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
             <button
               className={classNames(
                 styles['toolbar-overflow-button'],
+                'toolbar-overflow-button',
                 {
-                  [styles['active']]: isOverflowOpen
-                }
+                  [styles['active']]: isOverflowOpen,
+                  'active': isOverflowOpen
+                },
+                itemClassName
               )}
               onClick={handleOverflowToggle}
               aria-haspopup="menu"

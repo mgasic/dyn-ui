@@ -9,14 +9,15 @@
     "strict": true,
     "jsx": "react-jsx",
     "moduleResolution": "Node",
-    "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "types": [
       "vitest/globals",
       "@testing-library/jest-dom",
       "node"
-    ]
+    ],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "packages/**/*",

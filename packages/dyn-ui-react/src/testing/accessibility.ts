@@ -56,7 +56,7 @@ Nodes:\n${nodes}`;
       .join('\n\n');
 
     // Fail the test with the formatted message so CI output is actionable
-    expect(results.violations, `Accessibility violations:\n${formattedViolations}`).toHaveLength(0);
+    throw new Error(`Accessibility violations:\n${formattedViolations}`);
   } else {
     expect(results.violations).toHaveLength(0);
   }
