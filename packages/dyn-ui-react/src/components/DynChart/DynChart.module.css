@@ -139,7 +139,7 @@
   font-weight: var(--dyn-font-weight-normal);
   line-height: var(--dyn-line-height-normal);
 }
-/* .typeLine {}
+/* .typeLine {}? */
 
 .typeLine {
   --dyn-chart-marker-shape: circle;
