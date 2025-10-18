@@ -1,2 +1,11 @@
 export { DynPage } from './DynPage';
-export type { DynPageProps } from './DynPage.types';
+export type {
+  DynPageProps,
+  DynPageBreadcrumb,
+  DynPageAction,
+  LayoutSize,
+  LayoutSpacing,
+  LayoutDirection,
+  LayoutAlignment,
+  LayoutJustify,
+} from '../../types/layout.types';
