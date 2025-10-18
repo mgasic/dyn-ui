@@ -16,6 +16,7 @@ import {
 
   // Form Components - SCOPE 6
   DynInput,
+  DynTextArea,
   DynSelect,
   DynCheckbox,
   DynDatePicker,
@@ -69,6 +70,7 @@ describe('Component Exports', () => {
 
   it('exports all form components - SCOPE 6', () => {
     expect(typeof DynInput).toBe('function');
+    expect(typeof DynTextArea).toBe('function');
     expect(typeof DynSelect).toBe('function');
     expect(typeof DynCheckbox).toBe('function');
     expect(typeof DynDatePicker).toBe('function');

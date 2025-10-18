@@ -1,0 +1,92 @@
+.container {
+  --dyn-textarea-bg: var(--dyn-color-surface, var(--color-surface, #ffffff));
+  --dyn-textarea-color: var(--dyn-color-text-primary, var(--color-text-primary, #111827));
+  --dyn-textarea-border: var(--dyn-color-border, var(--color-border, #d1d5db));
+  --dyn-textarea-border-hover: var(--dyn-color-border-hover, var(--color-border-hover, #9ca3af));
+  --dyn-textarea-border-focus: var(--dyn-color-primary, var(--color-primary, #2563eb));
+  --dyn-textarea-focus-ring: var(--dyn-color-focus-ring, var(--color-focus-ring, rgba(37, 99, 235, 0.35)));
+  --dyn-textarea-placeholder: var(--dyn-color-text-placeholder, var(--color-text-placeholder, #9ca3af));
+  --dyn-textarea-disabled-bg: var(--dyn-color-surface-disabled, var(--color-surface-disabled, #f3f4f6));
+  --dyn-textarea-disabled-color: var(--dyn-color-text-disabled, var(--color-text-disabled, #9ca3af));
+  --dyn-textarea-readonly-bg: var(--dyn-color-surface-readonly, var(--color-surface-readonly, #f9fafb));
+  --dyn-textarea-error: var(--dyn-color-danger, var(--color-danger, #d32f2f));
+
+  display: flex;
+  width: 100%;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 6rem;
+  padding: var(--dyn-spacing-sm, var(--spacing-sm, 0.75rem));
+  border-radius: var(--dyn-border-radius-md, var(--border-radius-md, 0.5rem));
+  border: 1px solid var(--dyn-textarea-border);
+  background-color: var(--dyn-textarea-bg);
+  color: var(--dyn-textarea-color);
+  font-family: var(--dyn-font-family-base, var(--font-family-base, system-ui, -apple-system, sans-serif));
+  font-size: var(--dyn-font-size-base, var(--font-size-base, 1rem));
+  line-height: var(--dyn-line-height-base, var(--line-height-base, 1.5));
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  resize: vertical;
+}
+
+.textarea::placeholder {
+  color: var(--dyn-textarea-placeholder);
+}
+
+.textarea:hover:not(.textareaDisabled):not(.textareaReadonly) {
+  border-color: var(--dyn-textarea-border-hover);
+}
+
+.textarea:focus-visible {
+  outline: none;
+}
+
+.textareaFocused {
+  border-color: var(--dyn-textarea-border-focus);
+  box-shadow: 0 0 0 3px var(--dyn-textarea-focus-ring);
+}
+
+.textareaDisabled {
+  background-color: var(--dyn-textarea-disabled-bg);
+  color: var(--dyn-textarea-disabled-color);
+  cursor: not-allowed;
+}
+
+.textareaReadonly {
+  background-color: var(--dyn-textarea-readonly-bg);
+}
+
+.textareaError {
+  border-color: var(--dyn-textarea-error);
+}
+
+.textareaResizeNone {
+  resize: none;
+}
+
+.textareaResizeHorizontal {
+  resize: horizontal;
+}
+
+.textareaResizeBoth {
+  resize: both;
+}
+
+@media (max-width: 767px) {
+  .textarea {
+    min-height: var(--dyn-size-touch-target, var(--size-touch-target, 44px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .textarea {
+    transition: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .textarea {
+    border-width: 2px;
+  }
+}

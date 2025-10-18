@@ -1,0 +1,85 @@
+import type { Meta, StoryObj } from '@storybook/react';
+import { DynTextArea } from './DynTextArea';
+
+const meta: Meta<typeof DynTextArea> = {
+  title: 'Form/DynTextArea',
+  component: DynTextArea,
+  parameters: {
+    layout: 'padded',
+    docs: {
+      description: {
+        component:
+          'Dinamička textarea komponenta sa validacijom, kontrolom veličine i WCAG 2.1 AA podrškom. Koristi zajednički DynFieldContainer za konzistentno poravnanje labela i poruka o greškama.',
+      },
+    },
+  },
+  tags: ['autodocs'],
+  argTypes: {
+    resize: {
+      control: 'select',
+      options: ['none', 'vertical', 'horizontal', 'both'],
+      description: 'Određuje ponašanje resize opcije',
+    },
+    disabled: { control: 'boolean' },
+    readonly: { control: 'boolean' },
+    required: { control: 'boolean' },
+    optional: { control: 'boolean' },
+    rows: { control: 'number' },
+    cols: { control: 'number' },
+    placeholder: { control: 'text' },
+    help: { control: 'text' },
+  },
+  args: {
+    label: 'Opis',
+    placeholder: 'Unesite detaljniji opis...',
+    rows: 4,
+  },
+};
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Playground: Story = {
+  args: {
+    help: 'Možete koristiti markdown sintaksu za formatiranje.',
+  },
+};
+
+export const States: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: '1rem', maxWidth: 640 }}>
+      <DynTextArea label="Osnovno" placeholder="Standardno polje" />
+      <DynTextArea label="Obavezno" required placeholder="Morate popuniti ovo polje" />
+      <DynTextArea label="Sa greškom" errorMessage="Neispravan opis" value="tekst" />
+      <DynTextArea label="Onemogućeno" disabled value="Onemogućeni unos" />
+      <DynTextArea label="Samo čitanje" readonly value="Sadržaj samo za prikaz" />
+    </div>
+  ),
+};
+
+export const ResizeOptions: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: '1rem', maxWidth: 640 }}>
+      <DynTextArea label="Bez resize" resize="none" placeholder="Resize zabranjen" />
+      <DynTextArea label="Horizontalno" resize="horizontal" rows={3} />
+      <DynTextArea label="Vertikalno" resize="vertical" rows={6} />
+      <DynTextArea label="Oba smera" resize="both" rows={5} />
+    </div>
+  ),
+};
+
+export const DarkTheme: Story = {
+  parameters: {
+    backgrounds: { default: 'dark' },
+  },
+  render: () => (
+    <div data-theme="dark" style={{ padding: '2rem', background: '#111827', borderRadius: 12 }}>
+      <div style={{ display: 'grid', gap: '1rem', maxWidth: 640 }}>
+        <DynTextArea label="Opis" placeholder="Unesite detalje" />
+        <DynTextArea label="Sa greškom" errorMessage="Greška" value="Opis" />
+        <DynTextArea label="Savet" help="Tekst pomoći u tamnom modu" />
+      </div>
+    </div>
+  ),
+};

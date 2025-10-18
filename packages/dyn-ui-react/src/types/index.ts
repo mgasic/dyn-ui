@@ -35,6 +35,9 @@ export type { DynLabelProps } from './label.types';
 // Form Components types - SCOPE 6
 export type {
   DynInputProps,
+  DynTextAreaProps,
+  DynTextAreaRef,
+  DynTextAreaResize,
   DynSelectProps,
   DynDatePickerProps,
   DynFieldContainerProps,
@@ -52,6 +55,9 @@ export type {
 export {
   DYN_CHECKBOX_DEFAULT_PROPS,
 } from '../components/DynCheckbox/DynCheckbox.types';
+export {
+  DYN_TEXT_AREA_DEFAULT_PROPS,
+} from '../components/DynTextArea/DynTextArea.types';
 
 // Layout Components types - SCOPE 7
 export type {
