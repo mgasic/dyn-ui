@@ -67,6 +67,7 @@ export interface DynInputProps extends DynFieldBase {
   pattern?: string;
   icon?: string;
   showCleanButton?: boolean;
+  showSpinButtons?: boolean;
   step?: number;
   min?: number;
   max?: number;
