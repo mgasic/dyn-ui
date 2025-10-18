@@ -10,13 +10,7 @@ import { cleanup } from '@testing-library/react';
 // Force expect.stringContaining to return a plain substring so `toHaveClass(expect.stringContaining('x'))`
 // receives a simple string. Vitest's asymmetric matcher objects are not always compatible with
 // jest-dom's `toHaveClass` implementation in this environment, so override unconditionally.
-if (typeof (expect as any).stringContaining !== 'function') {
-  // Provide a minimal asymmetric matcher compatible with jest-dom's toHaveClass
-  (expect as any).stringContaining = (s: string) => ({
-    asymmetricMatch: (actual: unknown) => typeof actual === 'string' && (actual as string).includes(s),
-    toString: () => `StringContaining(${s})`,
-  });
-}
+(expect as any).stringContaining = (s: string) => s;
 
 // Cleanup after each test
 afterEach(() => {

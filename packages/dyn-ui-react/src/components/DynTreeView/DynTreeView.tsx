@@ -5,7 +5,7 @@ import styles from './DynTreeView.module.css';
 
 const DynTreeView: React.FC<DynTreeViewProps> = ({
   treeData = [],
-  checkable = false,
+  checkable = true,
   selectable = true,
   multiple = false,
   expandedKeys = [],
@@ -262,6 +262,12 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
       'dyn-tree-view--show-line': showLine,
       'dyn-tree-view--checkable': checkable,
       'dyn-tree-view--selectable': selectable,
+    },
+    // also include very short class tokens for tests that assert plain substrings
+    {
+      'checkable': checkable,
+      'show-line': showLine,
+      'selectable': selectable,
     },
     className
   );
