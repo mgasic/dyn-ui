@@ -179,7 +179,7 @@ export interface DynInputProps
   currencyConfig?: CurrencyInputConfig;
 
   /** Change event handler */
-  onChange?: (value: string) => void;
+  onChange?: (value: string | number) => void;
 
   /** Blur event handler */
   onBlur?: FocusEventHandler<HTMLInputElement>;
