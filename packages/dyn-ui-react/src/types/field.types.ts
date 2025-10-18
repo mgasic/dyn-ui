@@ -48,15 +48,13 @@ export interface DynFieldRef {
 export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'currency';
 export type InputSize = 'small' | 'medium' | 'large';
 
-export interface CurrencyInputConfig {
-  currencyCode: string;
-  precision?: number;
-  thousandSeparator?: string;
-  decimalSeparator?: string;
-  showSymbol?: boolean;
+export interface DynCurrencyConfig {
   symbol?: string;
-  symbolPosition?: 'prefix' | 'suffix';
-  autoFormat?: boolean;
+  currencyCode?: string;
+  showCurrencyCode?: boolean;
+  precision?: number;
+  decimalSeparator?: string;
+  thousandSeparator?: string;
 }
 
 export interface DynInputProps extends DynFieldBase {
@@ -73,7 +71,8 @@ export interface DynInputProps extends DynFieldBase {
   step?: number;
   min?: number;
   max?: number;
-  currencyConfig?: CurrencyInputConfig;
+  showSpinButtons?: boolean;
+  currencyConfig?: DynCurrencyConfig;
 }
 
 // Select specific types
