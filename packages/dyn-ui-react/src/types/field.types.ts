@@ -6,6 +6,11 @@
 import type { ReactNode } from 'react';
 import type { BaseComponentProps } from './theme';
 export type { DynFieldContainerProps } from '../components/DynFieldContainer/DynFieldContainer.types';
+export type {
+  DynTextAreaProps,
+  DynTextAreaRef,
+  DynTextAreaResize,
+} from '../components/DynTextArea/DynTextArea.types';
 
 export interface ValidationRule {
   type: 'required' | 'email' | 'url' | 'pattern' | 'minLength' | 'maxLength' | 'custom';
@@ -45,8 +50,19 @@ export interface DynFieldRef {
 }
 
 // Input specific types
-export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'currency';
 export type InputSize = 'small' | 'medium' | 'large';
+
+export interface CurrencyInputConfig {
+  currencyCode: string;
+  precision?: number;
+  thousandSeparator?: string;
+  decimalSeparator?: string;
+  showSymbol?: boolean;
+  symbol?: string;
+  symbolPosition?: 'prefix' | 'suffix';
+  autoFormat?: boolean;
+}
 
 export interface DynInputProps extends DynFieldBase {
   type?: InputType;
@@ -58,9 +74,11 @@ export interface DynInputProps extends DynFieldBase {
   pattern?: string;
   icon?: string;
   showCleanButton?: boolean;
+  showSpinButtons?: boolean;
   step?: number;
   min?: number;
   max?: number;
+  currencyConfig?: CurrencyInputConfig;
 }
 
 // Select specific types

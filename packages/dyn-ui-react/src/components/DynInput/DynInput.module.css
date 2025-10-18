@@ -135,6 +135,75 @@
   outline-offset: 2px;
 }
 
+.dyn-input-container--currency .dyn-input {
+  padding-left: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)));
+}
+
+.dyn-input-currency-symbol {
+  position: absolute;
+  left: var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem));
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dyn-color-text-secondary, var(--color-text-secondary, #6b7280));
+  font-weight: var(--dyn-font-weight-medium, var(--font-weight-medium, 500));
+  pointer-events: none;
+}
+
+.dyn-input-currency-code {
+  position: absolute;
+  right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)) + 0.25rem);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dyn-color-text-secondary, var(--color-text-secondary, #6b7280));
+  font-size: var(--dyn-font-size-sm, var(--font-size-sm, 0.875rem));
+  pointer-events: none;
+}
+
+.dyn-input--with-spin-buttons {
+  padding-right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)) + 0.5rem);
+}
+
+.dyn-input-spin-buttons {
+  position: absolute;
+  right: var(--dyn-spacing-xs, var(--spacing-xs, 0.25rem));
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dyn-input-spin-button {
+  width: 1.5rem;
+  height: 1.1rem;
+  border: 1px solid var(--dyn-input-border, var(--color-border, #d1d5db));
+  border-radius: var(--dyn-border-radius-sm, var(--border-radius-sm, 0.25rem));
+  background: var(--dyn-color-surface, var(--color-surface, #ffffff));
+  color: var(--dyn-color-text-secondary, var(--color-text-secondary, #6b7280));
+  font-size: 0.65rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.dyn-input-spin-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dyn-input-spin-button:not(:disabled):hover {
+  background: var(--dyn-color-surface-hover, var(--color-surface-hover, #f3f4f6));
+  color: var(--dyn-color-text-primary, var(--color-text-primary, #111827));
+}
+
+.dyn-input-spin-button:focus-visible {
+  outline: 2px solid var(--dyn-input-border-focus);
+  outline-offset: 2px;
+}
+
 /* Responsive touch target */
 @media (max-width: 767px) {
   .input,

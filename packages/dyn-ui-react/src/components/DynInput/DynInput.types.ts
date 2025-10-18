@@ -14,14 +14,15 @@ export type DynInputSize = 'small' | 'medium' | 'large';
 /**
  * Input type variants
  */
-export type DynInputType = 
+export type DynInputType =
   | 'text'
   | 'password'
   | 'email'
   | 'number'
   | 'tel'
   | 'url'
-  | 'search';
+  | 'search'
+  | 'currency';
 
 /**
  * Validation rule function type
@@ -38,6 +39,28 @@ export interface DynInputMask {
   formatModel?: boolean;
   /** Custom mask character definitions */
   definitions?: Record<string, RegExp>;
+}
+
+/**
+ * Currency input configuration
+ */
+export interface CurrencyInputConfig {
+  /** ISO 4217 currency code */
+  currencyCode: string;
+  /** Number of decimal places */
+  precision?: number;
+  /** Character used to group thousands */
+  thousandSeparator?: string;
+  /** Character used for decimal separation */
+  decimalSeparator?: string;
+  /** Whether to render the currency symbol */
+  showSymbol?: boolean;
+  /** Custom currency symbol override */
+  symbol?: string;
+  /** Placement of the currency symbol */
+  symbolPosition?: 'prefix' | 'suffix';
+  /** Whether to automatically format values */
+  autoFormat?: boolean;
 }
 
 /**
@@ -131,6 +154,9 @@ export interface DynInputProps
   /** Whether to show clear button when input has value */
   showClearButton?: boolean;
 
+  /** Whether to show spin buttons for numeric inputs */
+  showSpinButtons?: boolean;
+
   /** Input mask configuration */
   mask?: string | DynInputMask;
 
@@ -149,8 +175,11 @@ export interface DynInputProps
   /** Step value for number inputs */
   step?: number;
 
+  /** Currency input behaviour configuration */
+  currencyConfig?: CurrencyInputConfig;
+
   /** Change event handler */
-  onChange?: (value: string) => void;
+  onChange?: (value: string | number) => void;
 
   /** Blur event handler */
   onBlur?: FocusEventHandler<HTMLInputElement>;
