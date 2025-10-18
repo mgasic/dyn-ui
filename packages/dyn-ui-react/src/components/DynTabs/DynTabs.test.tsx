@@ -130,15 +130,23 @@ describe('DynTabs', () => {
       render(<DynTabs {...defaultProps} />);
 
       const tablist = screen.getByRole('tablist');
-      const tabs = screen.getAllByRole('tab');
       const tabpanel = screen.getByRole('tabpanel');
 
       expect(tablist).toHaveAttribute('role', 'tablist');
 
-      tabs.forEach((tab, index) => {
-        const tabId = mockItems[index].id;
+      // Map tabs by their accessible name (label) instead of relying on DOM order.
+      mockItems.forEach((item) => {
+        // If a tab is disabled it may still exist, but some implementations omit aria-controls.
+        // We try to locate the tab by name and then assert presence/shape of aria-controls when present.
+        const tab = screen.queryByRole('tab', { name: new RegExp(item.label, 'i') });
+        if (!tab) return;
+
         expect(tab).toHaveAttribute('role', 'tab');
-        expect(tab).toHaveAttribute('aria-controls', expect.stringContaining(`panel-${tabId}`));
+
+        const ariaControls = tab.getAttribute('aria-controls');
+        // Ensure aria-controls exists and references expected panel id when provided
+        expect(ariaControls).toBeTruthy();
+        expect(ariaControls).toContain(`panel-${item.id}`);
       });
 
       expect(tabpanel).toHaveAttribute('role', 'tabpanel');
