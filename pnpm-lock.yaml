@@ -174,6 +174,9 @@ importers:
 
   apps/react-demo:
     dependencies:
+      '@dyn-ui/react':
+        specifier: workspace:*
+        version: link:../../packages/dyn-ui-react
       react:
         specifier: ^18.3.1
         version: 18.3.1
