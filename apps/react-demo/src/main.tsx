@@ -1,11 +1,8 @@
-import React, { useState } from 'react'
-import ReactDOM from 'react-dom/client'
-// Correct import path for DynButton from built package or main entry point
-import { DynButton, ThemeProvider } from '../../../packages/dyn-ui-react'
-// or if default export:
-// import DynButton from '../../../packages/dyn-ui-react'
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom/client';
+import { DynButton, ThemeProvider } from '@dyn-ui/react';
 
-import '../../../packages/dyn-ui-react/src/styles/dyn-ui.css'
+import '@dyn-ui/react/styles/dyn-ui.css';
 
 const App = () => {
   const [loading, setLoading] = useState(false);
