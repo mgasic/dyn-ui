@@ -2,12 +2,19 @@
   "name": "@dyn-ui/react",
   "version": "0.1.0",
   "main": "./src/index.ts",
+  "module": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
-  },  "scripts": {
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
     "build": "vite build",
-    "dev": "vite",
+    "prepare-dist-pkg": "node scripts/generate-dist-package.js",
+    "prepublishOnly": "pnpm run prepare-dist-pkg && pnpm run build",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:box": "vitest --environment=jsdom src/components/DynBox"
