@@ -69,8 +69,8 @@ export type {
   DynGridPagination,
   DynGridSelectable,
   DynGridSortDirection,
-} from './components';
-export { DYN_GRID_DEFAULT_PROPS } from './components';
+} from './components/DynGrid/DynGrid.types';
+export { DYN_GRID_DEFAULT_PROPS } from './components/DynGrid/DynGrid.types';
 
 // Theme System
 export { ThemeProvider, useTheme } from './theme/ThemeProvider';

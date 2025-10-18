@@ -29,6 +29,9 @@ export { DynToolbar } from './DynToolbar';
 export { DynTreeView } from './DynTreeView';
 export { ThemeSwitcher } from './ThemeSwitcher';
 
+// Value exports
+export { DYN_GRID_DEFAULT_PROPS } from './DynGrid/DynGrid.types';
+
 // Re-export theme/provider utilities and helpers expected by tests
 export { ThemeProvider, useTheme } from '../theme/ThemeProvider';
 export { IconDictionaryProvider } from '../providers';
