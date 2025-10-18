@@ -17,7 +17,8 @@
     "test:run": "vitest --run",
     "test:coverage": "vitest --coverage",
     "test:ui": "vitest --ui",
-    "test:dyngauge": "vitest DynGauge --run"
+    "test:dyngauge": "vitest DynGauge --run",
+    "prepublishOnly": "pnpm run build && pnpm run prepare-dist-pkg"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "4.1.1",
