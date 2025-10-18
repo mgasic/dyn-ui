@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { testA11y } from '../../testing/accessibility';
 import { describe, expect, it, vi } from 'vitest';
@@ -217,6 +217,63 @@ describe('DynInput', () => {
 
       const input = screen.getByRole('textbox');
       expect(input).toHaveValue('');
+    });
+  });
+
+  describe('Currency and Spin Controls', () => {
+    it('formats currency values and renders symbol', () => {
+      render(
+        <DynInput name="amount" label="Amount" type="currency" value={1234.56} />
+      );
+
+      const input = screen.getByRole('textbox');
+      expect(input).toHaveValue('1.234,56');
+      expect(screen.getByText('R$')).toBeInTheDocument();
+    });
+
+    it('emits numeric value when typing currency', () => {
+      const onChange = vi.fn();
+      render(
+        <DynInput name="amount" label="Amount" type="currency" onChange={onChange} />
+      );
+
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: '1234' } });
+
+      expect(onChange).toHaveBeenLastCalledWith(1234);
+      expect(input).toHaveValue('1.234,00');
+    });
+
+    it('renders spin buttons and adjusts value respecting boundaries', async () => {
+      const onChange = vi.fn();
+      render(
+        <DynInput
+          name="quantity"
+          label="Quantity"
+          type="number"
+          value={2}
+          min={0}
+          max={4}
+          step={2}
+          showSpinButtons
+          onChange={onChange}
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+      const increment = screen.getByRole('button', { name: 'Increase value' });
+      const decrement = screen.getByRole('button', { name: 'Decrease value' });
+
+      await user.click(increment);
+      expect(input).toHaveValue('4');
+      expect(onChange).toHaveBeenLastCalledWith(4);
+
+      await user.click(increment);
+      expect(input).toHaveValue('4');
+
+      await user.click(decrement);
+      expect(input).toHaveValue('2');
+      expect(onChange).toHaveBeenLastCalledWith(2);
     });
   });
 });

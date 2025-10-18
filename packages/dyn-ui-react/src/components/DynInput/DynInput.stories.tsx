@@ -18,7 +18,7 @@ const meta: Meta<typeof DynInput> = {
   argTypes: {
     type: {
       control: 'select',
-      options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search'],
+      options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search', 'currency'],
       description: 'Input type'
     },
     size: {
@@ -36,10 +36,15 @@ const meta: Meta<typeof DynInput> = {
     required: { control: 'boolean' },
     optional: { control: 'boolean' },
     showClearButton: { control: 'boolean' },
+    showSpinButtons: { control: 'boolean' },
     icon: { control: 'text', description: 'Ime ikone ili ReactNode' },
     placeholder: { control: 'text' },
     help: { control: 'text' },
     value: { control: 'text' },
+    currencyConfig: {
+      control: 'object',
+      description: 'Podešavanja formatiranja valute'
+    }
   },
   args: {
     label: 'Input',
@@ -110,6 +115,37 @@ export const Types: Story = {
       <DynInput label="Telefon" type="tel" placeholder="" />
     </div>
   )
+};
+
+export const Currency: Story = {
+  args: {
+    label: 'Iznos',
+    type: 'currency',
+    value: 1234.56,
+    showSpinButtons: true,
+    step: 50,
+    min: 0,
+    currencyConfig: {
+      symbol: 'R$',
+      currencyCode: 'BRL',
+      showCurrencyCode: true,
+      decimalSeparator: ',',
+      thousandSeparator: '.',
+      precision: 2
+    }
+  }
+};
+
+export const NumberWithSpinButtons: Story = {
+  args: {
+    label: 'Količina',
+    type: 'number',
+    value: 2,
+    step: 1,
+    min: 0,
+    max: 10,
+    showSpinButtons: true
+  }
 };
 
 export const DarkTheme: Story = {

@@ -6,10 +6,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      'dyn-ui-react': path.resolve(__dirname, '../../packages/dyn-ui-react/src')
+      '@dyn-ui/react': path.resolve(__dirname, '../../packages/dyn-ui-react/src')
     }
   },
   optimizeDeps: {
-    exclude: ['dyn-ui-react']
+    exclude: ['@dyn-ui/react']
   }
 })

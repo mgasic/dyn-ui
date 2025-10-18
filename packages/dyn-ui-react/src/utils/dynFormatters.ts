@@ -3,6 +3,7 @@
  */
 import { DYN_BADGE_COLORS } from '../components/DynBadge/DynBadge.types';
 import type { IconDictionary, ProcessedIcon } from '../types/icon.types';
+import type { DynCurrencyConfig } from '../types/field.types';
 
 /**
  * Generates initials from a full name
@@ -110,5 +111,71 @@ export const processIconString = (
   return {
     baseClass: baseClass ?? 'dyn-icon',
     iconClass: processedClass.trim()
+  };
+};
+
+export interface FormatCurrencyValueResult {
+  formattedValue: string;
+  symbol: string;
+  currencyCode?: string;
+  showCurrencyCode: boolean;
+}
+
+export const formatCurrencyValue = (
+  value: string | number | null | undefined,
+  config: Required<DynCurrencyConfig> & { showCurrencyCode: boolean }
+): FormatCurrencyValueResult => {
+  const {
+    precision,
+    decimalSeparator,
+    thousandSeparator,
+    symbol,
+    currencyCode,
+    showCurrencyCode
+  } = config;
+
+  const precisionValue = Math.max(0, precision ?? 2);
+
+  if (value == null || value === '') {
+    return {
+      formattedValue: '',
+      symbol,
+      currencyCode,
+      showCurrencyCode
+    };
+  }
+
+  const numericValue =
+    typeof value === 'number' ? value : Number.parseFloat(String(value));
+
+  if (Number.isNaN(numericValue)) {
+    return {
+      formattedValue: '',
+      symbol,
+      currencyCode,
+      showCurrencyCode
+    };
+  }
+
+  const sign = numericValue < 0 ? '-' : '';
+  const absoluteValue = Math.abs(numericValue);
+  const fixedValue = absoluteValue.toFixed(precisionValue);
+  const [integerPartRaw, decimalPartRaw] = fixedValue.split('.');
+
+  const integerWithSeparator = integerPartRaw.replace(
+    /\B(?=(\d{3})+(?!\d))/g,
+    thousandSeparator
+  );
+
+  const formattedWithoutSign =
+    precisionValue > 0 && decimalPartRaw
+      ? `${integerWithSeparator}${decimalSeparator}${decimalPartRaw}`
+      : integerWithSeparator;
+
+  return {
+    formattedValue: `${sign}${formattedWithoutSign}`,
+    symbol,
+    currencyCode,
+    showCurrencyCode
   };
 };
