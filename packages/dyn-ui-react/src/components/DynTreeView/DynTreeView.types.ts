@@ -70,10 +70,10 @@ export interface DynTreeViewProps extends BaseComponentProps {
   onExpand?: (expandedKeys: string[]) => void;
 
   /** Check callback */
-  onCheck?: (checkedKeys: string[], info: TreeCheckInfo) => void;
+  onCheck?: (checkedKeys: string[], info?: TreeCheckInfo) => void;
 
   /** Select callback */
-  onSelect?: (selectedKeys: string[], info: TreeSelectInfo) => void;
+  onSelect?: (selectedKeys: string[], info?: TreeSelectInfo) => void;
 
   /** Search callback */
   onSearch?: (value: string) => void;
