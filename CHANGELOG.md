@@ -9,6 +9,7 @@ All notable changes to the DYN UI React library will be documented in this file.
 - **CSS Module Standardization**: Replaced all SCSS files with CSS modules for consistent styling approach
 - **Type Safety Enhancements**: Fixed TypeScript errors and improved component type definitions
 - **Export Consistency**: Standardized component exports with both named and default exports
+- **Hook Export Clarity**: Exposed form-related hooks (`useDynFieldValidation`, `useDynMask`, `useDynDateParser`) directly from their hook modules for clearer public imports
 - **Lint Automation**: Added custom ESLint rules to enforce export patterns and verify the presence of Storybook stories and Vitest suites for every component
 
 ### 🔧 Component Fixes
