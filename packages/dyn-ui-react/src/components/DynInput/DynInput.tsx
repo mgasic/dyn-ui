@@ -3,7 +3,15 @@
  * Part of DYN UI Form Components Group - SCOPE 6
  */
 
-import React, { forwardRef, useImperativeHandle, useRef, useState, useEffect } from 'react';
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo
+} from 'react';
 
 function classNames(...args: Array<string | Record<string, boolean> | undefined | null | any[]>): string {
   const classes: string[] = [];
@@ -25,11 +33,19 @@ function classNames(...args: Array<string | Record<string, boolean> | undefined 
   return classes.join(' ');
 }
 
-import type { DynInputProps, DynFieldRef } from '../../types/field.types';
+const escapeRegex = (valueToEscape: string) =>
+  valueToEscape.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+import type {
+  DynInputProps,
+  DynFieldRef,
+  DynCurrencyConfig
+} from '../../types/field.types';
 import { DynFieldContainer } from '../DynFieldContainer';
 import { useDynFieldValidation } from '../../hooks/useDynFieldValidation';
 import { useDynMask } from '../../hooks/useDynMask';
 import { DynIcon } from '../DynIcon';
+import { formatCurrencyValue } from '../../utils/dynFormatters';
 
 export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
   (
@@ -60,13 +76,17 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       step,
       min,
       max,
+      showSpinButtons = false,
+      currencyConfig,
       onChange,
       onBlur,
       onFocus
     },
     ref
   ) => {
-    const [value, setValue] = useState<string>(propValue);
+    const [value, setValue] = useState<string>(
+      propValue == null ? '' : String(propValue)
+    );
     const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   // generate stable id for the input when not provided
@@ -102,9 +122,138 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       }
     }));
 
+    const mergedCurrencyConfig = useMemo<Required<DynCurrencyConfig> & {
+      showCurrencyCode: boolean;
+    }>(() => {
+      const defaultConfig: Required<DynCurrencyConfig> & {
+        showCurrencyCode: boolean;
+      } = {
+        symbol: 'R$',
+        currencyCode: 'BRL',
+        showCurrencyCode: false,
+        precision: 2,
+        decimalSeparator: ',',
+        thousandSeparator: '.'
+      };
+
+      return {
+        ...defaultConfig,
+        ...(currencyConfig ?? {})
+      };
+    }, [currencyConfig]);
+
+    const sanitizeCurrencyValue = useCallback(
+      (rawValue: string | number | null | undefined) => {
+        if (rawValue == null || rawValue === '') {
+          return '';
+        }
+
+        const valueAsString = String(rawValue);
+        const { decimalSeparator, thousandSeparator, symbol, currencyCode } =
+          mergedCurrencyConfig;
+
+        let sanitized = valueAsString.replace(/\s/g, '');
+
+        if (symbol) {
+          sanitized = sanitized.replace(new RegExp(escapeRegex(symbol), 'g'), '');
+        }
+
+        if (currencyCode) {
+          sanitized = sanitized.replace(new RegExp(escapeRegex(currencyCode), 'gi'), '');
+        }
+
+        const allowedSeparator = decimalSeparator ?? '.';
+        sanitized = sanitized.replace(
+          new RegExp(`[^0-9${escapeRegex(allowedSeparator)}\\.\\-]`, 'g'),
+          ''
+        );
+
+        const dotMatches = sanitized.match(/\./g) ?? [];
+        let decimalMarker: string | null = null;
+
+        if (sanitized.includes(allowedSeparator)) {
+          decimalMarker = allowedSeparator;
+        } else if (sanitized.includes('.')) {
+          const digitsAfterLastDot = sanitized.length - sanitized.lastIndexOf('.') - 1;
+          if (
+            thousandSeparator === '.' &&
+            (dotMatches.length > 1 || digitsAfterLastDot === 3)
+          ) {
+            decimalMarker = null;
+          } else {
+            decimalMarker = '.';
+          }
+        }
+
+        if (thousandSeparator && thousandSeparator !== decimalMarker) {
+          sanitized = sanitized.replace(new RegExp(escapeRegex(thousandSeparator), 'g'), '');
+        }
+
+        if (decimalMarker) {
+          const escapedDecimal = escapeRegex(decimalMarker);
+          const lastDecimalIndex = sanitized.lastIndexOf(decimalMarker);
+          if (lastDecimalIndex !== -1) {
+            const before = sanitized
+              .slice(0, lastDecimalIndex)
+              .replace(new RegExp(escapedDecimal, 'g'), '')
+              .replace(/\./g, '');
+            const after = sanitized
+              .slice(lastDecimalIndex + 1)
+              .replace(new RegExp(escapedDecimal, 'g'), '')
+              .replace(/\./g, '');
+            sanitized = `${before}.${after}`;
+          }
+        }
+
+        sanitized = sanitized.replace(/[^0-9.\-]/g, '');
+
+        const minusIndex = sanitized.indexOf('-');
+        if (minusIndex > 0) {
+          sanitized = sanitized.replace(/-/g, '');
+        } else if (minusIndex === 0) {
+          sanitized = `-${sanitized.slice(1).replace(/-/g, '')}`;
+        } else {
+          sanitized = sanitized.replace(/-/g, '');
+        }
+
+        if (sanitized.split('.').length > 2) {
+          const [integerPart, ...decimalParts] = sanitized.split('.');
+          sanitized = `${integerPart}.${decimalParts.join('')}`;
+        }
+
+        return sanitized;
+      },
+      [mergedCurrencyConfig]
+    );
+
     useEffect(() => {
-      setValue(propValue);
-    }, [propValue]);
+      if (type === 'currency') {
+        setValue(sanitizeCurrencyValue(propValue));
+        return;
+      }
+
+      setValue(propValue == null ? '' : String(propValue));
+    }, [propValue, type, sanitizeCurrencyValue]);
+
+    const formatCurrency = useCallback(
+      (rawValue: string | number | null | undefined) => {
+        if (type !== 'currency') {
+          return {
+            formattedValue: rawValue == null ? '' : String(rawValue),
+            symbol: '',
+            currencyCode: undefined,
+            showCurrencyCode: false
+          };
+        }
+
+        return formatCurrencyValue(rawValue, mergedCurrencyConfig);
+      },
+      [mergedCurrencyConfig, type]
+    );
+
+    const currencyFormatting = useMemo(() => {
+      return formatCurrency(value);
+    }, [formatCurrency, value]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
@@ -113,6 +262,19 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
         const processedValue = handleMaskedChange(newValue);
         setValue(processedValue);
         onChange?.(maskFormatModel ? processedValue : unmaskValue(processedValue));
+      } else if (type === 'currency') {
+        const sanitizedValue = sanitizeCurrencyValue(newValue);
+        setValue(sanitizedValue);
+
+        const numericValue = sanitizedValue === '' ? NaN : Number(sanitizedValue);
+
+        if (sanitizedValue === '') {
+          onChange?.('');
+        } else if (Number.isNaN(numericValue)) {
+          onChange?.(sanitizedValue);
+        } else {
+          onChange?.(numericValue);
+        }
       } else {
         setValue(newValue);
         onChange?.(type === 'number' ? Number(newValue) : newValue);
@@ -120,6 +282,41 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
 
       clearError();
     };
+
+    const handleStepChange = useCallback(
+      (direction: 1 | -1) => {
+        if (disabled || readonly) return;
+
+        const stepValue = step ?? 1;
+        const currentNumeric = Number(
+          type === 'currency' ? value || 0 : value || 0
+        );
+
+        const baseValue = Number.isNaN(currentNumeric) ? 0 : currentNumeric;
+        let nextValue = baseValue + direction * stepValue;
+
+        if (typeof min === 'number') {
+          nextValue = Math.max(nextValue, min);
+        }
+
+        if (typeof max === 'number') {
+          nextValue = Math.min(nextValue, max);
+        }
+
+        const nextValueString = String(nextValue);
+
+        if (type === 'currency') {
+          setValue(nextValueString);
+          onChange?.(nextValue);
+        } else {
+          setValue(nextValueString);
+          onChange?.(type === 'number' ? nextValue : nextValueString);
+        }
+
+        clearError();
+      },
+      [clearError, disabled, max, min, onChange, readonly, step, type, value]
+    );
 
     const handleBlur = () => {
       setFocused(false);
@@ -142,22 +339,32 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
 
     if (!visible) return null;
 
-    const inputClasses = classNames(
-      'dyn-input',
-      `dyn-input--${size}`,
-      {
-        'dyn-input--focused': focused,
-        'dyn-input--error': !!error,
-        'dyn-input--disabled': disabled,
-        'dyn-input--readonly': readonly,
-        'dyn-input--with-icon': !!icon,
-        'dyn-input--cleanable': !!(showCleanButton && value && !readonly && !disabled)
-      }
-    );
+    const inputClasses = classNames('dyn-input', `dyn-input--${size}`, {
+      'dyn-input--focused': focused,
+      'dyn-input--error': !!error,
+      'dyn-input--disabled': disabled,
+      'dyn-input--readonly': readonly,
+      'dyn-input--with-icon': !!icon,
+      'dyn-input--cleanable': !!(showCleanButton && value && !readonly && !disabled),
+      'dyn-input--number': type === 'number',
+      'dyn-input--currency': type === 'currency',
+      'dyn-input--with-spin-buttons':
+        showSpinButtons && (type === 'number' || type === 'currency')
+    });
 
-    const displayValue = mask ? maskedValue : value;
+    const displayValue = mask
+      ? maskedValue
+      : type === 'currency'
+        ? currencyFormatting.formattedValue
+        : value;
 
-    const containerDivClass = classNames('dyn-input-container', className);
+    const containerDivClass = classNames('dyn-input-container', className, {
+      'dyn-input-container--currency': type === 'currency',
+      'dyn-input-container--with-spin-buttons':
+        showSpinButtons && (type === 'number' || type === 'currency')
+    });
+
+    const showSpin = showSpinButtons && (type === 'number' || type === 'currency');
 
     return (
       <DynFieldContainer
@@ -171,6 +378,12 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
         id={id}
       >
         <div className={containerDivClass}>
+          {type === 'currency' && currencyFormatting.symbol && (
+            <span className="dyn-input-currency-symbol" aria-hidden="true">
+              {currencyFormatting.symbol}
+            </span>
+          )}
+
           {icon && (
             <div className="dyn-input-icon-container">
               <DynIcon icon={icon} />
@@ -181,7 +394,7 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
             ref={inputRef}
             id={inputId}
             name={name}
-            type={type === 'number' ? 'text' : type}
+            type={type === 'number' || type === 'currency' ? 'text' : type}
             className={inputClasses}
             placeholder={placeholder}
             value={displayValue}
@@ -193,15 +406,23 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
             maxLength={maxLength}
             minLength={minLength}
             pattern={pattern}
-            step={step}
-            min={min}
-            max={max}
+            step={type === 'currency' ? undefined : step}
+            min={type === 'currency' ? undefined : min}
+            max={type === 'currency' ? undefined : max}
             onChange={handleChange}
             onBlur={handleBlur}
             onFocus={handleFocus}
             aria-invalid={!!error}
             aria-describedby={error ? `${name}-error` : undefined}
           />
+
+          {type === 'currency' &&
+            currencyFormatting.showCurrencyCode &&
+            currencyFormatting.currencyCode && (
+              <span className="dyn-input-currency-code" aria-hidden="true">
+                {currencyFormatting.currencyCode}
+              </span>
+            )}
 
           {showCleanButton && value && !readonly && !disabled && (
             <button
@@ -213,6 +434,31 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
             >
               <DynIcon icon="dyn-icon-close" />
             </button>
+          )}
+
+          {showSpin && (
+            <div className="dyn-input-spin-buttons" aria-hidden={disabled || readonly}>
+              <button
+                type="button"
+                className="dyn-input-spin-button dyn-input-spin-button--increment"
+                onClick={() => handleStepChange(1)}
+                tabIndex={-1}
+                aria-label="Increase value"
+                disabled={disabled || readonly}
+              >
+                ▲
+              </button>
+              <button
+                type="button"
+                className="dyn-input-spin-button dyn-input-spin-button--decrement"
+                onClick={() => handleStepChange(-1)}
+                tabIndex={-1}
+                aria-label="Decrease value"
+                disabled={disabled || readonly}
+              >
+                ▼
+              </button>
+            </div>
           )}
         </div>
       </DynFieldContainer>
