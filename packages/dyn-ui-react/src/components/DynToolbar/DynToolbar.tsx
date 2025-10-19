@@ -41,46 +41,90 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
   // Handle responsive layout
   const updateLayout = useCallback(() => {
-    if (!responsive || !overflowMenu || !toolbarRef.current) {
+    if (!overflowMenu) {
       setVisibleItems(filteredItems);
       setOverflowItems([]);
       return;
     }
+
+    const thresholdValue = Math.max(1, overflowThreshold);
+    const hasThresholdOverflow = filteredItems.length > thresholdValue;
+
+    const applyThreshold = () => {
+      if (!hasThresholdOverflow) {
+        setVisibleItems(filteredItems);
+        setOverflowItems([]);
+        return;
+      }
+
+      const maxVisible = Math.max(1, Math.min(thresholdValue, filteredItems.length - 1));
+      setVisibleItems(filteredItems.slice(0, maxVisible));
+      setOverflowItems(filteredItems.slice(maxVisible));
+    };
+
+    if (!responsive || !toolbarRef.current) {
+      applyThreshold();
+      return;
+    }
+
     const toolbarWidth = toolbarRef.current.offsetWidth;
 
-    // If toolbar has no measurable width (jsdom environment), don't collapse
-    // items into overflow — show all items to make tests and SSR stable.
+    // If toolbar has no measurable width (jsdom environment), fall back to
+    // threshold handling so tests and SSR render deterministically.
     if (!toolbarWidth || toolbarWidth === 0) {
+      applyThreshold();
+      return;
+    }
+
+    const itemElements = toolbarRef.current.querySelectorAll('[data-toolbar-item]');
+
+    if (itemElements.length === 0 || filteredItems.length === 0) {
+      setVisibleItems([]);
+      setOverflowItems([]);
+      return;
+    }
+
+    const padding = 32;
+    const measureVisibleItems = (reserveOverflowButton: boolean) => {
+      const overflowButtonWidth = reserveOverflowButton ? 48 : 0;
+      let totalWidth = 0;
+      let count = 0;
+
+      for (let i = 0; i < itemElements.length; i++) {
+        const itemWidth = itemElements[i].getBoundingClientRect().width;
+        if (totalWidth + itemWidth + overflowButtonWidth + padding <= toolbarWidth) {
+          totalWidth += itemWidth;
+          count++;
+        } else {
+          break;
+        }
+      }
+
+      return count;
+    };
+
+    let measuredVisible = measureVisibleItems(hasThresholdOverflow);
+    const needsOverflowByWidth = measuredVisible < filteredItems.length;
+    const shouldShowOverflow = hasThresholdOverflow || needsOverflowByWidth;
+
+    if (shouldShowOverflow && !hasThresholdOverflow) {
+      measuredVisible = measureVisibleItems(true);
+    }
+
+    if (!shouldShowOverflow) {
       setVisibleItems(filteredItems);
       setOverflowItems([]);
       return;
     }
-    const itemElements = toolbarRef.current.querySelectorAll('[data-toolbar-item]');
-    let totalWidth = 0;
-    let visibleCount = 0;
-    const overflowButtonWidth = 48;
-    const padding = 32;
 
-    // Calculate how many items can fit
-    for (let i = 0; i < itemElements.length; i++) {
-      const itemWidth = itemElements[i].getBoundingClientRect().width;
-      if (totalWidth + itemWidth + overflowButtonWidth + padding <= toolbarWidth) {
-        totalWidth += itemWidth;
-        visibleCount++;
-      } else {
-        break;
-      }
-    }
+    const maxVisible = hasThresholdOverflow
+      ? Math.max(1, Math.min(thresholdValue, filteredItems.length - 1))
+      : Math.max(1, filteredItems.length - 1);
 
-    // Apply overflow threshold
-    if (filteredItems.length > overflowThreshold && visibleCount < filteredItems.length) {
-      const actualVisibleCount = Math.max(1, Math.min(visibleCount, filteredItems.length - 1));
-      setVisibleItems(filteredItems.slice(0, actualVisibleCount));
-      setOverflowItems(filteredItems.slice(actualVisibleCount));
-    } else {
-      setVisibleItems(filteredItems);
-      setOverflowItems([]);
-    }
+    const visibleCount = Math.max(1, Math.min(measuredVisible, maxVisible));
+
+    setVisibleItems(filteredItems.slice(0, visibleCount));
+    setOverflowItems(filteredItems.slice(visibleCount));
   }, [filteredItems, responsive, overflowMenu, overflowThreshold]);
 
   useEffect(() => {
@@ -412,7 +456,7 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
               aria-label="More actions"
               title="More actions"
             >
-              <DynIcon icon="dyn-icon-more-horizontal" />
+              <DynIcon icon="more-horizontal" />
             </button>
 
             {isOverflowOpen && (

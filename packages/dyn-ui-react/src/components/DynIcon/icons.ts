@@ -137,7 +137,19 @@ export const iconRegistry = {
       })
     ]
   }),
-  
+
+  'more-horizontal': React.createElement('svg', {
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: '2',
+    children: [
+      React.createElement('circle', { key: '1', cx: '6', cy: '12', r: '1' }),
+      React.createElement('circle', { key: '2', cx: '12', cy: '12', r: '1' }),
+      React.createElement('circle', { key: '3', cx: '18', cy: '12', r: '1' })
+    ]
+  }),
+
   download: React.createElement('svg', {
     viewBox: '0 0 24 24',
     fill: 'none',
