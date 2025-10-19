@@ -17,12 +17,9 @@ declare module "*.module.sass" {
   export default classes;
 }
 
-// React Import Compatibility Fix (Rešava 49+ grešaka tipa 1259)
-declare module 'react' {
-  import * as React from 'react';
-  export = React;
-  export as namespace React;
-}
+// NOTE: do not redeclare the 'react' module here — it conflicts with @types/react
+// and breaks ES module named imports. The project relies on proper React
+// type definitions from node_modules/@types/react instead.
 
 // SVG kao React komponente
 declare module "*.svg" {
@@ -74,7 +71,7 @@ declare module 'vitest-axe' {
   export function toHaveNoViolations(): any;
 }
 
-// Design Token CSS Variables Support  
+// Design Token CSS Variables Support
 interface CSSStyleDeclaration {
   [key: `--dyn-${string}`]: string;
 }

@@ -3,7 +3,18 @@
  */
 import { DYN_BADGE_COLORS } from '../components/DynBadge/DynBadge.types';
 import type { IconDictionary, ProcessedIcon } from '../types/icon.types';
-import type { DynCurrencyConfig } from '../types/field.types';
+
+/**
+ * DynCurrencyConfig type: defined locally because it's not exported from '../types/field.types'
+ * Fields are optional here; callers use Required<DynCurrencyConfig> where needed.
+ */
+export interface DynCurrencyConfig {
+  precision?: number;
+  decimalSeparator?: string;
+  thousandSeparator?: string;
+  symbol?: string;
+  currencyCode?: string;
+}
 
 /**
  * Generates initials from a full name

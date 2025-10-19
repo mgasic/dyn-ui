@@ -9,7 +9,8 @@ import React, {
   useRef,
   useState,
   useEffect,
-  useMemo
+  useMemo,
+  useCallback
 } from 'react';
 
 function classNames(
@@ -35,11 +36,13 @@ function classNames(
 }
 
 import type { DynInputProps, DynFieldRef, CurrencyInputConfig } from '../../types/field.types';
+import type { DynCurrencyConfig } from '../../utils/dynFormatters';
 import { DynFieldContainer } from '../DynFieldContainer';
 import { useDynFieldValidation } from '../../hooks/useDynFieldValidation';
 import { useDynMask } from '../../hooks/useDynMask';
 import { DynIcon } from '../DynIcon';
-import { formatCurrencyValue } from '../../utils/dynFormatters';
+// NOTE: DynInput implements its own formatting helpers; do not import formatCurrencyValue
+// from utils to avoid name collision with local implementations.
 
 interface ResolvedCurrencyConfig {
   currencyCode: string;
@@ -53,7 +56,7 @@ interface ResolvedCurrencyConfig {
   symbolSpacing: string;
 }
 
-const DEFAULT_CURRENCY_CODE = 'USD';
+const DEFAULT_CURRENCY_CODE = 'BRL';
 const DEFAULT_PRECISION = 2;
 
 export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
@@ -70,6 +73,7 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       optional = false,
       visible = true,
       value: propValue = '',
+      showSpinButtons = false,
       errorMessage,
       validation,
       className,
@@ -146,7 +150,7 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
 
           const normalizedValue = roundToPrecision(numericValue, resolvedCurrencyConfig.precision);
           const formattedValue = resolvedCurrencyConfig.autoFormat
-            ? formatCurrencyValue(normalizedValue, resolvedCurrencyConfig)
+            ? formatCurrencyValue(normalizedValue, { ...resolvedCurrencyConfig, showSymbol: false })
             : formatPlainCurrencyValue(normalizedValue, resolvedCurrencyConfig);
 
           setInputValue(formattedValue);
@@ -193,16 +197,16 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
         let sanitized = valueAsString.replace(/\s/g, '');
 
         if (symbol) {
-          sanitized = sanitized.replace(new RegExp(escapeRegex(symbol), 'g'), '');
+          sanitized = sanitized.replace(new RegExp(escapeRegExp(symbol), 'g'), '');
         }
 
         if (currencyCode) {
-          sanitized = sanitized.replace(new RegExp(escapeRegex(currencyCode), 'gi'), '');
+          sanitized = sanitized.replace(new RegExp(escapeRegExp(currencyCode), 'gi'), '');
         }
 
         const allowedSeparator = decimalSeparator ?? '.';
         sanitized = sanitized.replace(
-          new RegExp(`[^0-9${escapeRegex(allowedSeparator)}\\.\\-]`, 'g'),
+          new RegExp(`[^0-9${escapeRegExp(allowedSeparator)}\\.\\-]`, 'g'),
           ''
         );
 
@@ -224,11 +228,11 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
         }
 
         if (thousandSeparator && thousandSeparator !== decimalMarker) {
-          sanitized = sanitized.replace(new RegExp(escapeRegex(thousandSeparator), 'g'), '');
+          sanitized = sanitized.replace(new RegExp(escapeRegExp(thousandSeparator), 'g'), '');
         }
 
         if (decimalMarker) {
-          const escapedDecimal = escapeRegex(decimalMarker);
+          const escapedDecimal = escapeRegExp(decimalMarker);
           const lastDecimalIndex = sanitized.lastIndexOf(decimalMarker);
           if (lastDecimalIndex !== -1) {
             const before = sanitized
@@ -309,10 +313,13 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       (direction: 1 | -1) => {
         if (disabled || readonly) return;
 
-        const stepValue = step ?? 1;
-        const currentNumeric = Number(
-          type === 'currency' ? value || 0 : value || 0
-        );
+  const stepValue = step ?? 1;
+  // Debugging information for failing tests (can be removed later)
+  // eslint-disable-next-line no-console
+  console.debug('[DynInput] handleStepChange', { inputValue, type, stepValue });
+        const currentNumeric = type === 'currency'
+          ? (parseCurrencyLikeValue(inputValue, resolvedCurrencyConfig) ?? 0)
+          : Number(inputValue || 0);
 
         const baseValue = Number.isNaN(currentNumeric) ? 0 : currentNumeric;
         let nextValue = baseValue + direction * stepValue;
@@ -328,16 +335,20 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
         const nextValueString = String(nextValue);
 
         if (type === 'currency') {
-          setValue(nextValueString);
-          onChange?.(nextValue);
+          const normalizedNext = roundToPrecision(nextValue, resolvedCurrencyConfig.precision);
+          const formatted = resolvedCurrencyConfig.autoFormat
+            ? formatCurrencyValue(normalizedNext, { ...resolvedCurrencyConfig, showSymbol: false })
+            : formatPlainCurrencyValue(normalizedNext, resolvedCurrencyConfig);
+          setInputValue(formatted);
+          onChange?.(normalizedNext);
         } else {
-          setValue(nextValueString);
+          setInputValue(nextValueString);
           onChange?.(type === 'number' ? nextValue : nextValueString);
         }
 
         clearError();
       },
-      [clearError, disabled, max, min, onChange, readonly, step, type, value]
+      [clearError, disabled, max, min, onChange, readonly, step, type, propValue]
     );
 
     const handleBlur = () => {
@@ -396,9 +407,9 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
         id={id}
       >
         <div className={containerDivClass}>
-          {type === 'currency' && currencyFormatting.symbol && (
+          {type === 'currency' && resolvedCurrencyConfig.symbol && (
             <span className="dyn-input-currency-symbol" aria-hidden="true">
-              {currencyFormatting.symbol}
+              {resolvedCurrencyConfig.symbol}
             </span>
           )}
 
@@ -529,8 +540,9 @@ function initializeInputValue(
     }
 
     const normalizedValue = roundToPrecision(numericValue, config.precision);
+    // Input should not include the currency symbol (it's rendered separately)
     return config.autoFormat
-      ? formatCurrencyValue(normalizedValue, config)
+      ? formatCurrencyValue(normalizedValue, { ...config, showSymbol: false })
       : formatPlainCurrencyValue(normalizedValue, config);
   }
 
@@ -587,7 +599,7 @@ function processCurrencyChange(
 
   const normalizedValue = roundToPrecision(numericValue, config.precision);
   const formattedValue = config.autoFormat
-    ? formatCurrencyValue(normalizedValue, config)
+    ? formatCurrencyValue(normalizedValue, { ...config, showSymbol: false })
     : formatPlainCurrencyValue(normalizedValue, config);
 
   setValue(formattedValue);
