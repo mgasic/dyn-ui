@@ -94,14 +94,29 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
       updateLayout();
     };
 
-    const resizeObserver = new ResizeObserver(handleResize);
-    if (toolbarRef.current) {
-      resizeObserver.observe(toolbarRef.current);
+    let resizeObserver: ResizeObserver | null = null;
+
+    if (typeof window !== 'undefined' && typeof window.ResizeObserver === 'function') {
+      const candidate = new window.ResizeObserver(handleResize) as unknown;
+
+      if (
+        candidate &&
+        typeof (candidate as ResizeObserver).observe === 'function' &&
+        typeof (candidate as ResizeObserver).disconnect === 'function'
+      ) {
+        resizeObserver = candidate as ResizeObserver;
+
+        if (toolbarRef.current) {
+          resizeObserver.observe(toolbarRef.current);
+        }
+      }
     }
 
     window.addEventListener('resize', handleResize);
+
     return () => {
-      resizeObserver.disconnect();
+      resizeObserver?.disconnect();
+
       window.removeEventListener('resize', handleResize);
     };
   }, [responsive, updateLayout]);

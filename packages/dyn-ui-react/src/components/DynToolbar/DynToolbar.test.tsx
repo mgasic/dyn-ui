@@ -527,6 +527,46 @@ describe('DynToolbar', () => {
     expect(button).toHaveAttribute('aria-label', 'Item without Tooltip');
   });
 
+  it('falls back to window resize events when ResizeObserver lacks required methods', async () => {
+    const manyItems: ToolbarItem[] = Array.from({ length: 6 }, (_, index) => ({
+      id: `item-${index}`,
+      label: `Item ${index}`,
+      action: jest.fn()
+    }));
+
+    (global.ResizeObserver as Mock).mockImplementationOnce(() => ({} as ResizeObserver));
+
+    const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+    let offsetWidthValue = 0;
+
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      get() {
+        return offsetWidthValue;
+      }
+    });
+
+    try {
+      render(<DynToolbar items={manyItems} responsive={true} overflowMenu={true} />);
+
+      expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
+
+      offsetWidthValue = 200;
+
+      window.dispatchEvent(new Event('resize'));
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('More actions')).toBeInTheDocument();
+      });
+    } finally {
+      if (originalOffsetWidth) {
+        Object.defineProperty(HTMLElement.prototype, 'offsetWidth', originalOffsetWidth);
+      } else {
+        delete (HTMLElement.prototype as unknown as { offsetWidth?: number }).offsetWidth;
+      }
+    }
+  });
+
   it('handles ResizeObserver updates', () => {
     const mockObserve = jest.fn();
     const mockDisconnect = jest.fn();
