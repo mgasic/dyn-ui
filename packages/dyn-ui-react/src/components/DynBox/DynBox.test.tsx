@@ -459,7 +459,9 @@ describe('DynBox', () => {
 
       const element = screen.getByTestId('custom-bg');
       // Custom backgrounds should not get CSS classes but should use CSS variables
-      expect(element).not.toHaveClass(getStyleClass('box--bg-rgba(255,255,255,0.1)'));
+      expect(
+        Array.from(element.classList).some(className => className.includes('box--bg-'))
+      ).toBe(false);
       expect(element).toHaveStyle({
         '--dyn-box-bg': 'rgba(255,255,255,0.1)',
       });
@@ -475,7 +477,9 @@ describe('DynBox', () => {
 
       const element = screen.getByTestId('custom-radius');
       // Custom radius should not get CSS classes but should use CSS variables
-      expect(element).not.toHaveClass(getStyleClass('box--rounded-20px'));
+      expect(
+        Array.from(element.classList).some(className => className.includes('box--rounded-'))
+      ).toBe(false);
       expect(element).toHaveStyle({
         '--dyn-box-radius': '20px',
       });
