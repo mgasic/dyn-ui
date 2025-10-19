@@ -2,7 +2,7 @@
  * DynMenu Unit Tests (improved - more robust queries & guards)
  */
 
-import '../../../setupTests';
+import '../../../test-setup';
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
