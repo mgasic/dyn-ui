@@ -1,0 +1,54 @@
+# .github/workflows/deploy-storybook.yml
+name: Deploy Storybook to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # ili 'master' ako koristiš master branch
+
+  # Omogućava ručno pokretanje workflow-a iz Actions tab-a
+  workflow_dispatch:
+
+# Potrebne dozvole za deployment na GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Sprečava konkurentne deployment-e
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        run: npm run build-storybook
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: './storybook-static'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
