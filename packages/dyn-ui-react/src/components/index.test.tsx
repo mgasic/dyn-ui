@@ -54,47 +54,58 @@ import {
 
 } from './index';
 
+const isComponentExport = (component: unknown): boolean => {
+  if (typeof component === 'function') return true;
+
+  if (typeof component === 'object' && component !== null) {
+    const maybeComponent = component as { $$typeof?: unknown; render?: unknown };
+    return Boolean(maybeComponent.render);
+  }
+
+  return false;
+};
+
 describe('Component Exports', () => {
   it('exports all basic components', () => {
-    expect(typeof DynButton).toBe('function');
-    expect(typeof DynIcon).toBe('function');
-    expect(typeof DynBox).toBe('function');
+    expect(isComponentExport(DynButton)).toBe(true);
+    expect(isComponentExport(DynIcon)).toBe(true);
+    expect(isComponentExport(DynBox)).toBe(true);
   });
 
   it('exports all display components - SCOPE 5', () => {
-    expect(typeof DynBadge).toBe('function');
-    expect(typeof DynAvatar).toBe('function');
-    expect(typeof DynLabel).toBe('function');
+    expect(isComponentExport(DynBadge)).toBe(true);
+    expect(isComponentExport(DynAvatar)).toBe(true);
+    expect(isComponentExport(DynLabel)).toBe(true);
   });
 
   it('exports all form components - SCOPE 6', () => {
-    expect(typeof DynInput).toBe('function');
-    expect(typeof DynSelect).toBe('function');
-    expect(typeof DynCheckbox).toBe('function');
-    expect(typeof DynDatePicker).toBe('function');
-    expect(typeof DynFieldContainer).toBe('function');
+    expect(isComponentExport(DynInput)).toBe(true);
+    expect(isComponentExport(DynSelect)).toBe(true);
+    expect(isComponentExport(DynCheckbox)).toBe(true);
+    expect(isComponentExport(DynDatePicker)).toBe(true);
+    expect(isComponentExport(DynFieldContainer)).toBe(true);
   });
   it('exports all layout components - SCOPE 7', () => {
-    expect(typeof DynContainer).toBe('function');
-    expect(typeof DynDivider).toBe('function');
-    expect(typeof DynGrid).toBe('function');
-    expect(typeof DynPage).toBe('function');
+    expect(isComponentExport(DynContainer)).toBe(true);
+    expect(isComponentExport(DynDivider)).toBe(true);
+    expect(isComponentExport(DynGrid)).toBe(true);
+    expect(isComponentExport(DynPage)).toBe(true);
   });
 
   it('exports all data display components', () => {
-    expect(typeof DynChart).toBe('function');
-    expect(typeof DynGauge).toBe('function');
-    expect(typeof DynListView).toBe('function');
-    expect(typeof DynTable).toBe('function');
-    expect(typeof DynTreeView).toBe('function');
+    expect(isComponentExport(DynChart)).toBe(true);
+    expect(isComponentExport(DynGauge)).toBe(true);
+    expect(isComponentExport(DynListView)).toBe(true);
+    expect(isComponentExport(DynTable)).toBe(true);
+    expect(isComponentExport(DynTreeView)).toBe(true);
   });
 
   it('exports all navigation components', () => {
-    expect(typeof DynMenu).toBe('function');
-    expect(typeof DynBreadcrumb).toBe('function');
-    expect(typeof DynTabs).toBe('function');
-    expect(typeof DynStepper).toBe('function');
-    expect(typeof DynToolbar).toBe('function');
+    expect(isComponentExport(DynMenu)).toBe(true);
+    expect(isComponentExport(DynBreadcrumb)).toBe(true);
+    expect(isComponentExport(DynTabs)).toBe(true);
+    expect(isComponentExport(DynStepper)).toBe(true);
+    expect(isComponentExport(DynToolbar)).toBe(true);
   });
 
   it('exports theme system', () => {
