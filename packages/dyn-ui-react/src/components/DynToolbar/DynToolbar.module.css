@@ -75,7 +75,9 @@
   padding: var(--dyn-spacing-sm, var(--spacing-xs, 8px));
   margin: var(--dyn-spacing-lg, var(--spacing-md, 16px));
   display: inline-flex;
-  width: auto;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
   flex: 0 0 auto;
 }
 
@@ -123,7 +125,8 @@
 
 .variant-floating .toolbar-content {
   width: auto;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .toolbar-items {
@@ -138,6 +141,7 @@
 .variant-floating .toolbar-items {
   flex: 0 0 auto;
   overflow: visible;
+  min-width: 0;
 }
 
 /* Toolbar Items */
