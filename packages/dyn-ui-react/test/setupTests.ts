@@ -2,6 +2,13 @@ import '@testing-library/jest-dom/vitest';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
+// Ensure Intl defaults to pt-BR formatting to match production locale expectations
+const OriginalNumberFormat = Intl.NumberFormat;
+Intl.NumberFormat = function (locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) {
+  return new OriginalNumberFormat(locales ?? 'pt-BR', options);
+} as typeof Intl.NumberFormat;
+Intl.NumberFormat.prototype = OriginalNumberFormat.prototype;
+
 // Silence pointer-events check errors (disabled elements) when supported
 const maybeConfigure = (userEvent as unknown as { configure?: (options: { pointerEventsCheck?: string }) => void }).configure;
 if (typeof maybeConfigure === 'function') {
