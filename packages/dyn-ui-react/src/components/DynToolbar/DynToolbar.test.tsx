@@ -106,12 +106,20 @@ describe('DynToolbar', () => {
     jest.clearAllMocks();
   });
 
-  it('renders toolbar with items', () => {
+  it('renders toolbar with items', async () => {
+    const user = userEvent.setup();
     render(<DynToolbar {...defaultProps} />);
 
     expect(screen.getByRole('toolbar')).toBeInTheDocument();
     expect(screen.getByText('Item 1')).toBeInTheDocument();
     expect(screen.getByText('Item 2')).toBeInTheDocument();
+
+    const overflowButton = screen.getByLabelText('More actions');
+    expect(overflowButton).toBeInTheDocument();
+    expect(screen.queryByText('Item 3')).not.toBeInTheDocument();
+
+    await user.click(overflowButton);
+
     expect(screen.getByText('Item 3')).toBeInTheDocument();
   });
 
@@ -122,8 +130,11 @@ describe('DynToolbar', () => {
     expect(screen.getByTestId('icon-test-icon-2')).toBeInTheDocument();
   });
 
-  it('displays badges on items', () => {
+  it('displays badges on items', async () => {
+    const user = userEvent.setup();
     render(<DynToolbar {...defaultProps} />);
+
+    await user.click(screen.getByLabelText('More actions'));
 
     const badge = screen.getByTestId('badge');
     expect(badge).toBeInTheDocument();
@@ -338,6 +349,31 @@ describe('DynToolbar', () => {
     expect(screen.getByLabelText('More actions')).toBeInTheDocument();
   });
 
+  it('enforces overflow threshold even when width is sufficient', () => {
+    const thresholdItems: ToolbarItem[] = Array.from({ length: 6 }, (_, i) => ({
+      id: `threshold-${i}`,
+      label: `Threshold ${i}`,
+      action: jest.fn()
+    }));
+
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 2000
+    });
+
+    render(
+      <DynToolbar
+        items={thresholdItems}
+        responsive={true}
+        overflowMenu={true}
+        overflowThreshold={3}
+      />
+    );
+
+    expect(screen.getByLabelText('More actions')).toBeInTheDocument();
+    expect(screen.queryByText('Threshold 4')).not.toBeInTheDocument();
+  });
+
   it('opens and closes overflow menu', async () => {
     const user = userEvent.setup();
     const manyItems: ToolbarItem[] = Array.from({ length: 10 }, (_, i) => ({
@@ -484,7 +520,9 @@ describe('DynToolbar', () => {
       );
 
       expect(() => {
-        toolbarRef.current?.refreshLayout();
+        act(() => {
+          toolbarRef.current?.refreshLayout();
+        });
       }).not.toThrow();
     });
   });
@@ -547,13 +585,22 @@ describe('DynToolbar', () => {
     });
 
     try {
-      render(<DynToolbar items={manyItems} responsive={true} overflowMenu={true} />);
+      render(
+        <DynToolbar
+          items={manyItems}
+          responsive={true}
+          overflowMenu={true}
+          overflowThreshold={manyItems.length + 1}
+        />
+      );
 
       expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
 
       offsetWidthValue = 200;
 
-      window.dispatchEvent(new Event('resize'));
+      act(() => {
+        window.dispatchEvent(new Event('resize'));
+      });
 
       await waitFor(() => {
         expect(screen.getByLabelText('More actions')).toBeInTheDocument();

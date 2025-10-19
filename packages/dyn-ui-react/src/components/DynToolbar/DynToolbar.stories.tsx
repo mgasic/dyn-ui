@@ -216,7 +216,7 @@ export const Floating: Story = {
     items: basicItems,
     variant: 'floating',
     position: 'bottom',
-    showLabels: false
+    showLabels: true
   }
 };
 
