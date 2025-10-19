@@ -1,9 +1,12 @@
 import '@testing-library/jest-dom/vitest';
+import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { configure } from '@testing-library/user-event';
 
-// Silence pointer-events check errors (disabled elements)
-configure({ pointerEventsCheck: 'never' });
+// Silence pointer-events check errors (disabled elements) when supported
+const maybeConfigure = (userEvent as unknown as { configure?: (options: { pointerEventsCheck?: string }) => void }).configure;
+if (typeof maybeConfigure === 'function') {
+  maybeConfigure({ pointerEventsCheck: 'never' });
+}
 
 // ResizeObserver mock
 class ResizeObserverMock {
