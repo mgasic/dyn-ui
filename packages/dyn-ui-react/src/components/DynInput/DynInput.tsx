@@ -313,10 +313,7 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       (direction: 1 | -1) => {
         if (disabled || readonly) return;
 
-  const stepValue = step ?? 1;
-  // Debugging information for failing tests (can be removed later)
-  // eslint-disable-next-line no-console
-  console.debug('[DynInput] handleStepChange', { inputValue, type, stepValue });
+        const stepValue = step ?? 1;
         const currentNumeric = type === 'currency'
           ? (parseCurrencyLikeValue(inputValue, resolvedCurrencyConfig) ?? 0)
           : Number(inputValue || 0);
@@ -348,7 +345,18 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
 
         clearError();
       },
-      [clearError, disabled, max, min, onChange, readonly, step, type, propValue]
+      [
+        clearError,
+        disabled,
+        inputValue,
+        max,
+        min,
+        onChange,
+        readonly,
+        resolvedCurrencyConfig,
+        step,
+        type
+      ]
     );
 
     const handleBlur = () => {
