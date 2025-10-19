@@ -1,23 +1,19 @@
 {
-  "$schema": "https://turbo.build/schema.json",
   "pipeline": {
-    // Build all packages. Inherit build dependencies from parent packages
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**"]
     },
-    // Run dev tasks without caching so file watching works as expected
     "dev": {
       "cache": false,
       "persistent": true
     },
-    // New test pipeline used by the root `pnpm test` script.
-    // This tells Turbo to run the `test` script in each package and
-    // propagate results up the dependency graph. We leave `outputs` empty
-    // since tests should never write build artifacts.
     "test": {
       "dependsOn": ["^test"],
       "outputs": []
+    },
+    "tasks": {
+      "dev": { "cache": false, "persistent": true }
     }
   }
 }
