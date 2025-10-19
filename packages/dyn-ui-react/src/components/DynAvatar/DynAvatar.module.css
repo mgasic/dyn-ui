@@ -50,6 +50,10 @@
   border-radius: var(--dyn-border-radius-md, var(--radius-md, 0.5rem));
 }
 
+.avatar--circle {
+  border-radius: var(--dyn-border-radius-full, var(--radius-full, 9999px));
+}
+
 .avatar--rounded {
   border-radius: var(--dyn-border-radius-lg, var(--radius-lg, 0.75rem));
 }

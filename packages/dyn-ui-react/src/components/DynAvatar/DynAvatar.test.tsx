@@ -194,7 +194,7 @@ describe('DynAvatar', () => {
     });
 
     it('applies default medium size when not specified', () => {
-      render(<DynAvatar alt="Test" size="md"/>);
+      render(<DynAvatar alt="Test" />);
       expect(screen.getByRole('img')).toHaveClass(getStyleClass('avatar--md'));
     });
 
