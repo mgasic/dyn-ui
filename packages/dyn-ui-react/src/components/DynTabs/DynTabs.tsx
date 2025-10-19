@@ -40,10 +40,13 @@ export const DynTabs = forwardRef<DynTabsRef, DynTabsProps>(
     const [internalId] = useState(() => id || generateId('tabs'));
 
     // Build processed items
-    const processedItems = useMemo(() => items.map((item, index) => {
+    type RawItem = NonNullable<DynTabsProps['items']>[number];
+    type ProcessedItem = RawItem & { processedValue: string; processedKey: string };
+
+    const processedItems = useMemo<ProcessedItem[]>(() => (items as RawItem[]).map((item: RawItem, index: number) => {
       const processedValue = item.value != null ? String(item.value) : item.id != null ? String(item.id) : `tab-${index}`;
       const processedKey = item.id != null ? String(item.id) : item.value != null ? String(item.value) : `tab-${index}`;
-      return { ...item, processedValue, processedKey } as typeof item & { processedValue: string; processedKey: string };
+      return { ...item, processedValue, processedKey };
     }), [items]);
 
     // Determine control mode and initial
@@ -232,7 +235,7 @@ export const DynTabs = forwardRef<DynTabsRef, DynTabsProps>(
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
           aria-describedby={ariaDescribedBy}
-          aria-orientation={orientation}
+          aria-orientation={orientation as 'horizontal' | 'vertical'}
           className={listClass}
           onKeyDown={handleKeyDown}
           ref={tablistRef}
