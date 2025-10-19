@@ -412,7 +412,7 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
               aria-label="More actions"
               title="More actions"
             >
-              <DynIcon icon="dyn-icon-more-horizontal" />
+              <DynIcon icon="more-horizontal" />
             </button>
 
             {isOverflowOpen && (
