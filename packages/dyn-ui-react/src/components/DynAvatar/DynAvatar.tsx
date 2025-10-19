@@ -47,7 +47,7 @@ export const DynAvatar = forwardRef<DynAvatarRef, DynAvatarProps>(
     {
       src,
       alt,
-      size = 'medium',
+      size = 'md',
       shape = 'circle',
       initials,
       status,
