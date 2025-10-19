@@ -19,7 +19,7 @@ export type {
   DynAvatarStatus,
   DynLabelProps,
   DynIconProps
-} from './components';
+} from './components/DynBadge';
 export { AVATAR_SIZES } from './components/DynAvatar/DynAvatar.types';
 
 // Form Components - SCOPE 6
