@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
   css: {
@@ -15,5 +15,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./packages/dyn-ui-react/test/setupTests.ts'],
     globals: true,
+    exclude: [...configDefaults.exclude, 'tests/e2e/**'],
   },
 });
