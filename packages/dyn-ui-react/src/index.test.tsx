@@ -7,7 +7,15 @@ import * as DynUI from './index';
 describe('DYN UI Library', () => {
   it('exports basic components', () => {
     expect(DynUI.DynButton).toBeDefined();
-    expect(typeof DynUI.DynButton).toBe('function');
+    const dynButtonType = typeof DynUI.DynButton;
+    expect(['function', 'object']).toContain(dynButtonType);
+
+    if (dynButtonType === 'object') {
+      expect(DynUI.DynButton).toHaveProperty(
+        '$$typeof',
+        Symbol.for('react.forward_ref')
+      );
+    }
   });
   
   it('exports display components', () => {
