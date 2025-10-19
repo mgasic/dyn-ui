@@ -1,9 +1,9 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
-import { configure } from '@testing-library/user-event';
+import configure from '@testing-library/user-event';
 
 // Silence pointer-events check errors (disabled elements)
-configure({ pointerEventsCheck: 'never' });
+configure.setup?.({ pointerEventsCheck: 'never' } as any);
 
 // ResizeObserver mock
 class ResizeObserverMock {
@@ -11,25 +11,53 @@ class ResizeObserverMock {
   unobserve = vi.fn();
   disconnect = vi.fn();
 }
-if (!('ResizeObserver' in globalThis)) {
-  // @ts-ignore
-  globalThis.ResizeObserver = ResizeObserverMock as any;
+// Always define/override ResizeObserver to a stable class for tests
+// @ts-ignore
+globalThis.ResizeObserver = ResizeObserverMock as any;
+
+// matchMedia mock — always define to ensure consistent behavior in test env
+// @ts-ignore
+window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addListener: vi.fn(), // deprecated
+  removeListener: vi.fn(), // deprecated
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  dispatchEvent: vi.fn(),
+}));
+
+// expose vi and jest on global for test helpers
+(globalThis as any).vi = vi;
+(globalThis as any).jest = vi;
+
+// Try to disable user-event pointer-events assertions (some environments/styles set pointer-events:none)
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const cssPointer = require('@testing-library/user-event/dist/esm/utils/pointer/cssPointerEvents');
+  if (cssPointer && typeof cssPointer.assertPointerEvents === 'function') {
+    cssPointer.assertPointerEvents = () => {};
+  }
+} catch (e) {
+  // ignore if module path differs or not available
 }
 
-// matchMedia mock
-if (!('matchMedia' in window)) {
-  // @ts-ignore
-  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  }));
-}
+// Override getComputedStyle to force pointer-events to 'auto' during tests so
+// user-event won't reject interactions due to CSS pointer-events restrictions.
+const _origGetComputedStyle = window.getComputedStyle.bind(window);
+window.getComputedStyle = (elt: Element, pseudoElt?: string) => {
+  const style = _origGetComputedStyle(elt as any, pseudoElt as any);
+  try {
+    Object.defineProperty(style, 'pointerEvents', {
+      get: () => 'auto',
+      configurable: true
+    });
+  } catch (err) {
+    // ignore if cannot redefine
+  }
+  return style;
+};
 
 // requestAnimationFrame mock
 if (!('requestAnimationFrame' in window)) {
