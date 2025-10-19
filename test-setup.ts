@@ -8,19 +8,21 @@ import { vi } from 'vitest';
 (globalThis as any).jest = vi;
 
 // CSS Modules mock for testing
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // deprecated
+      removeListener: vi.fn(), // deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+}
 
 // Mock IntersectionObserver
 global.IntersectionObserver = vi.fn().mockImplementation(() => ({
@@ -41,7 +43,15 @@ class MockResizeObserver {
 }
 
 // @ts-ignore
-global.ResizeObserver = MockResizeObserver as any;
+const ResizeObserverMock = MockResizeObserver as any;
+// @ts-ignore
+global.ResizeObserver = ResizeObserverMock;
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  window.ResizeObserver = ResizeObserverMock;
+}
 
 // Mock scrollIntoView
-Element.prototype.scrollIntoView = vi.fn();
+if (typeof Element !== 'undefined') {
+  Element.prototype.scrollIntoView = vi.fn();
+}

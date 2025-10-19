@@ -3,9 +3,13 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'jsdom',
-    setupFiles: ['./src/test-setup.ts'],
+    setupFiles: ['./test/setupTests.ts', './src/test-setup.ts'],
     globals: true,
-    css: true,
+    css: {
+      modules: {
+        generateScopedName: 'dyn-[name]__[local]___[hash:base64:5]'
+      }
+    },
     restoreMocks: true,
     clearMocks: true,
     mockReset: true
