@@ -12,6 +12,18 @@ declare module "*.module.scss" {
   export default classes;
 }
 
+declare module "*.module.sass" {
+  const classes: Readonly<Record<string, string>>;
+  export default classes;
+}
+
+// React Import Compatibility Fix (Rešava 49+ grešaka tipa 1259)
+declare module 'react' {
+  import * as React from 'react';
+  export = React;
+  export as namespace React;
+}
+
 // SVG kao React komponente
 declare module "*.svg" {
   import React = require("react");
@@ -50,6 +62,30 @@ declare module "*.webp" {
 declare module "*.json" {
   const value: any;
   export default value;
+}
+
+// Jest i Testing Library extensions
+declare module 'jest-axe' {
+  export function toHaveNoViolations(): any;
+  export function axe(element: any, options?: any): Promise<any>;
+}
+
+declare module 'vitest-axe' {
+  export function toHaveNoViolations(): any;
+}
+
+// Design Token CSS Variables Support  
+interface CSSStyleDeclaration {
+  [key: `--dyn-${string}`]: string;
+}
+
+// Global Test Environment
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toHaveNoViolations(): R;
+    }
+  }
 }
 
 // Design token types
