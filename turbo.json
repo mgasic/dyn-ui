@@ -11,9 +11,6 @@
     "test": {
       "dependsOn": ["^test"],
       "outputs": []
-    },
-    "tasks": {
-      "dev": { "cache": false, "persistent": true }
     }
   }
 }
