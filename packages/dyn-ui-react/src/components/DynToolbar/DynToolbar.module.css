@@ -86,6 +86,25 @@
   border-radius: var(--dyn-border-radius-pill, var(--border-radius-pill, 24px));
 }
 
+.variant-floating .toolbar-content {
+  width: auto;
+}
+
+.variant-floating .toolbar-items {
+  flex: initial;
+}
+
+.variant-floating .toolbar-overflow {
+  margin-left: var(--dyn-spacing-sm, var(--spacing-xs, 8px));
+}
+
+.variant-floating.position-bottom,
+.variant-floating.position-fixed-bottom,
+.variant-floating.position-top,
+.variant-floating.position-fixed-top {
+  border-radius: var(--dyn-border-radius-pill, var(--border-radius-pill, 24px));
+}
+
 /* Size Variants */
 .size-small {
   min-height: 36px;
