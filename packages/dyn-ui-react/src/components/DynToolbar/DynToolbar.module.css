@@ -68,6 +68,7 @@
   box-shadow: none;
 }
 
+
 .variant-floating {
   border-radius: var(--dyn-border-radius-pill, var(--border-radius-pill, 24px));
   box-shadow: var(--dyn-shadow-lg, var(--shadow-lg, 0 10px 15px rgba(0, 0, 0, 0.1)));
@@ -75,6 +76,14 @@
   margin: var(--dyn-spacing-lg, var(--spacing-md, 16px));
   display: inline-flex;
   width: auto;
+  flex: 0 0 auto;
+}
+
+.variant-floating.position-bottom,
+.variant-floating.position-fixed-bottom,
+.variant-floating.position-top,
+.variant-floating.position-fixed-top {
+  border-radius: var(--dyn-border-radius-pill, var(--border-radius-pill, 24px));
 }
 
 .variant-floating .toolbar-content {
@@ -131,6 +140,11 @@
   min-width: 0;
 }
 
+.variant-floating .toolbar-content {
+  width: auto;
+  flex: 0 1 auto;
+}
+
 .toolbar-items {
   display: flex;
   align-items: center;
@@ -138,6 +152,10 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
+}
+
+.variant-floating .toolbar-items {
+  flex: 0 0 auto;
 }
 
 /* Toolbar Items */
@@ -317,6 +335,10 @@
   position: relative;
   margin-left: auto;
   flex-shrink: 0;
+}
+
+.variant-floating .toolbar-overflow {
+  margin-left: var(--dyn-spacing-sm, var(--spacing-xs, 8px));
 }
 
 .toolbar-overflow-button {
