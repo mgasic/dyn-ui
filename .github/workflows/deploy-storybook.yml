@@ -1,3 +1,4 @@
+# .github/workflows/deploy-storybook.yml
 name: Deploy Storybook to GitHub Pages
 
 on:
@@ -37,7 +38,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build Storybook
         run: pnpm run build-storybook
