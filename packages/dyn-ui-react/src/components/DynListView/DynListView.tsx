@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import styles from './DynListView.module.css';
@@ -220,8 +220,9 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
   
   // Use items prop, fallback to data for backward compatibility
   const listItems = items.length > 0 ? items : data;
-  
+
   const [internalId] = useState(() => id || generateId('listview'));
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -258,6 +259,26 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
     getSelectedItems: getItemsByKeys,
   });
 
+  const { selectAll: selectAllKeys, clearSelection } = selection;
+  const allKeys = uniqueItemKeys;
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => {
+        rootRef.current?.focus();
+      },
+      selectAll: () => {
+        if (!allKeys.length) return;
+        selectAllKeys(allKeys);
+      },
+      clearSelection: () => {
+        clearSelection();
+      },
+    }),
+    [allKeys, clearSelection, selectAllKeys]
+  );
+
   const moveActive = (delta: number) => {
     const count = listItems.length;
     if (!count) return;
@@ -286,10 +307,11 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
   };
 
   const rootClasses = cn(
+    'dyn-list-view',
     getStyleClass('root'),
-    size === 'small' && getStyleClass('rootSmall'),
-    size === 'large' && getStyleClass('rootLarge'),
-    bordered && getStyleClass('rootBordered'),
+    size === 'small' && [getStyleClass('rootSmall'), 'dyn-list-view--small'],
+    size === 'large' && [getStyleClass('rootLarge'), 'dyn-list-view--large'],
+    bordered && [getStyleClass('rootBordered'), 'dyn-list-view--bordered'],
     className
   );
 
@@ -297,19 +319,21 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
     height: typeof height === 'number' ? `${height}px` : String(height) 
   } : undefined;
 
-  const allKeys = uniqueItemKeys;
   const allChecked =
     (multiSelect || selectable) &&
     allKeys.length > 0 &&
     allKeys.every((key) => selection.isSelected(key));
 
+  const computedAriaLabel = ariaLabel ?? (ariaLabelledBy ? undefined : 'List view');
+  const selectAllButtonLabel = allChecked ? 'Deselect all items' : 'Select all items';
+
   return (
     <div
-      ref={ref}
+      ref={rootRef}
       id={internalId}
       role="listbox"
       aria-multiselectable={multiSelect || selectable || undefined}
-      aria-label={ariaLabel}
+      aria-label={computedAriaLabel}
       aria-labelledby={ariaLabelledBy}
       aria-activedescendant={listItems[activeIndex] ? itemIds[activeIndex] : undefined}
       className={rootClasses}
@@ -320,18 +344,26 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
       {...rest}
     >
       {(multiSelect || selectable) && (
-        <div className={getStyleClass('option')}
-             role="option"
-             aria-selected={allChecked}
-        >
-          <input
-            type="checkbox"
-            role="checkbox"
-            aria-checked={allChecked}
-            checked={allChecked}
-            onChange={() => selection.selectAll(allChecked ? [] : allKeys)}
-          />
-          <span className={getStyleClass('option__label')}>Select All</span>
+        <div className={getStyleClass('bulkActions')}>
+          <button
+            type="button"
+            className={cn(getStyleClass('option'), getStyleClass('bulkActions__button'))}
+            aria-pressed={allChecked}
+            aria-label={selectAllButtonLabel}
+            onClick={() => selection.selectAll(allChecked ? [] : allKeys)}
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                getStyleClass('option__checkbox'),
+                allChecked && getStyleClass('option__checkbox--checked')
+              )}
+            />
+            <span className={getStyleClass('option__label')}>Select All</span>
+            <span className={getStyleClass('visuallyHidden')}>
+              {allChecked ? 'All items selected' : 'No items selected'}
+            </span>
+          </button>
         </div>
       )}
 
@@ -350,13 +382,16 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
           const title = (item as any).title ?? (item as any).label ?? (item as any).value ?? String((item as any).id ?? i + 1);
           const desc = (item as any).description;
           const complex = isComplexItem(item);
+          const checkboxId = `${itemIds[i]}-checkbox`;
+          const labelId = `${itemIds[i]}-label`;
+          const descriptionId = desc ? `${itemIds[i]}-description` : undefined;
+          const usesDefaultRenderer = !renderItem;
+          const optionLabelledBy = usesDefaultRenderer ? labelId : undefined;
+          const optionDescribedBy = usesDefaultRenderer && desc ? descriptionId : undefined;
 
           return (
             <div
               key={key}
-              id={itemIds[i]}
-              role="option"
-              aria-selected={selectedState}
               className={cn(
                 getStyleClass('option'),
                 selectedState && getStyleClass('option--selected'),
@@ -364,72 +399,80 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
                 item.disabled && getStyleClass('option--disabled')
               )}
               onMouseEnter={() => !item.disabled && setActiveIndex(i)}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => !item.disabled && selection.toggle(key)}
             >
-              {(selectable || multiSelect) && (
-                <input
-                  type="checkbox"
-                  role="checkbox"
-                  aria-checked={!!selectedState}
-                  checked={!!selectedState}
-                  disabled={item.disabled}
-                  onChange={() => !item.disabled && selection.toggle(key)}
-                  onClick={(e) => e.stopPropagation()}
-                  className={getStyleClass('option__checkbox')}
-                />
-              )}
-
-              <div className={getStyleClass('option__content')}>
-                {renderItem ? (
-                  renderItem(item, i)
-                ) : (
-                  <>
-                    <span className={getStyleClass('option__label')}>
-                      {title}
-                    </span>
-                    {desc && (
-                      <span className={getStyleClass('option__description')}>
-                        {desc}
-                      </span>
+              <div
+                id={itemIds[i]}
+                role="option"
+                aria-selected={selectedState}
+                aria-disabled={item.disabled || undefined}
+                className={getStyleClass('option__main')}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => !item.disabled && selection.toggle(key)}
+              >
+                {(selectable || multiSelect) && (
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      getStyleClass('option__checkbox'),
+                      selectedState && getStyleClass('option__checkbox--checked')
                     )}
-                  </>
+                  />
                 )}
+
+                <div className={getStyleClass('option__content')}>
+                  {renderItem ? (
+                    renderItem(item, i)
+                  ) : (
+                    <>
+                      <span className={getStyleClass('option__label')}>
+                        {title}
+                      </span>
+                      {desc && (
+                        <span className={getStyleClass('option__description')}>
+                          {desc}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
 
-              {complex && (
-                <button
-                  type="button"
-                  className={getStyleClass('option__expand')}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setExpanded(prev => ({ ...prev, [key]: !prev[key] }));
-                  }}
-                  aria-expanded={!!expanded[key]}
-                >
-                  {expanded[key] ? 'Collapse' : 'Expand'}
-                </button>
-              )}
-
-              {actions && actions.length > 0 && (
-                <div 
-                  className={getStyleClass('option__actions')} 
+              {(complex || (actions && actions.length > 0)) && (
+                <div
+                  className={getStyleClass('option__controls')}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {actions.map((action) => (
+                  {complex && (
                     <button
-                      key={action.key}
                       type="button"
-                      className={cn(
-                        getStyleClass('actionButton'),
-                        getActionButtonVariantClass(action.type)
-                      )}
-                      onClick={() => action.onClick(item, i)}
-                      title={action.title}
+                      className={getStyleClass('option__expand')}
+                      onClick={() =>
+                        setExpanded(prev => ({ ...prev, [key]: !prev[key] }))
+                      }
+                      aria-expanded={!!expanded[key]}
                     >
-                      {action.title}
+                      {expanded[key] ? 'Collapse' : 'Expand'}
                     </button>
-                  ))}
+                  )}
+
+                  {actions && actions.length > 0 && (
+                    <div className={getStyleClass('option__actions')}>
+                      {actions.map((action) => (
+                        <button
+                          key={action.key}
+                          type="button"
+                          className={cn(
+                            getStyleClass('actionButton'),
+                            getActionButtonVariantClass(action.type)
+                          )}
+                          onClick={() => action.onClick(item, i)}
+                          title={action.title}
+                        >
+                          {action.title}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
