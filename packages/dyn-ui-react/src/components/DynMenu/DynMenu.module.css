@@ -1,129 +1,231 @@
-.menubar,
-:global(.dyn-menu) {
+.menubar {
+  --dyn-menu-width: 280px;
   --dyn-menu-background: var(--color-neutral-light-00, #fff);
   --dyn-menu-border: var(--color-neutral-light-20, #e0e0e0);
-  --dyn-menu-item-hover: var(--color-neutral-light-10, #f0f0f0);
-  --dyn-menu-item-active: var(--color-neutral-light-15, #e8e8e8);
-  --dyn-menu-focus: var(--color-action-focus, #0066cc);
-  display: inline-flex;
-  flex-direction: row;
+  --dyn-menu-divider: var(--color-neutral-light-30, #d5d5d5);
+  --dyn-menu-item-color: var(--color-neutral-mid-80, #1f2933);
+  --dyn-menu-item-hover: var(--color-neutral-light-10, #f7f7f7);
+  --dyn-menu-item-active: var(--color-brand-01-light, #cce7ff);
+  --dyn-menu-focus: var(--color-action-focus, #005fb8);
+  display: flex;
+  flex-direction: column;
   align-items: stretch;
   gap: 0.25rem;
-  padding: 0.25rem;
-  border-radius: 0.5rem;
+  padding: 0.75rem 0.5rem;
+  width: 100%;
+  min-height: 100%;
   background-color: var(--dyn-menu-background);
-  border: 1px solid var(--dyn-menu-border);
+  border-right: 1px solid var(--dyn-menu-border);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  color: var(--dyn-menu-item-color);
 }
 
-.menubar--horizontal,
-:global(.dyn-menu--horizontal) {
+:global(.dyn-menu) {
+  composes: menubar;
+}
+
+.menubar--horizontal {
   flex-direction: row;
+  width: auto;
+  min-height: auto;
+  padding: 0.5rem;
+  border: 1px solid var(--dyn-menu-border);
+  border-right: none;
+  border-radius: 0.75rem;
+  box-shadow: none;
+  gap: 0.5rem;
 }
 
-.menubar--vertical,
-:global(.dyn-menu--vertical) {
+:global(.dyn-menu--horizontal) {
+  composes: menubar menubar--horizontal;
+}
+
+.menubar--vertical {
   flex-direction: column;
-  min-width: 16rem;
+  width: var(--dyn-menu-width);
+  min-height: 100%;
 }
 
-.menubar__item,
-:global(.dyn-menu-item-container) {
+:global(.dyn-menu--vertical) {
+  composes: menubar menubar--vertical;
+}
+
+.menubar__item {
   position: relative;
+  width: 100%;
 }
 
-.menubar__button,
-:global(.dyn-menu-item) {
-  display: inline-flex;
+:global(.dyn-menu-item-container) {
+  composes: menubar__item;
+}
+
+.menubar__button {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.5rem 0.75rem;
-  background: none;
+  padding: 0.625rem 0.75rem;
   border: none;
-  border-radius: 0.375rem;
-  font: inherit;
+  border-radius: 0.5rem;
+  background: transparent;
   color: inherit;
+  font: inherit;
   text-align: left;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+:global(.dyn-menu-item) {
+  composes: menubar__button;
+}
+
 .menubar__button:hover:not(:disabled),
-:global(.dyn-menu-item:hover:not(.dyn-menu-item-disabled)) {
+.menubar__button:active:not(:disabled) {
   background-color: var(--dyn-menu-item-hover);
 }
 
-.menubar__button:focus-visible,
+:global(.dyn-menu-item:hover:not(.dyn-menu-item-disabled)),
+:global(.dyn-menu-item:active:not(.dyn-menu-item-disabled)) {
+  background-color: var(--dyn-menu-item-hover);
+}
+
+.menubar__button--open {
+  background-color: var(--dyn-menu-item-active);
+  font-weight: 600;
+}
+
+:global(.dyn-menu-item-active) {
+  composes: menubar__button--open;
+}
+
+.menubar__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+:global(.dyn-menu-item-disabled) {
+  composes: menubar__button;
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.menubar__button:focus-visible {
+  outline: 2px solid var(--dyn-menu-focus);
+  outline-offset: 2px;
+}
+
 :global(.dyn-menu-item:focus-visible) {
   outline: 2px solid var(--dyn-menu-focus);
   outline-offset: 2px;
 }
 
-.menubar__button--open,
-:global(.dyn-menu-item-active) {
-  background-color: var(--dyn-menu-item-active);
-  font-weight: 600;
+.menubar__divider {
+  height: 1px;
+  margin: 0.5rem 0.75rem;
+  background-color: var(--dyn-menu-divider);
 }
 
-.menubar__button:disabled,
-:global(.dyn-menu-item-disabled) {
-  opacity: 0.4;
-  cursor: not-allowed;
+:global(.dyn-menu-divider) {
+  composes: menubar__divider;
 }
 
-.menu,
-:global(.dyn-menu-subitems) {
+.menu {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.25rem;
   margin-top: 0.25rem;
   min-width: 12rem;
-  border-radius: 0.5rem;
-  background-color: var(--color-neutral-light-00, #fff);
+  width: max-content;
+  border-radius: 0.75rem;
+  background-color: var(--dyn-menu-background);
   border: 1px solid var(--dyn-menu-border);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
   z-index: 2;
 }
 
-.menubar--horizontal .menu,
-:global(.dyn-menu--horizontal .dyn-menu-subitems) {
-  position: absolute;
-  top: calc(100% + 0.25rem);
-  left: 0;
+:global(.dyn-menu-subitems) {
+  composes: menu;
 }
 
-.menubar--vertical .menu,
-:global(.dyn-menu--vertical .dyn-menu-subitems) {
+.menubar--horizontal .menu {
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  left: 0;
+  width: 18rem;
+}
+
+:global(.dyn-menu--horizontal .dyn-menu-subitems) {
+  composes: menu;
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  left: 0;
+  width: 18rem;
+}
+
+.menubar--vertical .menu {
   position: static;
   width: 100%;
   box-shadow: none;
+  border-radius: 0.5rem;
 }
 
-.menu__item,
-:global(.dyn-menu-subitems .dyn-menu-item) {
-  display: inline-flex;
+:global(.dyn-menu--vertical .dyn-menu-subitems) {
+  composes: menu;
+  position: static;
+  width: 100%;
+  box-shadow: none;
+  border-radius: 0.5rem;
+}
+
+.menu__item {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
   width: 100%;
   padding: 0.5rem 0.75rem;
-  background: none;
   border: none;
-  border-radius: 0.375rem;
-  font: inherit;
+  border-radius: 0.5rem;
+  background: transparent;
   color: inherit;
+  font: inherit;
   text-align: left;
   cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.menu__item:hover:not(:disabled),
-:global(.dyn-menu-subitems .dyn-menu-item:hover:not(.dyn-menu-item-disabled)) {
+:global(.dyn-menu-subitems .dyn-menu-item) {
+  composes: menu__item;
+}
+
+.menu__item:hover:not(:disabled) {
   background-color: var(--dyn-menu-item-hover);
 }
 
-.menu__item:focus-visible,
+:global(
+  .dyn-menu-subitems .dyn-menu-item:hover:not(.dyn-menu-item-disabled)
+) {
+  background-color: var(--dyn-menu-item-hover);
+}
+
+.menu__item:focus-visible {
+  outline: 2px solid var(--dyn-menu-focus);
+  outline-offset: 2px;
+}
+
 :global(.dyn-menu-subitems .dyn-menu-item:focus-visible) {
   outline: 2px solid var(--dyn-menu-focus);
   outline-offset: 2px;
+}
+
+.menu__item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+:global(.dyn-menu-subitems .dyn-menu-item-disabled) {
+  composes: menu__item;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
