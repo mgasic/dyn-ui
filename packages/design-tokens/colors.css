@@ -4,6 +4,43 @@
  * components, themes, and global styles should consume.
  */
 :root {
+  /* Base palette */
+  --dyn-color-base-white: #ffffff;
+  --dyn-color-base-black: #000000;
+
+  /* Neutral palette mapped from tokens */
+  --dyn-color-neutral-00: #ffffff;
+  --dyn-color-neutral-05: #f9f9f9;
+  --dyn-color-neutral-10: #f0f0f0;
+  --dyn-color-neutral-20: #e0e0e0;
+  --dyn-color-neutral-40: #999999;
+  --dyn-color-neutral-60: #666666;
+  --dyn-color-neutral-70: #666666;
+  --dyn-color-neutral-90: #333333;
+  --dyn-color-neutral-0: var(--dyn-color-neutral-00);
+  --dyn-color-neutral-100: var(--dyn-color-neutral-10);
+  --dyn-color-neutral-200: var(--dyn-color-neutral-20);
+  --dyn-color-neutral-400: var(--dyn-color-neutral-40);
+  --dyn-color-neutral-600: var(--dyn-color-neutral-60);
+  --dyn-color-neutral-700: var(--dyn-color-neutral-70);
+  --dyn-color-neutral-800: var(--dyn-color-neutral-90);
+  --dyn-color-neutral-900: var(--dyn-color-neutral-90);
+
+  /* Feedback aliases */
+  --dyn-color-feedback-positive: #4caf50;
+  --dyn-color-feedback-negative: #f44336;
+  --dyn-color-feedback-negative-dark: #d32f2f;
+  --dyn-color-feedback-negative-darker: #b71c1c;
+  --dyn-color-feedback-warning: #ff9800;
+  --dyn-color-feedback-info: #2196f3;
+
+  /* Action / interactive states */
+  --dyn-color-action-default: #0066cc;
+  --dyn-color-action-hover: #0052a3;
+  --dyn-color-action-pressed: #003d7a;
+  --dyn-color-action-disabled: #cccccc;
+  --dyn-color-action-focus: #0066cc;
+
   /* Neutrals & backgrounds */
   --dyn-color-background: #ffffff;
   --dyn-color-background-secondary: #f8fafc;
