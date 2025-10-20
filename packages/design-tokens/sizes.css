@@ -1,0 +1,16 @@
+/* Component sizing and opacity tokens */
+:root {
+  /* Control sizes */
+  --dyn-size-xs: 1rem; /* 16px icon buttons */
+  --dyn-size-sm: 2.25rem; /* 36px */
+  --dyn-size-md: 2.5rem; /* 40px */
+  --dyn-size-lg: 3rem; /* 48px */
+
+  /* Touch target guidelines */
+  --dyn-size-touch-target: 44px;
+  --dyn-size-touch-target-sm: 40px;
+  --dyn-size-touch-target-lg: 52px;
+
+  /* Opacity defaults */
+  --dyn-opacity-disabled: 0.56;
+}
