@@ -125,6 +125,10 @@ const DynChart = forwardRef<HTMLDivElement, DynChartProps>((props, ref) => {
     xAxis,
     yAxis,
     ariaDescription,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': ariaDescribedBy,
+    role,
     className,
     id,
     children,
@@ -614,10 +618,17 @@ const DynChart = forwardRef<HTMLDivElement, DynChartProps>((props, ref) => {
     type,
   ]);
 
-  const canvasAriaLabel = title ?? 'Chart visualization';
-  const describedBy = [subtitle ? subtitleId : undefined, ariaDescription ? descriptionId : undefined]
-    .filter(Boolean)
-    .join(' ');
+  const figureAriaLabelledBy = [titleId, ariaLabelledBy].filter(Boolean).join(' ') || undefined;
+  const describedByParts = [
+    subtitle ? subtitleId : undefined,
+    ariaDescription ? descriptionId : undefined,
+    ariaDescribedBy,
+  ].filter(Boolean);
+  const describedBy = describedByParts.length > 0 ? describedByParts.join(' ') : undefined;
+  const canvasAriaLabel =
+    ariaLabel ?? (ariaLabelledBy ? undefined : title ?? 'Chart visualization');
+  const canvasAriaLabelledBy = ariaLabel ? undefined : figureAriaLabelledBy;
+  const canvasRole = role ?? 'img';
 
   return (
     <div
@@ -627,7 +638,7 @@ const DynChart = forwardRef<HTMLDivElement, DynChartProps>((props, ref) => {
       data-testid={dataTestId}
       className={cn(styles.root, typeClassNameMap[type], className)}
     >
-      <figure className={styles.figure} aria-labelledby={titleId} aria-describedby={describedBy || undefined}>
+      <figure className={styles.figure} aria-labelledby={figureAriaLabelledBy} aria-describedby={describedBy}>
         {(title || subtitle) && (
           <header className={styles.header}>
             {title && (
@@ -647,9 +658,10 @@ const DynChart = forwardRef<HTMLDivElement, DynChartProps>((props, ref) => {
           <canvas
             ref={canvasRef}
             className={styles.canvas}
-            role="img"
+            role={canvasRole}
             aria-label={canvasAriaLabel}
-            aria-describedby={describedBy || undefined}
+            aria-labelledby={canvasAriaLabelledBy}
+            aria-describedby={describedBy}
             width={chartDimensions.totalWidth}
             height={chartDimensions.totalHeight}
             style={{ width, height }}

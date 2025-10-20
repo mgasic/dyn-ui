@@ -1,4 +1,4 @@
-import type { BaseComponentProps } from '../../types';
+import type { AccessibilityProps, BaseComponentProps } from '../../types';
 
 export interface ChartDataPoint {
   label?: string;
@@ -29,7 +29,10 @@ export interface DynChartOptions {
   showGrid?: boolean;
 }
 
-export interface DynChartProps extends BaseComponentProps, DynChartOptions {
+export interface DynChartProps
+  extends BaseComponentProps,
+    DynChartOptions,
+    AccessibilityProps {
   /** Chart type */
   type?: ChartType;
 
