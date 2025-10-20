@@ -2,7 +2,7 @@ import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, u
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import styles from './DynListView.module.css';
-import type { DynListViewProps, ListViewItem, ListAction } from './DynListView.types';
+import type { DynListViewProps, DynListViewRef, ListViewItem, ListAction } from './DynListView.types';
 
 const getStyleClass = (n: string) => (styles as Record<string, string>)[n] || '';
 
@@ -190,7 +190,7 @@ const useSelectionManager = ({
   } as const;
 };
 
-export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function DynListView(
+export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function DynListView(
   {
     items = [],
     data = [], // legacy alias
@@ -262,20 +262,28 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
   const { selectAll: selectAllKeys, clearSelection } = selection;
   const allKeys = uniqueItemKeys;
 
-  useImperativeHandle(
+  useImperativeHandle<DynListViewRef | null>(
     ref,
-    () => ({
-      focus: () => {
-        rootRef.current?.focus();
-      },
-      selectAll: () => {
+    () => {
+      const node = rootRef.current;
+
+      if (!node) {
+        return null;
+      }
+
+      const handle = node as DynListViewRef;
+
+      handle.selectAll = () => {
         if (!allKeys.length) return;
         selectAllKeys(allKeys);
-      },
-      clearSelection: () => {
+      };
+
+      handle.clearSelection = () => {
         clearSelection();
-      },
-    }),
+      };
+
+      return handle;
+    },
     [allKeys, clearSelection, selectAllKeys]
   );
 

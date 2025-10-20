@@ -94,8 +94,10 @@ export interface DynListViewProps extends BaseComponentProps, AccessibilityProps
   'aria-labelledby'?: string;
 }
 
-export interface DynListViewRef {
-  focus: () => void;
+export interface DynListViewImperativeActions {
   selectAll: () => void;
   clearSelection: () => void;
 }
+
+export type DynListViewRef = HTMLDivElement & DynListViewImperativeActions;
+
