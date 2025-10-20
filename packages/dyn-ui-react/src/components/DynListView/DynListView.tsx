@@ -315,14 +315,11 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
   };
 
   const rootClasses = cn(
-    getStyleClass('root'),
     'dyn-list-view',
-    size === 'small' && getStyleClass('rootSmall'),
-    size === 'large' && getStyleClass('rootLarge'),
-    size === 'small' && 'dyn-list-view--small',
-    size === 'large' && 'dyn-list-view--large',
-    bordered && getStyleClass('rootBordered'),
-    bordered && 'dyn-list-view--bordered',
+    getStyleClass('root'),
+    size === 'small' && [getStyleClass('rootSmall'), 'dyn-list-view--small'],
+    size === 'large' && [getStyleClass('rootLarge'), 'dyn-list-view--large'],
+    bordered && [getStyleClass('rootBordered'), 'dyn-list-view--bordered'],
     className
   );
 
@@ -335,8 +332,8 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
     allKeys.length > 0 &&
     allKeys.every((key) => selection.isSelected(key));
 
-  const selectAllCheckboxId = `${internalId}-select-all`;
-  const selectAllLabelId = `${selectAllCheckboxId}-label`;
+  const computedAriaLabel = ariaLabel ?? (ariaLabelledBy ? undefined : 'List view');
+  const selectAllButtonLabel = allChecked ? 'Deselect all items' : 'Select all items';
 
   return (
     <div
@@ -344,7 +341,7 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
       id={internalId}
       role="listbox"
       aria-multiselectable={multiSelect || selectable || undefined}
-      aria-label={ariaLabel}
+      aria-label={computedAriaLabel}
       aria-labelledby={ariaLabelledBy}
       aria-activedescendant={listItems[activeIndex] ? itemIds[activeIndex] : undefined}
       className={rootClasses}
@@ -355,28 +352,26 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
       {...rest}
     >
       {(multiSelect || selectable) && (
-        <div
-          className={getStyleClass('option')}
-          role="option"
-          aria-selected={allChecked}
-          aria-labelledby={selectAllLabelId}
-          onClick={() => !disabled && selectAllKeys(allChecked ? [] : allKeys)}
-        >
-          <input
-            type="checkbox"
-            role="checkbox"
-            aria-checked={allChecked}
-            checked={allChecked}
-            id={selectAllCheckboxId}
-            aria-labelledby={selectAllLabelId}
-            aria-label="Select all items"
-            disabled={disabled}
-            onChange={() => !disabled && selectAllKeys(allChecked ? [] : allKeys)}
-            onClick={(event) => event.stopPropagation()}
-          />
-          <span className={getStyleClass('option__label')} id={selectAllLabelId}>
-            Select All
-          </span>
+        <div className={getStyleClass('bulkActions')}>
+          <button
+            type="button"
+            className={cn(getStyleClass('option'), getStyleClass('bulkActions__button'))}
+            aria-pressed={allChecked}
+            aria-label={selectAllButtonLabel}
+            onClick={() => selection.selectAll(allChecked ? [] : allKeys)}
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                getStyleClass('option__checkbox'),
+                allChecked && getStyleClass('option__checkbox--checked')
+              )}
+            />
+            <span className={getStyleClass('option__label')}>Select All</span>
+            <span className={getStyleClass('visuallyHidden')}>
+              {allChecked ? 'All items selected' : 'No items selected'}
+            </span>
+          </button>
         </div>
       )}
 
@@ -405,12 +400,6 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
           return (
             <div
               key={key}
-              id={itemIds[i]}
-              role="option"
-              aria-selected={selectedState}
-              aria-label={title}
-              aria-labelledby={optionLabelledBy}
-              aria-describedby={optionDescribedBy}
               className={cn(
                 getStyleClass('option'),
                 selectedState && getStyleClass('option--selected'),
@@ -418,76 +407,80 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
                 item.disabled && getStyleClass('option--disabled')
               )}
               onMouseEnter={() => !item.disabled && setActiveIndex(i)}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => !item.disabled && selection.toggle(key)}
             >
-              {(selectable || multiSelect) && (
-                <input
-                  type="checkbox"
-                  role="checkbox"
-                  aria-checked={!!selectedState}
-                  checked={!!selectedState}
-                  disabled={item.disabled}
-                  id={checkboxId}
-                  aria-labelledby={optionLabelledBy}
-                  aria-describedby={optionDescribedBy}
-                  aria-label={`Select ${title}`}
-                  onChange={() => !item.disabled && selection.toggle(key)}
-                  onClick={(e) => e.stopPropagation()}
-                  className={getStyleClass('option__checkbox')}
-                />
-              )}
-
-              <div className={getStyleClass('option__content')}>
-                {renderItem ? (
-                  renderItem(item, i)
-                ) : (
-                  <>
-                    <span className={getStyleClass('option__label')} id={labelId}>
-                      {title}
-                    </span>
-                    {desc && (
-                      <span className={getStyleClass('option__description')} id={descriptionId}>
-                        {desc}
-                      </span>
+              <div
+                id={itemIds[i]}
+                role="option"
+                aria-selected={selectedState}
+                aria-disabled={item.disabled || undefined}
+                className={getStyleClass('option__main')}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => !item.disabled && selection.toggle(key)}
+              >
+                {(selectable || multiSelect) && (
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      getStyleClass('option__checkbox'),
+                      selectedState && getStyleClass('option__checkbox--checked')
                     )}
-                  </>
+                  />
                 )}
+
+                <div className={getStyleClass('option__content')}>
+                  {renderItem ? (
+                    renderItem(item, i)
+                  ) : (
+                    <>
+                      <span className={getStyleClass('option__label')}>
+                        {title}
+                      </span>
+                      {desc && (
+                        <span className={getStyleClass('option__description')}>
+                          {desc}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
 
-              {complex && (
-                <button
-                  type="button"
-                  className={getStyleClass('option__expand')}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setExpanded(prev => ({ ...prev, [key]: !prev[key] }));
-                  }}
-                  aria-expanded={!!expanded[key]}
-                >
-                  {expanded[key] ? 'Collapse' : 'Expand'}
-                </button>
-              )}
-
-              {actions && actions.length > 0 && (
-                <div 
-                  className={getStyleClass('option__actions')} 
+              {(complex || (actions && actions.length > 0)) && (
+                <div
+                  className={getStyleClass('option__controls')}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {actions.map((action) => (
+                  {complex && (
                     <button
-                      key={action.key}
                       type="button"
-                      className={cn(
-                        getStyleClass('actionButton'),
-                        getActionButtonVariantClass(action.type)
-                      )}
-                      onClick={() => action.onClick(item, i)}
-                      title={action.title}
+                      className={getStyleClass('option__expand')}
+                      onClick={() =>
+                        setExpanded(prev => ({ ...prev, [key]: !prev[key] }))
+                      }
+                      aria-expanded={!!expanded[key]}
                     >
-                      {action.title}
+                      {expanded[key] ? 'Collapse' : 'Expand'}
                     </button>
-                  ))}
+                  )}
+
+                  {actions && actions.length > 0 && (
+                    <div className={getStyleClass('option__actions')}>
+                      {actions.map((action) => (
+                        <button
+                          key={action.key}
+                          type="button"
+                          className={cn(
+                            getStyleClass('actionButton'),
+                            getActionButtonVariantClass(action.type)
+                          )}
+                          onClick={() => action.onClick(item, i)}
+                          title={action.title}
+                        >
+                          {action.title}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
