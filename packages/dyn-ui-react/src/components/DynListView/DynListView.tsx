@@ -226,6 +226,10 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
   const [activeIndex, setActiveIndex] = useState(0);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
+  const toggleItemExpansion = useCallback((key: string) => {
+    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+  }, []);
+
   const itemIds = useMemo(
     () => listItems.map((_, i) => `${internalId}-option-${i}`),
     [listItems, internalId]
@@ -390,12 +394,17 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
           const title = (item as any).title ?? (item as any).label ?? (item as any).value ?? String((item as any).id ?? i + 1);
           const desc = (item as any).description;
           const complex = isComplexItem(item);
-          const checkboxId = `${itemIds[i]}-checkbox`;
           const labelId = `${itemIds[i]}-label`;
           const descriptionId = desc ? `${itemIds[i]}-description` : undefined;
           const usesDefaultRenderer = !renderItem;
           const optionLabelledBy = usesDefaultRenderer ? labelId : undefined;
           const optionDescribedBy = usesDefaultRenderer && desc ? descriptionId : undefined;
+          const isExpandable = complex;
+          const usesTitleAsExpandTrigger = isExpandable && usesDefaultRenderer;
+          const renderSeparateExpandControl = isExpandable && !usesDefaultRenderer;
+          const isExpanded = !!expanded[key];
+          const hasActions = actions && actions.length > 0;
+          const shouldRenderControls = hasActions || renderSeparateExpandControl;
 
           return (
             <div
@@ -413,6 +422,8 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
                 role="option"
                 aria-selected={selectedState}
                 aria-disabled={item.disabled || undefined}
+                aria-labelledby={optionLabelledBy}
+                aria-describedby={optionDescribedBy}
                 className={getStyleClass('option__main')}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => !item.disabled && selection.toggle(key)}
@@ -432,11 +443,33 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
                     renderItem(item, i)
                   ) : (
                     <>
-                      <span className={getStyleClass('option__label')}>
-                        {title}
-                      </span>
+                      {usesTitleAsExpandTrigger ? (
+                        <button
+                          type="button"
+                          id={labelId}
+                          className={cn(
+                            getStyleClass('option__label'),
+                            getStyleClass('option__label--expandable'),
+                            isExpanded && getStyleClass('option__label--expanded')
+                          )}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            toggleItemExpansion(key);
+                          }}
+                          aria-expanded={isExpanded}
+                        >
+                          {title}
+                        </button>
+                      ) : (
+                        <span id={labelId} className={getStyleClass('option__label')}>
+                          {title}
+                        </span>
+                      )}
                       {desc && (
-                        <span className={getStyleClass('option__description')}>
+                        <span
+                          id={descriptionId}
+                          className={getStyleClass('option__description')}
+                        >
                           {desc}
                         </span>
                       )}
@@ -445,25 +478,33 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
                 </div>
               </div>
 
-              {(complex || (actions && actions.length > 0)) && (
+              {shouldRenderControls && (
                 <div
                   className={getStyleClass('option__controls')}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {complex && (
+                  {renderSeparateExpandControl && (
                     <button
                       type="button"
-                      className={getStyleClass('option__expand')}
-                      onClick={() =>
-                        setExpanded(prev => ({ ...prev, [key]: !prev[key] }))
-                      }
-                      aria-expanded={!!expanded[key]}
+                      aria-expanded={isExpanded}
+                      aria-label={`${isExpanded ? 'Collapse' : 'Expand'} details for ${title}`}
+                      className={cn(
+                        getStyleClass('actionButton'),
+                        getStyleClass('actionButtonDefault'),
+                        getStyleClass('option__expandButton')
+                      )}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleItemExpansion(key);
+                      }}
                     >
-                      {expanded[key] ? 'Collapse' : 'Expand'}
+                      <span aria-hidden="true" className={getStyleClass('option__expandButtonIcon')}>
+                        {isExpanded ? '▴' : '▾'}
+                      </span>
                     </button>
                   )}
 
-                  {actions && actions.length > 0 && (
+                  {hasActions && (
                     <div className={getStyleClass('option__actions')}>
                       {actions.map((action) => (
                         <button
@@ -484,7 +525,7 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
                 </div>
               )}
 
-              {expanded[key] && (
+              {isExpanded && (
                 <div className={getStyleClass('option__details')}>
                   {Object.entries(item).map(([k, v]) => (
                     <div key={k}>
