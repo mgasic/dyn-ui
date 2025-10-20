@@ -202,6 +202,22 @@ describe('DynInput', () => {
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('maxlength', '10');
     });
+
+    it('forwards the form attribute to the native input element', () => {
+      render(
+        <DynInput
+          name="password"
+          label="Password"
+          type="password"
+          form="login-form"
+          aria-describedby="password-help"
+        />
+      );
+
+      const input = screen.getByLabelText('Password');
+      expect(input).toHaveAttribute('form', 'login-form');
+      expect(input).toHaveAttribute('aria-describedby', 'password-help');
+    });
   });
 
   describe('Edge Cases', () => {

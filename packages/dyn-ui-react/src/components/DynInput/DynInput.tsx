@@ -74,10 +74,12 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       currencyConfig,
       onChange,
       onBlur,
-      onFocus
+      onFocus,
+      ...rest
     },
     ref
   ) => {
+    const { ['aria-describedby']: ariaDescribedBy, ...restProps } = rest;
     const isCurrencyType = type === 'currency';
     const resolvedCurrencyConfig = useMemo(
       () => resolveCurrencyConfig(currencyConfig, type),
@@ -410,6 +412,7 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
           )}
 
           <input
+            {...restProps}
             ref={inputRef}
             id={inputId}
             name={name}
@@ -433,7 +436,9 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
             onBlur={handleBlur}
             onFocus={handleFocus}
             aria-invalid={!!error}
-            aria-describedby={error ? `${name}-error` : undefined}
+            aria-describedby={[ariaDescribedBy, error ? `${name}-error` : undefined]
+              .filter(Boolean)
+              .join(' ') || undefined}
           />
 
           {showCleanButton && inputValue && !readonly && !disabled && (
