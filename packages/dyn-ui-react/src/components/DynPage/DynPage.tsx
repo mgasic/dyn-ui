@@ -8,6 +8,7 @@ import { DynPageProps } from '../../types/layout.types';
 import { classNames } from '../../utils/classNames';
 import { DynButton } from '../DynButton';
 import type { DynButtonKind } from '../DynButton/DynButton.types';
+import styles from './DynPage.module.css';
 
 export const DynPage: React.FC<DynPageProps> = ({
   title,
@@ -24,15 +25,43 @@ export const DynPage: React.FC<DynPageProps> = ({
   id,
   'data-testid': testId
 }) => {
+  const sizeClass =
+    size === 'small'
+      ? styles.sizeSmall
+      : size === 'large'
+        ? styles.sizeLarge
+        : undefined;
+
+  const paddingClass =
+    padding === 'none'
+      ? styles.paddingNone
+      : padding === 'xs'
+        ? styles.paddingXs
+        : padding === 'sm'
+          ? styles.paddingSm
+          : padding === 'lg'
+            ? styles.paddingLg
+            : padding === 'xl'
+              ? styles.paddingXl
+              : styles.paddingMd;
+
+  const backgroundClass =
+    background === 'page'
+      ? styles.backgroundPage
+      : background === 'surface'
+        ? styles.backgroundSurface
+        : undefined;
+
   const pageClasses = classNames(
-    'dyn-page',
-    `dyn-page--${size}`,
-    `dyn-page--padding-${padding}`,
-    `dyn-page--${background}`,
+    styles.root,
+    sizeClass,
+    paddingClass,
+    backgroundClass,
     {
-      'dyn-page--loading': loading,
-      'dyn-page--error': !!error
+      [styles.isLoading]: loading,
+      [styles.isError]: !!error
     },
+    'dyn-page',
     className
   );
 
@@ -40,10 +69,10 @@ export const DynPage: React.FC<DynPageProps> = ({
     if (breadcrumbs.length === 0) return null;
 
     return (
-      <nav className="dyn-page-breadcrumbs" aria-label="Navegação">
-        <ol className="dyn-page-breadcrumb-list">
+      <nav className={styles.breadcrumbs} aria-label="Navegação">
+        <ol className={styles.breadcrumbList}>
           {breadcrumbs.map((breadcrumb, index) => (
-            <li key={index} className="dyn-page-breadcrumb-item">
+            <li key={index} className={styles.breadcrumbItem}>
               {breadcrumb.href || breadcrumb.onClick ? (
                 <a
                   href={breadcrumb.href}
@@ -53,15 +82,15 @@ export const DynPage: React.FC<DynPageProps> = ({
                       breadcrumb.onClick();
                     }
                   }}
-                  className="dyn-page-breadcrumb-link"
+                  className={styles.breadcrumbLink}
                 >
                   {breadcrumb.title}
                 </a>
               ) : (
-                <span className="dyn-page-breadcrumb-text">{breadcrumb.title}</span>
+                <span className={styles.breadcrumbText}>{breadcrumb.title}</span>
               )}
               {index < breadcrumbs.length - 1 && (
-                <span className="dyn-page-breadcrumb-separator" aria-hidden="true">/</span>
+                <span className={styles.breadcrumbSeparator} aria-hidden="true">/</span>
               )}
             </li>
           ))}
@@ -74,7 +103,7 @@ export const DynPage: React.FC<DynPageProps> = ({
     if (actions.length === 0) return null;
 
     return (
-      <div className="dyn-page-actions">
+      <div className={styles.actions}>
         {actions.map((action) => (
           <DynButton
             key={action.key}
@@ -95,8 +124,8 @@ export const DynPage: React.FC<DynPageProps> = ({
   if (loading) {
     return (
       <div className={pageClasses} id={id} data-testid={testId}>
-        <div className="dyn-page-loading">
-          <div className="dyn-page-spinner"></div>
+        <div className={styles.loading}>
+          <div className={styles.spinner}></div>
           <span>Carregando página...</span>
         </div>
       </div>
@@ -106,11 +135,11 @@ export const DynPage: React.FC<DynPageProps> = ({
   if (error) {
     return (
       <div className={pageClasses} id={id} data-testid={testId}>
-        <div className="dyn-page-error">
-          <div className="dyn-page-error-icon">⚠</div>
-          <div className="dyn-page-error-content">
+        <div className={styles.error}>
+          <div className={styles.errorIcon}>⚠</div>
+          <div>
             {typeof error === 'string' ? (
-              <span className="dyn-page-error-message">{error}</span>
+              <span className={styles.errorMessage}>{error}</span>
             ) : (
               error
             )}
@@ -122,21 +151,21 @@ export const DynPage: React.FC<DynPageProps> = ({
 
   return (
     <div className={pageClasses} id={id} data-testid={testId}>
-      <header className="dyn-page-header">
+      <header className={styles.header}>
         {renderBreadcrumbs()}
 
-        <div className="dyn-page-title-section">
-          <div className="dyn-page-title-content">
-            <h1 className="dyn-page-title">{title}</h1>
+        <div className={styles.titleSection}>
+          <div className={styles.titleContent}>
+            <h1 className={styles.title}>{title}</h1>
             {subtitle && (
-              <p className="dyn-page-subtitle">{subtitle}</p>
+              <p className={styles.subtitle}>{subtitle}</p>
             )}
           </div>
           {renderActions()}
         </div>
       </header>
 
-      <main className="dyn-page-content">
+      <main className={styles.content}>
         {children}
       </main>
     </div>
