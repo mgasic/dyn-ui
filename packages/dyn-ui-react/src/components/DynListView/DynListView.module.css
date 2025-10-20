@@ -13,8 +13,8 @@
 .dyn-list-view__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: var(--dyn-spacing-sm, 0.5rem);
+  padding: var(--dyn-spacing-md, 0.75rem) var(--dyn-spacing-lg, 1rem);
   background: var(--dyn-color-background-secondary);
   border-bottom: 1px solid var(--dyn-color-border);
   font-size: var(--dyn-font-size-sm);
@@ -33,7 +33,7 @@
 }
 
 .dyn-list-view--fixed-height .dyn-list-view__content {
-  max-height: 400px;
+  max-height: var(--dyn-size-page-min-height, 25rem);
 }
 
 /* Items */
@@ -41,7 +41,7 @@
   display: flex;
   align-items: stretch;
   border-bottom: 1px solid var(--dyn-color-border-light);
-  transition: background-color 0.2s ease;
+  transition: background-color var(--dyn-transition-base, 0.2s ease);
 }
 
 .dyn-list-view__item:last-child {
@@ -59,7 +59,7 @@
 .dyn-list-view__item-selection {
   display: flex;
   align-items: center;
-  padding: 16px 12px;
+  padding: var(--dyn-spacing-lg, 1rem) var(--dyn-spacing-md, 0.75rem);
   border-right: 1px solid var(--dyn-color-border-light);
 }
 
@@ -77,13 +77,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: var(--dyn-spacing-lg, 1rem);
 }
 
 .dyn-list-view__item-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--dyn-spacing-sm, 0.5rem);
   flex: 1;
   min-width: 0;
 }
@@ -91,11 +91,13 @@
 .dyn-list-view__expand-button {
   background: none;
   border: none;
-  padding: 4px;
+  padding: var(--dyn-spacing-xs, 0.25rem);
   cursor: pointer;
   color: var(--dyn-color-text-secondary);
   border-radius: var(--dyn-border-radius-sm);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color var(--dyn-transition-base, 0.2s ease),
+    color var(--dyn-transition-base, 0.2s ease);
 }
 
 .dyn-list-view__expand-button:hover {
@@ -113,7 +115,7 @@
   font-weight: var(--dyn-font-weight-medium);
   color: var(--dyn-color-text-primary);
   line-height: var(--dyn-line-height-tight);
-  margin-bottom: 2px;
+  margin-bottom: var(--dyn-spacing-xxs, 0.125rem);
   word-wrap: break-word;
 }
 
@@ -127,7 +129,7 @@
 /* Item Actions */
 .dyn-list-view__item-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--dyn-spacing-sm, 0.5rem);
   align-items: center;
 }
 
@@ -136,11 +138,13 @@
   color: var(--dyn-color-background);
   border: none;
   border-radius: var(--dyn-border-radius-sm);
-  padding: 6px 12px;
+  padding: calc(var(--dyn-spacing-xs, 0.25rem) + var(--dyn-spacing-xxs, 0.125rem)) var(--dyn-spacing-md, 0.75rem);
   font-size: var(--dyn-font-size-sm);
   font-weight: var(--dyn-font-weight-medium);
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition:
+    background-color var(--dyn-transition-base, 0.2s ease),
+    transform var(--dyn-transition-fast, 0.15s ease);
 }
 
 .dyn-list-view__action-button:hover {
@@ -157,13 +161,13 @@
 
 /* Item Details (Expanded) */
 .dyn-list-view__item-details {
-  padding: 0 16px 16px 16px;
+  padding: 0 var(--dyn-spacing-lg, 1rem) var(--dyn-spacing-lg, 1rem) var(--dyn-spacing-lg, 1rem);
   border-top: 1px solid var(--dyn-color-border-light);
   background: var(--dyn-color-background-secondary);
 }
 
 .dyn-list-view__item-field {
-  margin-bottom: 8px;
+  margin-bottom: var(--dyn-spacing-sm, 0.5rem);
   font-size: var(--dyn-font-size-sm);
   color: var(--dyn-color-text-secondary);
 }
@@ -174,12 +178,12 @@
 
 .dyn-list-view__item-field strong {
   color: var(--dyn-color-text-primary);
-  margin-right: 4px;
+  margin-right: var(--dyn-spacing-xs, 0.25rem);
 }
 
 /* Size Variants */
 .dyn-list-view--small .dyn-list-view__item-header {
-  padding: 12px;
+  padding: var(--dyn-spacing-md, 0.75rem);
 }
 
 .dyn-list-view--small .dyn-list-view__item-title {
@@ -191,7 +195,7 @@
 }
 
 .dyn-list-view--large .dyn-list-view__item-header {
-  padding: 20px;
+  padding: calc(var(--dyn-spacing-xl, 1.5rem) - var(--dyn-spacing-xs, 0.25rem));
 }
 
 .dyn-list-view--large .dyn-list-view__item-title {
@@ -203,8 +207,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 40px 20px;
+  gap: var(--dyn-spacing-sm, 0.5rem);
+  padding:
+    calc(var(--dyn-spacing-3xl, 3rem) - var(--dyn-spacing-sm, 0.5rem))
+    calc(var(--dyn-spacing-xl, 1.5rem) - var(--dyn-spacing-xs, 0.25rem));
   color: var(--dyn-color-text-secondary);
   font-size: var(--dyn-font-size-sm);
 }
@@ -214,8 +220,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 40px 20px;
+  gap: var(--dyn-spacing-sm, 0.5rem);
+  padding:
+    calc(var(--dyn-spacing-3xl, 3rem) - var(--dyn-spacing-sm, 0.5rem))
+    calc(var(--dyn-spacing-xl, 1.5rem) - var(--dyn-spacing-xs, 0.25rem));
   color: var(--dyn-color-text-secondary);
   font-size: var(--dyn-font-size-sm);
   text-align: center;
@@ -231,7 +239,7 @@
   .dyn-list-view__item-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: var(--dyn-spacing-md, 0.75rem);
   }
   
   .dyn-list-view__item-actions {
