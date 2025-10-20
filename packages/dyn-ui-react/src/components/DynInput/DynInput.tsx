@@ -165,7 +165,7 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
           const numericValue = parseCurrencyLikeValue(inputValue, resolvedCurrencyConfig);
           return numericValue ?? '';
         }
-        return mask && !maskFormatModel ? unmaskValue(inputValue) : inputValue;
+        return mask && !resolvedMaskFormatModel ? unmaskValue(inputValue) : inputValue;
       },
       setValue: (newValue: string | number | null | undefined) => {
         if (isCurrencyType) {
@@ -317,7 +317,9 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
       if (mask) {
         const processedValue = handleMaskedChange(newValue);
         setInputValue(processedValue);
-        onChange?.(maskFormatModel ? processedValue : unmaskValue(processedValue));
+        onChange?.(
+          resolvedMaskFormatModel ? processedValue : unmaskValue(processedValue)
+        );
       } else if (isCurrencyType) {
         handleCurrencyChange(newValue);
       } else {
