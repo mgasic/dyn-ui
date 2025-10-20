@@ -169,6 +169,18 @@
   margin-left: auto;
 }
 
+.option__expandButton {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.option__expandButtonIcon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .actionButton,
 .action-button,
 :global(.dyn-list-view__action-button) {
