@@ -191,41 +191,6 @@
   box-shadow: var(--dyn-table-action-button-focus-shadow);
 }
 
-.dyn-table__sort-button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--dyn-spacing-xs);
-  background: none;
-  border: none;
-  color: inherit;
-  font: inherit;
-  line-height: inherit;
-  padding: var(--dyn-spacing-xxs);
-  margin: calc(-1 * var(--dyn-spacing-xxs));
-  cursor: pointer;
-  border-radius: var(--dyn-border-radius-sm);
-  transition: color var(--dyn-duration-normal) var(--dyn-timing-standard),
-    background-color var(--dyn-duration-normal) var(--dyn-timing-standard),
-    box-shadow var(--dyn-duration-normal) var(--dyn-timing-standard);
-}
-
-.dyn-table__sort-button:hover {
-  background: var(--dyn-color-background-hover);
-  color: var(--dyn-color-primary);
-}
-
-.dyn-table__sort-button:focus-visible {
-  outline: none;
-  background: var(--dyn-color-background-hover);
-  color: var(--dyn-color-primary);
-  box-shadow: 0 0 0 2px var(--dyn-color-primary);
-}
-
-.dyn-table__sort-button:active {
-  background: var(--dyn-color-background-hover);
-  color: var(--dyn-color-primary);
-}
-
 .dyn-table__sort-icons {
   display: flex;
   flex-direction: column;
