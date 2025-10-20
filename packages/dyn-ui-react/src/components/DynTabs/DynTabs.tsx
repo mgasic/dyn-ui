@@ -16,7 +16,9 @@ export const DynTabs = forwardRef<DynTabsRef, DynTabsProps>(
       defaultActiveTab,
       onChange,
       onTabClose,
+      onTabAdd,
       closable,
+      addable,
       position = 'top',
       orientation = 'horizontal',
       activation = 'auto',
@@ -94,11 +96,11 @@ export const DynTabs = forwardRef<DynTabsRef, DynTabsProps>(
       return null;
     }
 
-  const tabsRef = useRef<Array<HTMLButtonElement | null>>([]);
-  const tablistRef = useRef<HTMLDivElement | null>(null);
+    const tabsRef = useRef<Array<HTMLButtonElement | null>>([]);
+    const tablistRef = useRef<HTMLDivElement | null>(null);
 
-  // positions for close buttons keyed by processedValue
-  const [closePositions, setClosePositions] = useState<Record<string, { left: number; top: number }>>({});
+    // positions for close buttons keyed by processedValue
+    const [closePositions, setClosePositions] = useState<Record<string, { left: number; top: number }>>({});
 
     const onSelect = (val: string, focusPanel = false) => {
       if (!isControlled) setCurrent(val);
@@ -106,8 +108,8 @@ export const DynTabs = forwardRef<DynTabsRef, DynTabsProps>(
       if (lazy) {
         // Immediately show loading for the newly selected tab (always set to false first)
         setLoaded(prev => ({ ...prev, [val]: false }));
-  // Complete loading after a short delay so the loading state is observable
-  setTimeout(() => setLoaded(prev => ({ ...prev, [val]: true })), 50);
+        // Complete loading after a short delay so the loading state is observable
+        setTimeout(() => setLoaded(prev => ({ ...prev, [val]: true })), 50);
       }
       if (focusPanel) {
         const panel = document.getElementById(`${internalId}-panel-${val}`);
@@ -240,7 +242,7 @@ export const DynTabs = forwardRef<DynTabsRef, DynTabsProps>(
           onKeyDown={handleKeyDown}
           ref={tablistRef}
         >
-            {processedItems.map((item, index) => {
+          {processedItems.map((item, index) => {
             const selected = item.processedValue === current;
             const tabId = `${internalId}-tab-${item.processedValue}`;
             const panelId = `${internalId}-panel-${item.processedValue}`;
@@ -280,6 +282,19 @@ export const DynTabs = forwardRef<DynTabsRef, DynTabsProps>(
               </React.Fragment>
             );
           })}
+          {addable && (
+            <button
+              type="button"
+              className={css('tab-add')}
+              aria-label="Add tab"
+              data-testid={`${dataTestId || 'test-tabs'}-add-button`}
+              onClick={() => {
+                onTabAdd?.();
+              }}
+            >
+              +
+            </button>
+          )}
         </div>
 
         {/* Separate container for close buttons so they are not direct children of the tablist.
