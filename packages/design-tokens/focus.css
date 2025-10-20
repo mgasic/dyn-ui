@@ -1,0 +1,6 @@
+/* Focus and outline primitives */
+:root {
+  --dyn-focus-ring-width: 2px;
+  --dyn-focus-ring-offset: 2px;
+  --dyn-color-focus: var(--dyn-color-action-focus);
+}

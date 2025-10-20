@@ -9,4 +9,10 @@
   --dyn-timing-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --dyn-timing-entrance: cubic-bezier(0.16, 1, 0.3, 1);
   --dyn-timing-exit: cubic-bezier(0.4, 0, 0.6, 1);
+
+  /* Transition presets */
+  --dyn-transition-base: all 0.2s ease-in-out;
+  --dyn-transition-fast: 0.15s ease;
+  --dyn-transition-normal: 0.2s ease-in-out;
+  --dyn-transition-slow: 0.3s ease-in-out;
 }

@@ -1,5 +1,7 @@
 /* Entry point for consuming the design tokens via CSS */
 @import './colors.css';
+@import './focus.css';
+@import './sizes.css';
 @import './spacing.css';
 @import './typography.css';
 @import './shadows.css';
