@@ -366,11 +366,7 @@
     justify-content: flex-end;
   }
 
-  .option__controls {
-    justify-content: flex-end;
-    width: 100%;
-  }
-
+  .actionButton,
   .action-button,
   :global(.dyn-list-view__action-button) {
     flex: 1;
