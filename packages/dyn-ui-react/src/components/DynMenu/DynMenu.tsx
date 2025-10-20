@@ -8,6 +8,7 @@ const getStyleClass = (n: string) => (styles as Record<string, string>)[n] || ''
 
 export const DynMenu: React.FC<DynMenuProps> = ({
   items,
+  menus,
   orientation = 'horizontal',
   className,
   id,
@@ -18,6 +19,10 @@ export const DynMenu: React.FC<DynMenuProps> = ({
   ...rest
 }) => {
   const [internalId] = useState(() => id || generateId('menu'));
+  const resolvedItems = useMemo<DynMenuItem[]>(
+    () => (items && items.length ? items : menus ?? []),
+    [items, menus]
+  );
   const isHorizontal = orientation === 'horizontal';
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [focusIndex, setFocusIndex] = useState<number>(0);
@@ -29,7 +34,7 @@ export const DynMenu: React.FC<DynMenuProps> = ({
     if (focusIndex >= 0) itemRefs.current[focusIndex]?.focus();
   }, [focusIndex]);
 
-  const visibleMenuCount = useMemo(() => items.length, [items]);
+  const visibleMenuCount = useMemo(() => resolvedItems.length, [resolvedItems]);
 
   const moveFocus = (delta: number) => {
     if (!visibleMenuCount) return;
@@ -87,45 +92,63 @@ export const DynMenu: React.FC<DynMenuProps> = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledBy}
       aria-orientation={orientation}
-      className={cn(getStyleClass('menubar'), className)}
+      className={cn(
+        getStyleClass('menubar'),
+        getStyleClass(`menubar--${orientation}`),
+        'dyn-menu',
+        `dyn-menu--${orientation}`,
+        className
+      )}
       data-testid={dataTestId || 'dyn-menu'}
       ref={menubarRef}
       onKeyDown={onMenubarKeyDown}
       {...rest}
     >
-      {items.map((item, idx) => {
+      {resolvedItems.map((item, idx) => {
         const isOpen = openIndex === idx;
         const buttonId = `${internalId}-item-${idx}`;
         const menuId = `${internalId}-submenu-${idx}`;
+        const childItems = item.children ?? item.subItems ?? [];
         return (
-          <div key={buttonId} className={getStyleClass('menubar__item')}>
+          <div key={buttonId} className={cn(getStyleClass('menubar__item'), 'dyn-menu-item-container')}>
             <button
               ref={(el) => { itemRefs.current[idx] = el; }}
               id={buttonId}
               type="button"
               role="menuitem"
-              className={cn(getStyleClass('menubar__button'), isOpen && getStyleClass('menubar__button--open'))}
-              aria-haspopup={item.children && item.children.length ? 'menu' : undefined}
-              aria-expanded={item.children && item.children.length ? isOpen : undefined}
-              aria-controls={item.children && item.children.length ? menuId : undefined}
+              className={cn(
+                getStyleClass('menubar__button'),
+                isOpen && getStyleClass('menubar__button--open'),
+                'dyn-menu-item',
+                isOpen && 'dyn-menu-item-active',
+                item.disabled && 'dyn-menu-item-disabled'
+              )}
+              aria-haspopup={childItems.length ? 'menu' : undefined}
+              aria-expanded={childItems.length ? isOpen : undefined}
+              aria-controls={childItems.length ? menuId : undefined}
+              disabled={item.disabled}
               onClick={() => handleItemClick(idx)}
             >
               {item.label}
             </button>
-            {item.children && item.children.length > 0 && isOpen && (
+            {childItems.length > 0 && isOpen && (
               <div
                 id={menuId}
                 role="menu"
                 aria-labelledby={buttonId}
-                className={getStyleClass('menu')}
+                className={cn(getStyleClass('menu'), 'dyn-menu-subitems')}
               >
-                {item.children.map((sub, sidx) => (
+                {childItems.map((sub, sidx) => (
                   <button
                     key={`${menuId}-opt-${sidx}`}
                     role="menuitem"
                     type="button"
-                    className={getStyleClass('menu__item')}
-                    onClick={() => onSubItemClick(sub.action)}
+                    className={cn(getStyleClass('menu__item'), 'dyn-menu-item')}
+                    disabled={sub.disabled}
+                    onClick={() => {
+                      if (sub.disabled) return;
+                      onSubItemClick(sub.action);
+                    }}
                   >
                     {sub.label}
                   </button>
