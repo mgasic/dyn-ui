@@ -74,10 +74,12 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       currencyConfig,
       onChange,
       onBlur,
-      onFocus
+      onFocus,
+      ...rest
     },
     ref
   ) => {
+    const { ['aria-describedby']: ariaDescribedBy, ...restProps } = rest;
     const isCurrencyType = type === 'currency';
     const resolvedCurrencyConfig = useMemo(
       () => resolveCurrencyConfig(currencyConfig, type),
@@ -385,6 +387,16 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       showSpin && getStyleClass('dyn-input-container--with-spin-buttons')
     );
 
+    const errorId = `${inputId}-error`;
+    const helpId = `${inputId}-help`;
+    const describedBy = [
+      ariaDescribedBy,
+      help ? helpId : undefined,
+      error ? errorId : undefined
+    ]
+      .filter(Boolean)
+      .join(' ') || undefined;
+
     return (
       <DynFieldContainer
         label={label}
@@ -410,6 +422,7 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
           )}
 
           <input
+            {...restProps}
             ref={inputRef}
             id={inputId}
             name={name}
@@ -433,7 +446,7 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
             onBlur={handleBlur}
             onFocus={handleFocus}
             aria-invalid={!!error}
-            aria-describedby={error ? `${name}-error` : undefined}
+            aria-describedby={describedBy}
           />
 
           {showCleanButton && inputValue && !readonly && !disabled && (

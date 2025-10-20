@@ -202,6 +202,50 @@ describe('DynInput', () => {
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('maxlength', '10');
     });
+
+    it('forwards the form attribute to the native input element', () => {
+      render(
+        <DynInput
+          name="password"
+          label="Password"
+          type="password"
+          form="login-form"
+          aria-describedby="password-help"
+        />
+      );
+
+      const input = screen.getByLabelText('Password');
+      expect(input).toHaveAttribute('form', 'login-form');
+      expect(input).toHaveAttribute('aria-describedby', 'password-help');
+    });
+
+    it('merges custom aria-describedby with help and validation feedback', async () => {
+      render(
+        <DynInput
+          name="username"
+          label="Username"
+          help="Use your account username"
+          required
+          aria-describedby="external-hint"
+        />
+      );
+
+      const input = screen.getByLabelText(/Username/);
+      const helpId = `${input.id}-help`;
+      const errorId = `${input.id}-error`;
+
+      expect(input).toHaveAttribute('aria-describedby', expect.stringContaining('external-hint'));
+      expect(input).toHaveAttribute('aria-describedby', expect.stringContaining(helpId));
+
+      fireEvent.blur(input);
+
+      await screen.findByText('Este campo é obrigatório');
+
+      const describedBy = input.getAttribute('aria-describedby');
+      expect(describedBy?.split(' ')).toEqual(
+        expect.arrayContaining(['external-hint', helpId, errorId])
+      );
+    });
   });
 
   describe('Edge Cases', () => {

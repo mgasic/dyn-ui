@@ -100,6 +100,7 @@ export interface DynInputProps extends DynFieldBase {
   min?: number;
   max?: number;
   currencyConfig?: CurrencyInputConfig;
+  form?: string;
 }
 
 // Select specific types
