@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import styles from './DynListView.module.css';
@@ -220,8 +220,9 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
   
   // Use items prop, fallback to data for backward compatibility
   const listItems = items.length > 0 ? items : data;
-  
+
   const [internalId] = useState(() => id || generateId('listview'));
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -258,6 +259,26 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
     getSelectedItems: getItemsByKeys,
   });
 
+  const { selectAll: selectAllKeys, clearSelection } = selection;
+  const allKeys = uniqueItemKeys;
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => {
+        rootRef.current?.focus();
+      },
+      selectAll: () => {
+        if (!allKeys.length) return;
+        selectAllKeys(allKeys);
+      },
+      clearSelection: () => {
+        clearSelection();
+      },
+    }),
+    [allKeys, clearSelection, selectAllKeys]
+  );
+
   const moveActive = (delta: number) => {
     const count = listItems.length;
     if (!count) return;
@@ -287,9 +308,13 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
 
   const rootClasses = cn(
     getStyleClass('root'),
+    'dyn-list-view',
     size === 'small' && getStyleClass('rootSmall'),
     size === 'large' && getStyleClass('rootLarge'),
+    size === 'small' && 'dyn-list-view--small',
+    size === 'large' && 'dyn-list-view--large',
     bordered && getStyleClass('rootBordered'),
+    bordered && 'dyn-list-view--bordered',
     className
   );
 
@@ -297,15 +322,17 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
     height: typeof height === 'number' ? `${height}px` : String(height) 
   } : undefined;
 
-  const allKeys = uniqueItemKeys;
   const allChecked =
     (multiSelect || selectable) &&
     allKeys.length > 0 &&
     allKeys.every((key) => selection.isSelected(key));
 
+  const selectAllCheckboxId = `${internalId}-select-all`;
+  const selectAllLabelId = `${selectAllCheckboxId}-label`;
+
   return (
     <div
-      ref={ref}
+      ref={rootRef}
       id={internalId}
       role="listbox"
       aria-multiselectable={multiSelect || selectable || undefined}
@@ -320,18 +347,28 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
       {...rest}
     >
       {(multiSelect || selectable) && (
-        <div className={getStyleClass('option')}
-             role="option"
-             aria-selected={allChecked}
+        <div
+          className={getStyleClass('option')}
+          role="option"
+          aria-selected={allChecked}
+          aria-labelledby={selectAllLabelId}
+          onClick={() => !disabled && selectAllKeys(allChecked ? [] : allKeys)}
         >
           <input
             type="checkbox"
             role="checkbox"
             aria-checked={allChecked}
             checked={allChecked}
-            onChange={() => selection.selectAll(allChecked ? [] : allKeys)}
+            id={selectAllCheckboxId}
+            aria-labelledby={selectAllLabelId}
+            aria-label="Select all items"
+            disabled={disabled}
+            onChange={() => !disabled && selectAllKeys(allChecked ? [] : allKeys)}
+            onClick={(event) => event.stopPropagation()}
           />
-          <span className={getStyleClass('option__label')}>Select All</span>
+          <span className={getStyleClass('option__label')} id={selectAllLabelId}>
+            Select All
+          </span>
         </div>
       )}
 
@@ -350,6 +387,12 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
           const title = (item as any).title ?? (item as any).label ?? (item as any).value ?? String((item as any).id ?? i + 1);
           const desc = (item as any).description;
           const complex = isComplexItem(item);
+          const checkboxId = `${itemIds[i]}-checkbox`;
+          const labelId = `${itemIds[i]}-label`;
+          const descriptionId = desc ? `${itemIds[i]}-description` : undefined;
+          const usesDefaultRenderer = !renderItem;
+          const optionLabelledBy = usesDefaultRenderer ? labelId : undefined;
+          const optionDescribedBy = usesDefaultRenderer && desc ? descriptionId : undefined;
 
           return (
             <div
@@ -357,6 +400,9 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
               id={itemIds[i]}
               role="option"
               aria-selected={selectedState}
+              aria-label={title}
+              aria-labelledby={optionLabelledBy}
+              aria-describedby={optionDescribedBy}
               className={cn(
                 getStyleClass('option'),
                 selectedState && getStyleClass('option--selected'),
@@ -374,6 +420,10 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
                   aria-checked={!!selectedState}
                   checked={!!selectedState}
                   disabled={item.disabled}
+                  id={checkboxId}
+                  aria-labelledby={optionLabelledBy}
+                  aria-describedby={optionDescribedBy}
+                  aria-label={`Select ${title}`}
                   onChange={() => !item.disabled && selection.toggle(key)}
                   onClick={(e) => e.stopPropagation()}
                   className={getStyleClass('option__checkbox')}
@@ -385,11 +435,11 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
                   renderItem(item, i)
                 ) : (
                   <>
-                    <span className={getStyleClass('option__label')}>
+                    <span className={getStyleClass('option__label')} id={labelId}>
                       {title}
                     </span>
                     {desc && (
-                      <span className={getStyleClass('option__description')}>
+                      <span className={getStyleClass('option__description')} id={descriptionId}>
                         {desc}
                       </span>
                     )}

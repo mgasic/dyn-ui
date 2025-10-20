@@ -1,6 +1,45 @@
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import DynListView from './DynListView';
-import { DynListViewProps, ListAction } from './DynListView.types';
+import { DynListViewProps, DynListViewRef, ListAction } from './DynListView.types';
+
+const getDisplayLabel = (item: Record<string, any>): string => {
+  return (
+    item.title ??
+    item.label ??
+    item.name ??
+    item.value ??
+    (item.id !== undefined ? `Item ${item.id}` : 'Selected item')
+  );
+};
+
+const getItemKey = (
+  item: Record<string, any>,
+  index: number,
+  itemKey?: DynListViewProps['itemKey']
+): string => {
+  if (typeof itemKey === 'function') {
+    const key = itemKey(item);
+    if (key !== undefined && key !== null) {
+      return String(key);
+    }
+  } else if (typeof itemKey === 'string') {
+    const value = item[itemKey];
+    if (value !== undefined && value !== null) {
+      return String(value);
+    }
+  }
+
+  if (item.id !== undefined && item.id !== null) {
+    return String(item.id);
+  }
+
+  if (item.value !== undefined && item.value !== null) {
+    return String(item.value);
+  }
+
+  return String(index);
+};
 
 const meta: Meta<typeof DynListView> = {
   title: 'Data Display/DynListView',
@@ -40,6 +79,20 @@ const meta: Meta<typeof DynListView> = {
       description: 'Fixed height for scrollable list'
     },
   },
+  decorators: [
+    (StoryComponent) => (
+      <div
+        style={{
+          maxWidth: 640,
+          width: '100%',
+          display: 'grid',
+          gap: '1rem',
+        }}
+      >
+        <StoryComponent />
+      </div>
+    ),
+  ],
 };
 
 export default meta;
@@ -90,11 +143,111 @@ export const WithSelection: Story = {
   args: {
     ...Default.args,
     selectable: true,
-    selectedKeys: ['1', '3'],
-    onSelectionChange: (keys, items) => {
-      console.log('Selected keys:', keys);
-      console.log('Selected items:', items);
-    },
+    defaultValue: ['1', '3'],
+  },
+  render: (args) => {
+    const listRef = useRef<DynListViewRef>(null);
+    const dataSet = useMemo(
+      () => (Array.isArray(args.items) && args.items.length ? args.items : args.data ?? []),
+      [args.data, args.items]
+    );
+
+    const createKeyToItemMap = useCallback(() => {
+      const pairs = dataSet.map((item, index) => [getItemKey(item as any, index, args.itemKey), item] as const);
+      return new Map<string, any>(pairs);
+    }, [dataSet, args.itemKey]);
+
+    const keyToItem = useMemo(() => createKeyToItemMap(), [createKeyToItemMap]);
+
+    const initialKeys = useMemo(() => {
+      const value = args.defaultValue;
+      if (Array.isArray(value)) {
+        return value.map(String);
+      }
+      if (value !== undefined && value !== null && value !== '') {
+        return [String(value)];
+      }
+      return [];
+    }, [args.defaultValue]);
+
+    const computeLabels = useCallback(
+      (keys: string[]) =>
+        keys
+          .map((key) => {
+            const item = keyToItem.get(key);
+            if (!item) return undefined;
+            return getDisplayLabel(item as any);
+          })
+          .filter((value): value is string => Boolean(value)),
+      [keyToItem]
+    );
+
+    const [selectionState, setSelectionState] = useState(() => ({
+      keys: initialKeys,
+      labels: computeLabels(initialKeys),
+    }));
+
+    useEffect(() => {
+      setSelectionState({
+        keys: initialKeys,
+        labels: computeLabels(initialKeys),
+      });
+    }, [computeLabels, initialKeys]);
+
+    const controlButtonStyle: CSSProperties = {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.25rem',
+      padding: '0.375rem 0.75rem',
+      borderRadius: 'var(--dyn-border-radius-sm)',
+      border: '1px solid var(--dyn-color-border)',
+      background: 'var(--dyn-color-background)',
+      color: 'var(--dyn-color-text-primary)',
+      fontSize: 'var(--dyn-font-size-sm)',
+      fontWeight: 500,
+      cursor: 'pointer',
+    };
+
+    return (
+      <div style={{ display: 'grid', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            style={controlButtonStyle}
+            onClick={() => listRef.current?.selectAll()}
+          >
+            Select all
+          </button>
+          <button
+            type="button"
+            style={{ ...controlButtonStyle, color: 'var(--dyn-color-danger, #dc2626)', borderColor: 'var(--dyn-color-border)' }}
+            onClick={() => listRef.current?.clearSelection()}
+          >
+            Clear selection
+          </button>
+        </div>
+        <DynListView
+          {...args}
+          ref={listRef}
+          onSelectionChange={(keys, items) => {
+            setSelectionState({
+              keys,
+              labels: items.map((item) => getDisplayLabel(item as any)),
+            });
+            args.onSelectionChange?.(keys, items);
+          }}
+        />
+        <div
+          style={{ fontSize: '0.875rem', color: 'var(--dyn-color-text-secondary)' }}
+          aria-live="polite"
+        >
+          {selectionState.keys.length
+            ? `Selected (${selectionState.keys.length}): ${selectionState.labels.join(', ')}`
+            : 'No items selected'}
+        </div>
+      </div>
+    );
   },
 };
 
