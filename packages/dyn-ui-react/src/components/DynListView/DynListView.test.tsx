@@ -124,7 +124,13 @@ describe('DynListView', () => {
       render(<DynListView data={sampleData} renderItem={customRender} />);
 
       expect(screen.getByText('Custom: Item 1')).toBeInTheDocument();
-      expect(customRender).toHaveBeenCalledWith(sampleData[0], 0);
+      const firstCall = customRender.mock.calls[0];
+      expect(firstCall[0]).toEqual(sampleData[0]);
+      expect(firstCall[1]).toBe(0);
+      expect(firstCall[2]).toMatchObject({
+        title: 'Item 1',
+        toggleExpansion: expect.any(Function),
+      });
     });
   });
 
@@ -144,6 +150,19 @@ describe('DynListView', () => {
       expect(expandTrigger).toBeInTheDocument();
     });
 
+    it('treats items with additional metadata as expandable', () => {
+      const dataWithExtras = [{
+        id: 1,
+        title: 'Status Only',
+        status: 'Ready',
+      }];
+
+      render(<DynListView data={dataWithExtras} />);
+
+      const expandTrigger = screen.getByRole('button', { name: 'Status Only' });
+      expect(expandTrigger).toBeInTheDocument();
+    });
+
     it('expands item details on click', () => {
       const complexData = [{
         id: 1,
@@ -156,6 +175,74 @@ describe('DynListView', () => {
 
       render(<DynListView data={complexData} />);
       const expandTrigger = screen.getByRole('button', { name: 'Complex Item' });
+      fireEvent.click(expandTrigger);
+
+      expect(screen.getByText(/prop1:/)).toBeInTheDocument();
+      expect(screen.getByText(/value1/)).toBeInTheDocument();
+    });
+
+    it('supports expanding complex items with custom rendering', () => {
+      const complexData = [{
+        id: 1,
+        title: 'Complex Item',
+        prop1: 'value1',
+        prop2: 'value2',
+        prop3: 'value3',
+        prop4: 'value4',
+      }];
+
+      render(
+        <DynListView
+          data={complexData}
+          renderItem={(item) => (
+            <div>
+              <span>{item.title}</span>
+            </div>
+          )}
+        />
+      );
+
+      const expandTrigger = screen.getByRole('button', {
+        name: 'Expand details for Complex Item',
+      });
+
+      fireEvent.click(expandTrigger);
+
+      expect(screen.getByText(/prop1:/)).toBeInTheDocument();
+      expect(screen.getByText(/value1/)).toBeInTheDocument();
+    });
+
+    it('allows custom renderers to use the provided TitleButton for expansion', () => {
+      const complexData = [{
+        id: 1,
+        title: 'Complex Item',
+        prop1: 'value1',
+        prop2: 'value2',
+        prop3: 'value3',
+      }];
+
+      render(
+        <DynListView
+          data={complexData}
+          renderItem={(item, _index, context) => {
+            if (!context) {
+              return <div>{item.title}</div>;
+            }
+
+            return (
+              <div>
+                <context.TitleButton>{item.title}</context.TitleButton>
+              </div>
+            );
+          }}
+        />
+      );
+
+      const expandTrigger = screen.getByRole('button', { name: 'Complex Item' });
+      expect(
+        screen.queryByRole('button', { name: /Expand details for Complex Item/i })
+      ).not.toBeInTheDocument();
+
       fireEvent.click(expandTrigger);
 
       expect(screen.getByText(/prop1:/)).toBeInTheDocument();
