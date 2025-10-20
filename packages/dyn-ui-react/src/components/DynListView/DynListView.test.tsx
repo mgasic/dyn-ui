@@ -61,10 +61,11 @@ describe('DynListView', () => {
   });
 
   describe('Selection', () => {
-    it('renders selection checkboxes when selectable', () => {
+    it('renders selection controls when selectable', () => {
       render(<DynListView data={sampleData} selectable />);
-      const checkboxes = screen.getAllByRole('checkbox');
-      expect(checkboxes).toHaveLength(4); // 3 items + select all
+      const selectAllButton = screen.getByRole('button', { name: /select all items/i });
+      expect(selectAllButton).toBeInTheDocument();
+      expect(screen.getAllByRole('option')).toHaveLength(3);
     });
 
     it('handles item selection', () => {
@@ -77,8 +78,8 @@ describe('DynListView', () => {
         />
       );
 
-      const checkboxes = screen.getAllByRole('checkbox');
-      fireEvent.click(checkboxes[1]); // Click first item checkbox
+      const options = screen.getAllByRole('option');
+      fireEvent.click(options[0]);
 
       expect(onSelectionChange).toHaveBeenCalledWith(['1'], [sampleData[0]]);
     });
@@ -93,8 +94,8 @@ describe('DynListView', () => {
         />
       );
 
-      const selectAllCheckbox = screen.getAllByRole('checkbox')[0];
-      fireEvent.click(selectAllCheckbox);
+      const selectAllButton = screen.getByRole('button', { name: /select all items/i });
+      fireEvent.click(selectAllButton);
 
       expect(onSelectionChange).toHaveBeenCalledWith(['1', '2', '3'], sampleData);
     });
