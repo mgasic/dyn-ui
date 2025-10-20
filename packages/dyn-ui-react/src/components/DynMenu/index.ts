@@ -1,11 +1,7 @@
 export { DynMenu } from './DynMenu';
-export type { 
+export type {
   DynMenuProps,
-  DynMenuRef,
   MenuItem,
   DynMenuItem,
-  MenuBadge,
-  MenuOrientation,
-  MenuLiterals
+  MenuOrientation
 } from './DynMenu.types';
-export { DEFAULT_MENU_LITERALS } from './DynMenu.types';
