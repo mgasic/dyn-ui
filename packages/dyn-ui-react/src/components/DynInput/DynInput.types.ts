@@ -1,10 +1,14 @@
 import type {
   InputHTMLAttributes,
   FocusEventHandler,
-  ChangeEventHandler,
   ReactNode,
 } from 'react';
 import type { BaseComponentProps, AccessibilityProps } from '../../types';
+import type {
+  DynFieldRef,
+  ValidationRule,
+  CurrencyInputConfig as FieldCurrencyInputConfig,
+} from '../../types/field.types';
 
 /**
  * Input size variants using design token scale
@@ -25,9 +29,9 @@ export type DynInputType =
   | 'currency';
 
 /**
- * Validation rule function type
+ * Validation rule type compatible with form field validation helpers
  */
-export type DynInputValidationRule = (value: string) => string | null | undefined;
+export type DynInputValidationRule = ValidationRule;
 
 /**
  * Input mask configuration
@@ -44,24 +48,10 @@ export interface DynInputMask {
 /**
  * Currency input configuration
  */
-export interface CurrencyInputConfig {
-  /** ISO 4217 currency code */
-  currencyCode: string;
-  /** Number of decimal places */
-  precision?: number;
-  /** Character used to group thousands */
-  thousandSeparator?: string;
-  /** Character used for decimal separation */
-  decimalSeparator?: string;
-  /** Whether to render the currency symbol */
-  showSymbol?: boolean;
-  /** Custom currency symbol override */
-  symbol?: string;
-  /** Placement of the currency symbol */
-  symbolPosition?: 'prefix' | 'suffix';
-  /** Whether to automatically format values */
-  autoFormat?: boolean;
-}
+export type CurrencyInputConfig = FieldCurrencyInputConfig & {
+  /** Whether to append the currency code to the formatted symbol */
+  showCurrencyCode?: boolean;
+};
 
 /**
  * Props interface for DynInput component
@@ -136,10 +126,10 @@ export interface DynInputProps
   /** Success message when valid */
   successMessage?: string;
 
-  /** Validation rule function or array of functions */
+  /** Validation rules */
   validation?: DynInputValidationRule | DynInputValidationRule[];
-  
-  /** Validation rules array (alias) */
+
+  /** Additional validation rules (alias for backwards compatibility) */
   validationRules?: DynInputValidationRule[];
   
   /** Whether to validate on change */
@@ -153,6 +143,9 @@ export interface DynInputProps
 
   /** Whether to show clear button when input has value */
   showClearButton?: boolean;
+
+  /** @deprecated Use showClearButton instead */
+  showCleanButton?: boolean;
 
   /** Whether to show spin buttons for numeric inputs */
   showSpinButtons?: boolean;
@@ -197,31 +190,31 @@ export interface DynInputProps
 /**
  * Ref type for DynInput component
  */
-export interface DynInputRef {
+export type DynInputRef = Omit<DynFieldRef, 'getValue' | 'setValue'> & {
   /** Focus the input element */
   focus: () => void;
-  
+
   /** Blur the input element */
   blur: () => void;
-  
+
   /** Clear the input value */
   clear: () => void;
-  
+
   /** Get the current input value */
   getValue: () => string | number;
-  
+
   /** Set the input value programmatically */
-  setValue: (value: string | number) => void;
-  
+  setValue: (value: string | number | null | undefined) => void;
+
   /** Validate the input and return validation result (async for compatibility) */
   validate: () => Promise<boolean>;
-  
+
   /** Clear any validation errors */
   clearError: () => void;
-  
+
   /** Get the native input element */
   getElement: () => HTMLInputElement | null;
-}
+};
 
 /**
  * Default props type for DynInput
