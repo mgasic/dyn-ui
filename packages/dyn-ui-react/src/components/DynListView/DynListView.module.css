@@ -1,5 +1,6 @@
 /* DynListView Component Styles */
-.dyn-list-view {
+.root,
+:global(.dyn-list-view) {
   display: flex;
   flex-direction: column;
   background: var(--dyn-color-background);
@@ -9,8 +10,8 @@
   overflow: hidden;
 }
 
-/* Header */
-.dyn-list-view__header {
+.header,
+:global(.dyn-list-view__header) {
   display: flex;
   align-items: center;
   gap: var(--dyn-spacing-sm, 0.5rem);
@@ -22,73 +23,124 @@
   color: var(--dyn-color-text-secondary);
 }
 
-.dyn-list-view__select-all-text {
-  user-select: none;
-}
-
-/* Content */
-.dyn-list-view__content {
+.content,
+:global(.dyn-list-view__content) {
   flex: 1;
   overflow: auto;
 }
 
-.dyn-list-view--fixed-height .dyn-list-view__content {
+.rootFixedHeight .content,
+:global(.dyn-list-view--fixed-height .dyn-list-view__content) {
   max-height: var(--dyn-size-page-min-height, 25rem);
 }
 
-/* Items */
-.dyn-list-view__item {
+.option,
+:global(.dyn-list-view__item) {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  gap: var(--dyn-spacing-md, 0.75rem);
+  padding: var(--dyn-spacing-lg, 1rem);
   border-bottom: 1px solid var(--dyn-color-border-light);
   transition: background-color var(--dyn-transition-base, 0.2s ease);
 }
 
-.dyn-list-view__item:last-child {
+.option:last-child,
+:global(.dyn-list-view__item:last-child) {
   border-bottom: none;
 }
 
-.dyn-list-view__item:hover {
+.option:hover,
+:global(.dyn-list-view__item:hover) {
   background-color: var(--dyn-color-background-hover);
 }
 
-.dyn-list-view__item--selected {
+.option--selected,
+:global(.dyn-list-view__item--selected) {
   background-color: var(--dyn-color-background-selected);
 }
 
-.dyn-list-view__item-selection {
-  display: flex;
-  align-items: center;
-  padding: var(--dyn-spacing-lg, 1rem) var(--dyn-spacing-md, 0.75rem);
-  border-right: 1px solid var(--dyn-color-border-light);
+.option--active {
+  box-shadow: inset 0 0 0 2px var(--dyn-color-focus-ring, var(--dyn-color-primary));
 }
 
-.dyn-list-view__item-body {
+.option--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.option__checkbox {
+  width: var(--dyn-size-control-md, 1.25rem);
+  height: var(--dyn-size-control-md, 1.25rem);
+  flex-shrink: 0;
+}
+
+.option__content {
   flex: 1;
   min-width: 0;
-}
-
-/* Item Content */
-.dyn-list-view__item-content {
-  width: 100%;
-}
-
-.dyn-list-view__item-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--dyn-spacing-lg, 1rem);
+  flex-direction: column;
+  gap: var(--dyn-spacing-xxs, 0.125rem);
 }
 
-.dyn-list-view__item-info {
+.option__label,
+:global(.dyn-list-view__item-title) {
+  font-size: var(--dyn-font-size-base);
+  font-weight: var(--dyn-font-weight-medium);
+  color: var(--dyn-color-text-primary);
+  line-height: var(--dyn-line-height-tight);
+  word-wrap: break-word;
+}
+
+.option__description,
+:global(.dyn-list-view__item-description) {
+  font-size: var(--dyn-font-size-sm);
+  color: var(--dyn-color-text-secondary);
+  line-height: var(--dyn-line-height-normal);
+  word-wrap: break-word;
+}
+
+.option__actions,
+:global(.dyn-list-view__item-actions) {
   display: flex;
-  align-items: center;
   gap: var(--dyn-spacing-sm, 0.5rem);
-  flex: 1;
-  min-width: 0;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
-.dyn-list-view__expand-button {
+.action-button,
+:global(.dyn-list-view__action-button) {
+  background: var(--dyn-color-primary);
+  color: var(--dyn-color-background);
+  border: none;
+  border-radius: var(--dyn-border-radius-sm);
+  padding:
+    calc(var(--dyn-spacing-xs, 0.25rem) + var(--dyn-spacing-xxs, 0.125rem))
+    var(--dyn-spacing-md, 0.75rem);
+  font-size: var(--dyn-font-size-sm);
+  font-weight: var(--dyn-font-weight-medium);
+  cursor: pointer;
+  transition:
+    background-color var(--dyn-transition-base, 0.2s ease),
+    transform var(--dyn-transition-fast, 0.15s ease);
+}
+
+.action-button:hover,
+:global(.dyn-list-view__action-button:hover) {
+  background: var(--dyn-color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.action-button:disabled,
+:global(.dyn-list-view__action-button:disabled) {
+  background: var(--dyn-color-disabled);
+  color: var(--dyn-color-text-disabled);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.option__expand,
+:global(.dyn-list-view__expand-button) {
   background: none;
   border: none;
   padding: var(--dyn-spacing-xs, 0.25rem);
@@ -100,110 +152,21 @@
     color var(--dyn-transition-base, 0.2s ease);
 }
 
-.dyn-list-view__expand-button:hover {
+.option__expand:hover,
+:global(.dyn-list-view__expand-button:hover) {
   background-color: var(--dyn-color-background-hover);
   color: var(--dyn-color-text-primary);
 }
 
-.dyn-list-view__item-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.dyn-list-view__item-title {
-  font-size: var(--dyn-font-size-base);
-  font-weight: var(--dyn-font-weight-medium);
-  color: var(--dyn-color-text-primary);
-  line-height: var(--dyn-line-height-tight);
-  margin-bottom: var(--dyn-spacing-xxs, 0.125rem);
-  word-wrap: break-word;
-}
-
-.dyn-list-view__item-description {
-  font-size: var(--dyn-font-size-sm);
-  color: var(--dyn-color-text-secondary);
-  line-height: var(--dyn-line-height-normal);
-  word-wrap: break-word;
-}
-
-/* Item Actions */
-.dyn-list-view__item-actions {
-  display: flex;
-  gap: var(--dyn-spacing-sm, 0.5rem);
-  align-items: center;
-}
-
-.dyn-list-view__action-button {
-  background: var(--dyn-color-primary);
-  color: var(--dyn-color-background);
-  border: none;
-  border-radius: var(--dyn-border-radius-sm);
-  padding: calc(var(--dyn-spacing-xs, 0.25rem) + var(--dyn-spacing-xxs, 0.125rem)) var(--dyn-spacing-md, 0.75rem);
-  font-size: var(--dyn-font-size-sm);
-  font-weight: var(--dyn-font-weight-medium);
-  cursor: pointer;
-  transition:
-    background-color var(--dyn-transition-base, 0.2s ease),
-    transform var(--dyn-transition-fast, 0.15s ease);
-}
-
-.dyn-list-view__action-button:hover {
-  background: var(--dyn-color-primary-hover);
-  transform: translateY(-1px);
-}
-
-.dyn-list-view__action-button:disabled {
-  background: var(--dyn-color-disabled);
-  color: var(--dyn-color-text-disabled);
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Item Details (Expanded) */
-.dyn-list-view__item-details {
+.option__details,
+:global(.dyn-list-view__item-details) {
   padding: 0 var(--dyn-spacing-lg, 1rem) var(--dyn-spacing-lg, 1rem) var(--dyn-spacing-lg, 1rem);
   border-top: 1px solid var(--dyn-color-border-light);
   background: var(--dyn-color-background-secondary);
 }
 
-.dyn-list-view__item-field {
-  margin-bottom: var(--dyn-spacing-sm, 0.5rem);
-  font-size: var(--dyn-font-size-sm);
-  color: var(--dyn-color-text-secondary);
-}
-
-.dyn-list-view__item-field:last-child {
-  margin-bottom: 0;
-}
-
-.dyn-list-view__item-field strong {
-  color: var(--dyn-color-text-primary);
-  margin-right: var(--dyn-spacing-xs, 0.25rem);
-}
-
-/* Size Variants */
-.dyn-list-view--small .dyn-list-view__item-header {
-  padding: var(--dyn-spacing-md, 0.75rem);
-}
-
-.dyn-list-view--small .dyn-list-view__item-title {
-  font-size: var(--dyn-font-size-sm);
-}
-
-.dyn-list-view--small .dyn-list-view__item-description {
-  font-size: var(--dyn-font-size-xs);
-}
-
-.dyn-list-view--large .dyn-list-view__item-header {
-  padding: calc(var(--dyn-spacing-xl, 1.5rem) - var(--dyn-spacing-xs, 0.25rem));
-}
-
-.dyn-list-view--large .dyn-list-view__item-title {
-  font-size: var(--dyn-font-size-lg);
-}
-
-/* States */
-.dyn-list-view__loading {
+.loading,
+:global(.dyn-list-view__loading) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -215,7 +178,8 @@
   font-size: var(--dyn-font-size-sm);
 }
 
-.dyn-list-view__empty {
+.empty,
+:global(.dyn-list-view__empty) {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -229,56 +193,93 @@
   text-align: center;
 }
 
-/* Bordered variant */
-.dyn-list-view--bordered {
-  /* Already has border by default */
+.rootSmall {
 }
 
-/* Responsive Design */
+.rootSmall .option,
+:global(.dyn-list-view--small .dyn-list-view__item-header) {
+  padding: var(--dyn-spacing-md, 0.75rem) var(--dyn-spacing-lg, 1rem);
+}
+
+.rootSmall .option__label,
+:global(.dyn-list-view--small .dyn-list-view__item-title) {
+  font-size: var(--dyn-font-size-sm);
+}
+
+.rootSmall .option__description,
+:global(.dyn-list-view--small .dyn-list-view__item-description) {
+  font-size: var(--dyn-font-size-xs);
+}
+
+.rootLarge {
+}
+
+.rootLarge .option,
+:global(.dyn-list-view--large .dyn-list-view__item-header) {
+  padding: calc(var(--dyn-spacing-xl, 1.5rem) - var(--dyn-spacing-xs, 0.25rem)) var(--dyn-spacing-xl, 1.5rem);
+}
+
+.rootLarge .option__label,
+:global(.dyn-list-view--large .dyn-list-view__item-title) {
+  font-size: var(--dyn-font-size-lg);
+}
+
+.rootBordered,
+:global(.dyn-list-view--bordered) {
+  border-width: 1px;
+}
+
 @media (max-width: 768px) {
-  .dyn-list-view__item-header {
+  .option,
+  :global(.dyn-list-view__item-header) {
     flex-direction: column;
     align-items: stretch;
     gap: var(--dyn-spacing-md, 0.75rem);
   }
-  
-  .dyn-list-view__item-actions {
+
+  .option__actions,
+  :global(.dyn-list-view__item-actions) {
     justify-content: flex-end;
   }
-  
-  .dyn-list-view__action-button {
+
+  .action-button,
+  :global(.dyn-list-view__action-button) {
     flex: 1;
     text-align: center;
   }
 }
 
-/* Dark Theme Support */
-[data-theme="dark"] .dyn-list-view {
+[data-theme="dark"] .root,
+[data-theme="dark"] :global(.dyn-list-view) {
   background: var(--dyn-color-background-dark);
   border-color: var(--dyn-color-border-dark);
 }
 
-[data-theme="dark"] .dyn-list-view__header {
+[data-theme="dark"] .header,
+[data-theme="dark"] :global(.dyn-list-view__header) {
   background: var(--dyn-color-background-secondary-dark);
   border-color: var(--dyn-color-border-dark);
   color: var(--dyn-color-text-secondary-dark);
 }
 
-[data-theme="dark"] .dyn-list-view__item-title {
+[data-theme="dark"] .option__label,
+[data-theme="dark"] :global(.dyn-list-view__item-title) {
   color: var(--dyn-color-text-primary-dark);
 }
 
-[data-theme="dark"] .dyn-list-view__item-description {
+[data-theme="dark"] .option__description,
+[data-theme="dark"] :global(.dyn-list-view__item-description) {
   color: var(--dyn-color-text-secondary-dark);
 }
 
-/* High Contrast Mode */
 @media (prefers-contrast: high) {
-  .dyn-list-view {
+  .root,
+  :global(.dyn-list-view) {
     border-width: 2px;
   }
-  
-  .dyn-list-view__item {
+
+  .option,
+  :global(.dyn-list-view__item) {
     border-bottom-width: 2px;
   }
 }
