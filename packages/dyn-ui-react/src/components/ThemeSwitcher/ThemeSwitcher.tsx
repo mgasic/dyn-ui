@@ -1,27 +1,20 @@
 import * as React from 'react';
 import { useTheme, type Theme } from '../../theme/ThemeProvider';
+import { cn } from '../../utils/classNames';
+import type { ThemeSwitcherProps } from './ThemeSwitcher.types';
+export type { ThemeSwitcherProps } from './ThemeSwitcher.types';
+import styles from './ThemeSwitcher.module.css';
 
-export type ThemeSwitcherProps = {
-  themes?: Theme[];
-  size?: 'sm' | 'md';
-  rounded?: 'sm' | 'md' | 'lg' | 'full';
-  onChange?: (theme: Theme) => void;
-  labels?: Record<Theme, string>;
-  className?: string;
+const sizeClassMap: Record<NonNullable<ThemeSwitcherProps['size']>, string> = {
+  sm: styles.sizeSm,
+  md: styles.sizeMd,
 };
 
-const getSpacing = (size: 'sm' | 'md') => {
-  return size === 'sm' ? '6px' : '8px';
-};
-
-const getBorderRadius = (rounded: string) => {
-  const radiusMap = {
-    sm: '4px',
-    md: '6px',
-    lg: '8px',
-    full: '9999px'
-  };
-  return radiusMap[rounded as keyof typeof radiusMap] || '6px';
+const roundedClassMap: Record<NonNullable<ThemeSwitcherProps['rounded']>, string> = {
+  sm: styles.roundedSm,
+  md: styles.roundedMd,
+  lg: styles.roundedLg,
+  full: styles.roundedFull,
 };
 
 export function ThemeSwitcher({
@@ -31,6 +24,8 @@ export function ThemeSwitcher({
   onChange,
   labels,
   className,
+  buttonClassName,
+  activeButtonClassName,
 }: ThemeSwitcherProps) {
   const { theme, setTheme, availableThemes } = useTheme();
   const themeList = themes && themes.length ? themes : availableThemes;
@@ -41,27 +36,16 @@ export function ThemeSwitcher({
     onChange?.(newTheme);
   };
 
-  const spacing = getSpacing(size);
-  const borderRadius = getBorderRadius(rounded);
-
   return (
     <div
       role="tablist"
       aria-label="Theme switcher"
-      className={className}
-      style={{
-        display: 'inline-flex',
-        border: '1px solid var(--dyn-color-border, #e5e7eb)',
-        borderRadius,
-        overflow: 'hidden',
-        background: 'var(--dyn-color-muted, #f9fafb)',
-        transition: 'all 0.2s ease',
-      }}
+      className={cn(styles.toggleGroup, sizeClassMap[size], roundedClassMap[rounded], className)}
     >
       {themeList.map((t) => {
         const isActive = theme === t;
         const label = labels?.[t] ?? t.charAt(0).toUpperCase() + t.slice(1);
-        
+
         return (
           <button
             key={t}
@@ -69,29 +53,12 @@ export function ThemeSwitcher({
             role="tab"
             aria-selected={isActive}
             onClick={() => handleThemeChange(t)}
-            style={{
-              appearance: 'none',
-              cursor: 'pointer',
-              padding: `${spacing} ${parseInt(spacing) * 2}px`,
-              border: 'none',
-              background: isActive ? 'var(--dyn-color-primary, #3b82f6)' : 'transparent',
-              color: isActive ? 'white' : 'var(--dyn-color-foreground, #374151)',
-              fontWeight: isActive ? 600 : 500,
-              lineHeight: 1.2,
-              fontSize: size === 'sm' ? '0.875rem' : '1rem',
-              transition: 'all 0.2s ease',
-              minWidth: '60px',
-            }}
-            onMouseEnter={(e) => {
-              if (!isActive) {
-                e.currentTarget.style.background = 'var(--dyn-color-border, #f3f4f6)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive) {
-                e.currentTarget.style.background = 'transparent';
-              }
-            }}
+            className={cn(
+              styles.toggleGroupButton,
+              buttonClassName,
+              isActive && activeButtonClassName,
+            )}
+            data-active={isActive ? 'true' : undefined}
           >
             {label}
           </button>
