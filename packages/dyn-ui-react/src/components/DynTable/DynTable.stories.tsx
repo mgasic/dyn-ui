@@ -1,10 +1,69 @@
+import { type FC, useEffect, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import DynTable from './DynTable';
-import { DynTableProps, DynTableColumn, TableAction } from './DynTable.types';
+import {
+  DynTableProps,
+  DynTableColumn,
+  TableAction,
+  TablePagination,
+  TableSortDirection
+} from './DynTable.types';
+
+type PaginationState = Pick<TablePagination, 'current' | 'pageSize' | 'total'>;
+
+const DynTableStoryWrapper: FC<DynTableProps> = (props) => {
+  const { sortBy, onSort, pagination, ...rest } = props;
+  const [sortState, setSortState] = useState<DynTableProps['sortBy'] | null>(sortBy ?? null);
+  const [paginationState, setPaginationState] = useState<PaginationState | null>(() =>
+    pagination ? { current: pagination.current, pageSize: pagination.pageSize, total: pagination.total } : null
+  );
+
+  useEffect(() => {
+    setSortState(sortBy ?? null);
+  }, [sortBy?.column, sortBy?.direction]);
+
+  useEffect(() => {
+    if (!pagination) {
+      setPaginationState(null);
+      return;
+    }
+
+    setPaginationState({
+      current: pagination.current,
+      pageSize: pagination.pageSize,
+      total: pagination.total,
+    });
+  }, [pagination?.current, pagination?.pageSize, pagination?.total, pagination ? 1 : 0]);
+
+  const handleSort = (column: string, direction: TableSortDirection) => {
+    setSortState({ column, direction });
+    onSort?.(column, direction);
+  };
+
+  const paginationProps = paginationState
+    ? {
+        ...paginationState,
+        onChange: (page: number, pageSize: number) => {
+          setPaginationState(prev => (prev ? { ...prev, current: page, pageSize } : prev));
+          pagination?.onChange?.(page, pageSize);
+        },
+      }
+    : undefined;
+
+  return (
+    <DynTable
+      {...rest}
+      sortBy={sortState ?? undefined}
+      onSort={handleSort}
+      pagination={paginationProps}
+    />
+  );
+};
 
 const meta: Meta<typeof DynTable> = {
   title: 'Data Display/DynTable',
   component: DynTable,
+  render: (args) => <DynTableStoryWrapper {...args} />,
   parameters: {
     layout: 'padded',
     docs: {
