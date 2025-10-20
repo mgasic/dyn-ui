@@ -1,10 +1,129 @@
+import { type FC, useEffect, useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import DynTable from './DynTable';
-import { DynTableProps, DynTableColumn, TableAction } from './DynTable.types';
+import {
+  DynTableProps,
+  DynTableColumn,
+  TableAction,
+  TablePagination,
+  TableSortDirection
+} from './DynTable.types';
+
+type PaginationState = Pick<TablePagination, 'current' | 'pageSize' | 'total'>;
+
+const DynTableStoryWrapper: FC<DynTableProps> = (props) => {
+  const { sortBy, onSort, pagination, data = [], columns = [], ...rest } = props;
+  const [sortState, setSortState] = useState<DynTableProps['sortBy'] | null>(sortBy ?? null);
+  const [paginationState, setPaginationState] = useState<PaginationState | null>(() =>
+    pagination ? { current: pagination.current, pageSize: pagination.pageSize, total: pagination.total } : null
+  );
+
+  useEffect(() => {
+    setSortState(sortBy ?? null);
+  }, [sortBy?.column, sortBy?.direction]);
+
+  useEffect(() => {
+    if (!pagination) {
+      setPaginationState(null);
+      return;
+    }
+
+    setPaginationState({
+      current: pagination.current,
+      pageSize: pagination.pageSize,
+      total: pagination.total,
+    });
+  }, [pagination?.current, pagination?.pageSize, pagination?.total, pagination ? 1 : 0]);
+
+  const handleSort = (column: string, direction: TableSortDirection) => {
+    setSortState({ column, direction });
+    onSort?.(column, direction);
+  };
+
+  const sortedData = useMemo(() => {
+    if (!sortState) return data;
+
+    const column = columns.find(col => col.key === sortState.column);
+    const columnType = column?.type;
+
+    const compare = (a: any, b: any) => {
+      const aValue = a?.[sortState.column];
+      const bValue = b?.[sortState.column];
+
+      if (aValue === bValue) return 0;
+      if (aValue === undefined || aValue === null) return 1;
+      if (bValue === undefined || bValue === null) return -1;
+
+      if (columnType === 'number' || columnType === 'currency') {
+        const aNumber = Number(aValue);
+        const bNumber = Number(bValue);
+        if (!Number.isNaN(aNumber) && !Number.isNaN(bNumber)) {
+          return aNumber - bNumber;
+        }
+      }
+
+      if (columnType === 'date') {
+        const aTime = new Date(aValue as string | number | Date).getTime();
+        const bTime = new Date(bValue as string | number | Date).getTime();
+        if (!Number.isNaN(aTime) && !Number.isNaN(bTime)) {
+          return aTime - bTime;
+        }
+      }
+
+      if (columnType === 'boolean') {
+        return Number(Boolean(aValue)) - Number(Boolean(bValue));
+      }
+
+      const aString = String(aValue).toLowerCase();
+      const bString = String(bValue).toLowerCase();
+      if (aString < bString) return -1;
+      if (aString > bString) return 1;
+      return 0;
+    };
+
+    const directionMultiplier = sortState.direction === 'asc' ? 1 : -1;
+
+    return [...data].sort((a, b) => directionMultiplier * compare(a, b));
+  }, [columns, data, sortState]);
+
+  const paginatedData = useMemo(() => {
+    if (!paginationState) return sortedData;
+    const startIndex = Math.max(0, (paginationState.current - 1) * paginationState.pageSize);
+    return sortedData.slice(startIndex, startIndex + paginationState.pageSize);
+  }, [paginationState, sortedData]);
+
+  const paginationProps = paginationState
+    ? {
+        ...paginationState,
+        onChange: (page: number, pageSize: number) => {
+          setPaginationState(prev => {
+            if (!prev) return prev;
+            const totalItems = prev.total ?? sortedData.length;
+            const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+            const nextPage = Math.min(Math.max(page, 1), totalPages);
+            return { ...prev, current: nextPage, pageSize };
+          });
+          pagination?.onChange?.(page, pageSize);
+        },
+      }
+    : undefined;
+
+  return (
+    <DynTable
+      {...rest}
+      data={paginatedData}
+      columns={columns}
+      sortBy={sortState ?? undefined}
+      onSort={handleSort}
+      pagination={paginationProps}
+    />
+  );
+};
 
 const meta: Meta<typeof DynTable> = {
   title: 'Data Display/DynTable',
   component: DynTable,
+  render: (args) => <DynTableStoryWrapper {...args} />,
   parameters: {
     layout: 'padded',
     docs: {
