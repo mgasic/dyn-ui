@@ -41,6 +41,10 @@ const meta: Meta<typeof DynInput> = {
     placeholder: { control: 'text' },
     help: { control: 'text' },
     value: { control: 'text' },
+    form: {
+      control: 'text',
+      description: 'ID forme sa kojom je input povezan preko HTML `form` atributa'
+    },
     currencyConfig: {
       control: 'object',
       description: 'Podešavanja formatiranja valute'
@@ -113,6 +117,45 @@ export const Types: Story = {
       <DynInput label="Lozinka" type="password" placeholder="••••••••" />
       <DynInput label="Godine" type="number" placeholder="18" min={0} max={120} />
       <DynInput label="Telefon" type="tel" placeholder="" />
+    </div>
+  )
+};
+
+export const ExternalFormAssociation: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: '1rem', maxWidth: 480 }}>
+      <form
+        id="external-login-form"
+        style={{
+          display: 'grid',
+          gap: '0.75rem',
+          padding: '1rem',
+          border: '1px solid #e0e0e0',
+          borderRadius: 8
+        }}
+        onSubmit={(event) => {
+          event.preventDefault();
+        }}
+      >
+        <DynInput
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="email@primer.com"
+          required
+        />
+        <button type="submit">Pošalji</button>
+      </form>
+
+      <DynInput
+        label="Lozinka (izvan forme)"
+        name="password"
+        type="password"
+        placeholder="••••••••"
+        required
+        form="external-login-form"
+        help="Ovaj input koristi HTML form atribut da bi bio povezan sa formom iznad."
+      />
     </div>
   )
 };
