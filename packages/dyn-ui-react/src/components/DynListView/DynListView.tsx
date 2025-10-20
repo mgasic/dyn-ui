@@ -190,7 +190,7 @@ const useSelectionManager = ({
   } as const;
 };
 
-export const DynListView = forwardRef<DynListViewRef | null, DynListViewProps>(function DynListView(
+export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function DynListView(
   {
     items = [],
     data = [], // legacy alias
@@ -262,7 +262,7 @@ export const DynListView = forwardRef<DynListViewRef | null, DynListViewProps>(f
   const { selectAll: selectAllKeys, clearSelection } = selection;
   const allKeys = uniqueItemKeys;
 
-  useImperativeHandle(
+  useImperativeHandle<DynListViewRef | null>(
     ref,
     () => {
       const node = rootRef.current;
@@ -271,15 +271,18 @@ export const DynListView = forwardRef<DynListViewRef | null, DynListViewProps>(f
         return null;
       }
 
-      return Object.assign(node, {
-        selectAll: () => {
-          if (!allKeys.length) return;
-          selectAllKeys(allKeys);
-        },
-        clearSelection: () => {
-          clearSelection();
-        },
-      }) as DynListViewRef;
+      const handle = node as DynListViewRef;
+
+      handle.selectAll = () => {
+        if (!allKeys.length) return;
+        selectAllKeys(allKeys);
+      };
+
+      handle.clearSelection = () => {
+        clearSelection();
+      };
+
+      return handle;
     },
     [allKeys, clearSelection, selectAllKeys]
   );
