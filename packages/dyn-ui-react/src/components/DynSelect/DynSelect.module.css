@@ -3,12 +3,12 @@
  * Part of DYN UI Form Components Group - SCOPE 6
  */
 
-.dyn-select-container {
+.container {
   position: relative;
   width: 100%;
 }
 
-.dyn-select {
+.select {
   position: relative;
   min-height: 40px;
   width: 100%;
@@ -26,76 +26,87 @@
   padding: var(--dyn-spacing-sm, 8px) var(--dyn-spacing-md, 12px);
 }
 
-.dyn-select:hover:not(.dyn-select--disabled):not(.dyn-select--readonly) {
+.select:hover:not(.selectDisabled):not(.selectReadonly) {
   border-color: var(--dyn-color-border-hover, #9ca3af);
 }
 
-.dyn-select--focused,
-.dyn-select--open {
+.selectFocused,
+.selectOpen {
   border-color: var(--dyn-color-primary, #0066cc);
   box-shadow: 0 0 0 3px var(--dyn-color-primary-alpha, rgba(0, 102, 204, 0.1));
 }
 
-.dyn-select--error {
+.selectError {
   border-color: var(--dyn-color-error, #f44336);
 }
 
-.dyn-select--error.dyn-select--focused {
+.selectError.selectFocused {
   box-shadow: 0 0 0 3px var(--dyn-color-error-alpha, rgba(244, 67, 54, 0.1));
 }
 
-.dyn-select--disabled {
+.selectDisabled {
   background-color: var(--dyn-color-surface-disabled, #f3f4f6);
   color: var(--dyn-color-text-disabled, #9ca3af);
   cursor: not-allowed;
   border-color: var(--dyn-color-border-disabled, #e5e7eb);
 }
 
-.dyn-select--readonly {
+.selectReadonly {
   background-color: var(--dyn-color-surface-readonly, #f9fafb);
   cursor: default;
 }
 
-.dyn-select--loading {
+.selectLoading {
   cursor: wait;
 }
 
-/* Size variants */
-.dyn-select--small {
+.selectSearchable {
+  cursor: text;
+}
+
+.selectMultiple {
+  min-height: 48px;
+}
+
+.selectSizeSmall {
   font-size: var(--dyn-font-size-sm, 14px);
   min-height: 32px;
   padding: var(--dyn-spacing-xs, 6px) var(--dyn-spacing-sm, 8px);
 }
 
-.dyn-select--large {
+.selectSizeMedium {
+  /* uses base styles */
+}
+
+.selectSizeLarge {
   font-size: var(--dyn-font-size-lg, 18px);
   min-height: 48px;
   padding: var(--dyn-spacing-md, 12px) var(--dyn-spacing-lg, 16px);
 }
 
-.dyn-select-content {
+.selectContent {
   flex: 1;
   display: flex;
   align-items: center;
   min-height: 24px;
 }
 
-.dyn-select-text {
+.selectText {
   line-height: 1.5;
 }
 
-.dyn-select-text.dyn-select-placeholder {
+.selectPlaceholder {
   color: var(--dyn-color-text-placeholder, #9ca3af);
 }
 
-.dyn-select-tags {
+.tags {
   display: flex;
   flex-wrap: wrap;
   gap: var(--dyn-spacing-xs, 4px);
   align-items: center;
 }
 
-.dyn-select-tag {
+.tag {
   display: inline-flex;
   align-items: center;
   background-color: var(--dyn-color-primary-light, #e3f2fd);
@@ -107,7 +118,7 @@
   gap: var(--dyn-spacing-xs, 4px);
 }
 
-.dyn-select-tag-remove {
+.tagRemove {
   background: none;
   border: none;
   cursor: pointer;
@@ -121,11 +132,11 @@
   height: 16px;
 }
 
-.dyn-select-tag-remove:hover {
+.tagRemove:hover {
   background-color: var(--dyn-color-primary-alpha, rgba(0, 102, 204, 0.1));
 }
 
-.dyn-select-arrow {
+.arrow {
   margin-left: var(--dyn-spacing-sm, 8px);
   color: var(--dyn-color-text-secondary, #666);
   transition: transform 0.2s ease;
@@ -134,11 +145,11 @@
   justify-content: center;
 }
 
-.dyn-select-arrow--up {
+.arrowUp {
   transform: rotate(180deg);
 }
 
-.dyn-select-dropdown {
+.dropdown {
   position: absolute;
   top: 100%;
   left: 0;
@@ -155,12 +166,12 @@
   flex-direction: column;
 }
 
-.dyn-select-search {
+.search {
   padding: var(--dyn-spacing-md, 12px);
   border-bottom: 1px solid var(--dyn-color-border, #d1d5db);
 }
 
-.dyn-select-search-input {
+.searchInput {
   width: 100%;
   font-size: var(--dyn-font-size-sm, 14px);
   padding: var(--dyn-spacing-sm, 8px);
@@ -169,18 +180,18 @@
   outline: none;
 }
 
-.dyn-select-search-input:focus {
+.searchInput:focus {
   border-color: var(--dyn-color-primary, #0066cc);
   box-shadow: 0 0 0 2px var(--dyn-color-primary-alpha, rgba(0, 102, 204, 0.1));
 }
 
-.dyn-select-options {
+.options {
   flex: 1;
   overflow-y: auto;
   max-height: 240px;
 }
 
-.dyn-select-option {
+.option {
   display: flex;
   align-items: center;
   padding: var(--dyn-spacing-md, 12px);
@@ -192,25 +203,25 @@
   gap: var(--dyn-spacing-sm, 8px);
 }
 
-.dyn-select-option:hover:not(.dyn-select-option--disabled) {
+.option:hover:not(.optionDisabled) {
   background-color: var(--dyn-color-surface-hover, #f3f4f6);
 }
 
-.dyn-select-option--selected {
+.optionSelected {
   background-color: var(--dyn-color-primary-light, #e3f2fd);
   color: var(--dyn-color-primary-dark, #1565c0);
 }
 
-.dyn-select-option--disabled {
+.optionDisabled {
   color: var(--dyn-color-text-disabled, #9ca3af);
   cursor: not-allowed;
 }
 
-.dyn-select-option-text {
+.optionText {
   flex: 1;
 }
 
-.dyn-select-checkbox {
+.checkbox {
   width: 16px;
   height: 16px;
   border: 1px solid var(--dyn-color-border, #d1d5db);
@@ -222,13 +233,13 @@
   transition: all 0.2s ease;
 }
 
-.dyn-select-checkbox--checked {
+.checkboxChecked {
   background-color: var(--dyn-color-primary, #0066cc);
   border-color: var(--dyn-color-primary, #0066cc);
   color: var(--dyn-color-surface, #fff);
 }
 
-.dyn-select-empty {
+.emptyState {
   padding: var(--dyn-spacing-lg, 24px) var(--dyn-spacing-md, 12px);
   text-align: center;
   color: var(--dyn-color-text-secondary, #666);
