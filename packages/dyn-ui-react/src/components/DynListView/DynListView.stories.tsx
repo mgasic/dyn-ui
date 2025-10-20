@@ -146,7 +146,7 @@ export const WithSelection: Story = {
     defaultValue: ['1', '3'],
   },
   render: (args) => {
-    const listRef = useRef<DynListViewRef>(null);
+    const listRef = useRef<DynListViewRef | null>(null);
     const dataSet = useMemo(
       () => (Array.isArray(args.items) && args.items.length ? args.items : args.data ?? []),
       [args.data, args.items]
