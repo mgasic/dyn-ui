@@ -1,23 +1,23 @@
 .menubar,
 :global(.dyn-menu) {
-  --dyn-menu-width: 280px;
-  --dyn-menu-background: var(--color-neutral-light-00, #fff);
-  --dyn-menu-border: var(--color-neutral-light-20, #e0e0e0);
-  --dyn-menu-divider: var(--color-neutral-light-30, #d5d5d5);
-  --dyn-menu-item-color: var(--color-neutral-mid-80, #1f2933);
-  --dyn-menu-item-hover: var(--color-neutral-light-10, #f7f7f7);
-  --dyn-menu-item-active: var(--color-brand-01-light, #cce7ff);
-  --dyn-menu-focus: var(--color-action-focus, #005fb8);
+  --dyn-menu-width: var(--dyn-size-overlay-width-md, 17.5rem);
+  --dyn-menu-background: var(--dyn-color-surface, #ffffff);
+  --dyn-menu-border: var(--dyn-color-border-light, #e2e8f0);
+  --dyn-menu-divider: var(--dyn-color-border-subtle, rgba(15, 23, 42, 0.08));
+  --dyn-menu-item-color: var(--dyn-color-text, #111827);
+  --dyn-menu-item-hover: var(--dyn-color-surface-hover, #f8fafc);
+  --dyn-menu-item-active: var(--dyn-color-primary-subtle, #dbeafe);
+  --dyn-menu-focus: var(--dyn-color-focus-ring, rgba(37, 99, 235, 0.35));
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.25rem;
-  padding: 0.75rem 0.5rem;
+  gap: var(--dyn-spacing-xs, 0.25rem);
+  padding: var(--dyn-spacing-md, 0.75rem) var(--dyn-spacing-sm, 0.5rem);
   width: 100%;
   min-height: 100%;
   background-color: var(--dyn-menu-background);
-  border-right: 1px solid var(--dyn-menu-border);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  border-right: var(--dyn-border-width-hairline, 1px) solid var(--dyn-menu-border);
+  box-shadow: var(--dyn-shadow-overlay, 0 12px 24px rgba(15, 23, 42, 0.12));
   color: var(--dyn-menu-item-color);
 }
 
@@ -26,12 +26,12 @@
   flex-direction: row;
   width: auto;
   min-height: auto;
-  padding: 0.5rem;
-  border: 1px solid var(--dyn-menu-border);
+  padding: var(--dyn-spacing-sm, 0.5rem);
+  border: var(--dyn-border-width-hairline, 1px) solid var(--dyn-menu-border);
   border-right: none;
-  border-radius: 0.75rem;
+  border-radius: var(--dyn-border-radius-lg, 0.75rem);
   box-shadow: none;
-  gap: 0.5rem;
+  gap: var(--dyn-spacing-sm, 0.5rem);
 }
 
 .menubar--vertical,
@@ -52,17 +52,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--dyn-spacing-sm, 0.5rem);
   width: 100%;
-  padding: 0.625rem 0.75rem;
+  padding: calc(var(--dyn-spacing-sm, 0.5rem) + var(--dyn-spacing-xxs, 0.125rem))
+    var(--dyn-spacing-md, 0.75rem);
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--dyn-border-radius-md, 0.5rem);
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color var(--dyn-duration-normal, 200ms) var(--dyn-timing-standard, ease),
+    color var(--dyn-duration-normal, 200ms) var(--dyn-timing-standard, ease);
 }
 
 .menubar__button:hover:not(:disabled),
@@ -80,7 +83,7 @@
 .menubar__button--open,
 :global(.dyn-menu-item-active) {
   background-color: var(--dyn-menu-item-active);
-  font-weight: 600;
+  font-weight: var(--dyn-font-weight-semibold, 600);
 }
 
 .menubar__button:disabled {
@@ -89,8 +92,8 @@
 }
 
 .menubar__button:focus-visible {
-  outline: 2px solid var(--dyn-menu-focus);
-  outline-offset: 2px;
+  outline: var(--dyn-border-width-thin, 2px) solid var(--dyn-menu-focus);
+  outline-offset: var(--dyn-spacing-xxs, 0.125rem);
 }
 
 :global(.dyn-menu-item-disabled) {
@@ -99,14 +102,14 @@
 }
 
 :global(.dyn-menu-item:focus-visible) {
-  outline: 2px solid var(--dyn-menu-focus);
-  outline-offset: 2px;
+  outline: var(--dyn-border-width-thin, 2px) solid var(--dyn-menu-focus);
+  outline-offset: var(--dyn-spacing-xxs, 0.125rem);
 }
 
 .menubar__divider,
 :global(.dyn-menu-divider) {
-  height: 1px;
-  margin: 0.5rem 0.75rem;
+  height: var(--dyn-border-width-hairline, 1px);
+  margin: var(--dyn-spacing-sm, 0.5rem) var(--dyn-spacing-md, 0.75rem);
   background-color: var(--dyn-menu-divider);
 }
 
@@ -114,24 +117,24 @@
 :global(.dyn-menu-subitems) {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  margin-top: 0.25rem;
-  min-width: 12rem;
+  gap: var(--dyn-spacing-xs, 0.25rem);
+  padding: var(--dyn-spacing-xs, 0.25rem);
+  margin-top: var(--dyn-spacing-xs, 0.25rem);
+  min-width: var(--dyn-size-overlay-width-sm, 12rem);
   width: max-content;
-  border-radius: 0.75rem;
+  border-radius: var(--dyn-border-radius-lg, 0.75rem);
   background-color: var(--dyn-menu-background);
-  border: 1px solid var(--dyn-menu-border);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+  border: var(--dyn-border-width-hairline, 1px) solid var(--dyn-menu-border);
+  box-shadow: var(--dyn-shadow-overlay-lg, 0 16px 32px rgba(15, 23, 42, 0.16));
   z-index: 2;
 }
 
 .menubar--horizontal .menu,
 :global(.dyn-menu--horizontal .dyn-menu-subitems) {
   position: absolute;
-  top: calc(100% + 0.375rem);
+  top: calc(100% + var(--dyn-spacing-sm, 0.5rem) - var(--dyn-spacing-xxs, 0.125rem));
   left: 0;
-  width: 18rem;
+  width: var(--dyn-size-overlay-width-lg, 18rem);
 }
 
 .menubar--vertical .menu,
@@ -139,24 +142,26 @@
   position: static;
   width: 100%;
   box-shadow: none;
-  border-radius: 0.5rem;
+  border-radius: var(--dyn-border-radius-md, 0.5rem);
 }
 
 .menu__item,
 :global(.dyn-menu-subitems .dyn-menu-item) {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--dyn-spacing-sm, 0.5rem);
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: var(--dyn-spacing-sm, 0.5rem) var(--dyn-spacing-md, 0.75rem);
   border: none;
-  border-radius: 0.5rem;
+  border-radius: var(--dyn-border-radius-md, 0.5rem);
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color var(--dyn-duration-normal, 200ms) var(--dyn-timing-standard, ease),
+    color var(--dyn-duration-normal, 200ms) var(--dyn-timing-standard, ease);
 }
 
 .menu__item:hover:not(:disabled) {
@@ -170,13 +175,13 @@
 }
 
 .menu__item:focus-visible {
-  outline: 2px solid var(--dyn-menu-focus);
-  outline-offset: 2px;
+  outline: var(--dyn-border-width-thin, 2px) solid var(--dyn-menu-focus);
+  outline-offset: var(--dyn-spacing-xxs, 0.125rem);
 }
 
 :global(.dyn-menu-subitems .dyn-menu-item:focus-visible) {
-  outline: 2px solid var(--dyn-menu-focus);
-  outline-offset: 2px;
+  outline: var(--dyn-border-width-thin, 2px) solid var(--dyn-menu-focus);
+  outline-offset: var(--dyn-spacing-xxs, 0.125rem);
 }
 
 .menu__item:disabled,
