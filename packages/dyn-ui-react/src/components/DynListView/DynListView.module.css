@@ -290,6 +290,7 @@
     justify-content: flex-end;
   }
 
+  .actionButton,
   .action-button,
   :global(.dyn-list-view__action-button) {
     flex: 1;
