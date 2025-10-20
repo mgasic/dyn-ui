@@ -6,6 +6,12 @@ import type { DynListViewProps, ListViewItem, ListAction } from './DynListView.t
 
 const getStyleClass = (n: string) => (styles as Record<string, string>)[n] || '';
 
+const getActionButtonVariantClass = (type?: ListAction['type']) => {
+  const normalized = (type ?? 'default').toLowerCase();
+  const variantKey = `actionButton${normalized.replace(/^[a-z]/, (c) => c.toUpperCase())}`;
+  return getStyleClass(variantKey) || getStyleClass('actionButtonDefault');
+};
+
 const isComplexItem = (item: any) => {
   // Consider item complex if it has more than typical display fields
   const displayKeys = new Set(['id','title','label','value','description','icon','disabled','selected']);
@@ -415,8 +421,8 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
                       key={action.key}
                       type="button"
                       className={cn(
-                        getStyleClass('action-button'),
-                        getStyleClass(`action-button--${action.type || 'default'}`)
+                        getStyleClass('actionButton'),
+                        getActionButtonVariantClass(action.type)
                       )}
                       onClick={() => action.onClick(item, i)}
                       title={action.title}
