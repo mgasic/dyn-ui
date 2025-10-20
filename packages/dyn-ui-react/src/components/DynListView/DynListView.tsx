@@ -391,8 +391,12 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
           const usesDefaultRenderer = !renderItem;
           const optionLabelledBy = usesDefaultRenderer ? labelId : undefined;
           const optionDescribedBy = usesDefaultRenderer && desc ? descriptionId : undefined;
-          const isExpandable = complex && usesDefaultRenderer;
+          const isExpandable = complex;
+          const usesTitleAsExpandTrigger = isExpandable && usesDefaultRenderer;
+          const renderSeparateExpandControl = isExpandable && !usesDefaultRenderer;
           const isExpanded = !!expanded[key];
+          const hasActions = actions && actions.length > 0;
+          const shouldRenderControls = hasActions || renderSeparateExpandControl;
 
           return (
             <div
@@ -431,7 +435,7 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
                     renderItem(item, i)
                   ) : (
                     <>
-                      {isExpandable ? (
+                      {usesTitleAsExpandTrigger ? (
                         <button
                           type="button"
                           id={labelId}
@@ -466,27 +470,50 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
                 </div>
               </div>
 
-              {actions && actions.length > 0 && (
+              {shouldRenderControls && (
                 <div
                   className={getStyleClass('option__controls')}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className={getStyleClass('option__actions')}>
-                    {actions.map((action) => (
-                      <button
-                        key={action.key}
-                        type="button"
-                        className={cn(
-                          getStyleClass('actionButton'),
-                          getActionButtonVariantClass(action.type)
-                        )}
-                        onClick={() => action.onClick(item, i)}
-                        title={action.title}
-                      >
-                        {action.title}
-                      </button>
-                    ))}
-                  </div>
+                  {renderSeparateExpandControl && (
+                    <button
+                      type="button"
+                      aria-expanded={isExpanded}
+                      aria-label={`${isExpanded ? 'Collapse' : 'Expand'} details for ${title}`}
+                      className={cn(
+                        getStyleClass('actionButton'),
+                        getStyleClass('actionButtonDefault'),
+                        getStyleClass('option__expandButton')
+                      )}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleItemExpansion(key);
+                      }}
+                    >
+                      <span aria-hidden="true" className={getStyleClass('option__expandButtonIcon')}>
+                        {isExpanded ? '▴' : '▾'}
+                      </span>
+                    </button>
+                  )}
+
+                  {hasActions && (
+                    <div className={getStyleClass('option__actions')}>
+                      {actions.map((action) => (
+                        <button
+                          key={action.key}
+                          type="button"
+                          className={cn(
+                            getStyleClass('actionButton'),
+                            getActionButtonVariantClass(action.type)
+                          )}
+                          onClick={() => action.onClick(item, i)}
+                          title={action.title}
+                        >
+                          {action.title}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
