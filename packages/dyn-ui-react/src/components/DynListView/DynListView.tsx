@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import styles from './DynListView.module.css';
@@ -220,8 +220,9 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
   
   // Use items prop, fallback to data for backward compatibility
   const listItems = items.length > 0 ? items : data;
-  
+
   const [internalId] = useState(() => id || generateId('listview'));
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -257,6 +258,26 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
     onSelectionChange,
     getSelectedItems: getItemsByKeys,
   });
+
+  const { selectAll: selectAllKeys, clearSelection } = selection;
+  const allKeys = uniqueItemKeys;
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => {
+        rootRef.current?.focus();
+      },
+      selectAll: () => {
+        if (!allKeys.length) return;
+        selectAllKeys(allKeys);
+      },
+      clearSelection: () => {
+        clearSelection();
+      },
+    }),
+    [allKeys, clearSelection, selectAllKeys]
+  );
 
   const moveActive = (delta: number) => {
     const count = listItems.length;
@@ -297,7 +318,6 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
     height: typeof height === 'number' ? `${height}px` : String(height) 
   } : undefined;
 
-  const allKeys = uniqueItemKeys;
   const allChecked =
     (multiSelect || selectable) &&
     allKeys.length > 0 &&
@@ -308,7 +328,7 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
 
   return (
     <div
-      ref={ref}
+      ref={rootRef}
       id={internalId}
       role="listbox"
       aria-multiselectable={multiSelect || selectable || undefined}
@@ -361,6 +381,12 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
           const title = (item as any).title ?? (item as any).label ?? (item as any).value ?? String((item as any).id ?? i + 1);
           const desc = (item as any).description;
           const complex = isComplexItem(item);
+          const checkboxId = `${itemIds[i]}-checkbox`;
+          const labelId = `${itemIds[i]}-label`;
+          const descriptionId = desc ? `${itemIds[i]}-description` : undefined;
+          const usesDefaultRenderer = !renderItem;
+          const optionLabelledBy = usesDefaultRenderer ? labelId : undefined;
+          const optionDescribedBy = usesDefaultRenderer && desc ? descriptionId : undefined;
 
           return (
             <div
