@@ -1,5 +1,48 @@
 import { BaseComponentProps, AccessibilityProps } from '../../types';
-import { ReactNode } from 'react';
+import { ReactNode, ButtonHTMLAttributes } from 'react';
+
+export interface DynListViewItemRenderContext {
+  /** Whether the current item supports expansion */
+  isExpandable: boolean;
+  /** Whether the current item is expanded */
+  isExpanded: boolean;
+  /** Programmatically toggle expansion state */
+  toggleExpansion: () => void;
+  /**
+   * Returns props for a button element that toggles the item expansion.
+   * Calling this function registers the custom renderer as providing its own expansion trigger.
+   */
+  getTitleTriggerProps: (
+    props?: ButtonHTMLAttributes<HTMLButtonElement>
+  ) => ButtonHTMLAttributes<HTMLButtonElement> & { 'aria-expanded': boolean };
+  /**
+   * Convenience component for rendering an accessible button that toggles expansion.
+   * Rendering the component registers the custom renderer as providing its own expansion trigger.
+   */
+  TitleButton: (
+    props: ButtonHTMLAttributes<HTMLButtonElement> & { children?: ReactNode }
+  ) => ReactNode;
+  /** Register that the custom renderer is handling expansion triggers */
+  registerExpansionTrigger: () => void;
+  /**
+   * Update the aria-labelledby attribute on the option wrapper to reference
+   * custom labelled elements rendered by the custom renderer.
+   */
+  setOptionLabelledBy: (value: string | undefined) => void;
+  /**
+   * Update the aria-describedby attribute on the option wrapper to reference
+   * descriptive elements rendered by the custom renderer.
+   */
+  setOptionDescribedBy: (value: string | undefined) => void;
+  /** Default title resolved from the item */
+  title: string;
+  /** Default description resolved from the item */
+  description?: string;
+  /** Generated id for the default label */
+  labelId: string;
+  /** Generated id for the default description */
+  descriptionId?: string;
+}
 
 export interface ListViewItem {
   id: string | number;
@@ -76,7 +119,11 @@ export interface DynListViewProps extends BaseComponentProps, AccessibilityProps
   itemKey?: string | ((item: ListViewItem) => string);
   
   /** Custom item renderer */
-  renderItem?: (item: ListViewItem, index: number) => ReactNode;
+  renderItem?: (
+    item: ListViewItem,
+    index: number,
+    context?: DynListViewItemRenderContext
+  ) => ReactNode;
   
   /** Selection change callback */
   onSelectionChange?: (keys: string[], items: ListViewItem[]) => void;

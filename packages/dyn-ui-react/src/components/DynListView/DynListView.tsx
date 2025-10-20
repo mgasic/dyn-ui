@@ -2,7 +2,12 @@ import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, u
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import styles from './DynListView.module.css';
-import type { DynListViewProps, DynListViewRef, ListViewItem, ListAction } from './DynListView.types';
+import type {
+  DynListViewProps,
+  ListViewItem,
+  ListAction,
+  DynListViewItemRenderContext,
+} from './DynListView.types';
 
 const getStyleClass = (n: string) => (styles as Record<string, string>)[n] || '';
 
@@ -12,11 +17,25 @@ const getActionButtonVariantClass = (type?: ListAction['type']) => {
   return getStyleClass(variantKey) || getStyleClass('actionButtonDefault');
 };
 
-const isComplexItem = (item: any) => {
-  // Consider item complex if it has more than typical display fields
-  const displayKeys = new Set(['id','title','label','value','description','icon','disabled','selected']);
-  const keys = Object.keys(item || {});
-  return keys.filter(k => !displayKeys.has(k)).length >= 3; // threshold can be tuned
+const isComplexItem = (item: unknown) => {
+  if (item === null || typeof item !== 'object') {
+    return false;
+  }
+
+  const displayKeys = new Set([
+    'id',
+    'title',
+    'label',
+    'value',
+    'description',
+    'icon',
+    'disabled',
+    'selected',
+  ]);
+
+  return Object.keys(item as Record<string, unknown>).some(
+    (key) => !displayKeys.has(key)
+  );
 };
 
 const resolveBaseKey = (
@@ -397,13 +416,161 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
           const labelId = `${itemIds[i]}-label`;
           const descriptionId = desc ? `${itemIds[i]}-description` : undefined;
           const usesDefaultRenderer = !renderItem;
-          const optionLabelledBy = usesDefaultRenderer ? labelId : undefined;
-          const optionDescribedBy = usesDefaultRenderer && desc ? descriptionId : undefined;
+          let optionLabelledBy = usesDefaultRenderer ? labelId : undefined;
+          let optionDescribedBy = usesDefaultRenderer && desc ? descriptionId : undefined;
           const isExpandable = complex;
           const usesTitleAsExpandTrigger = isExpandable && usesDefaultRenderer;
-          const renderSeparateExpandControl = isExpandable && !usesDefaultRenderer;
           const isExpanded = !!expanded[key];
           const hasActions = actions && actions.length > 0;
+          let customHandledExpansion = false;
+
+          const markCustomHandledExpansion = () => {
+            if (isExpandable) {
+              customHandledExpansion = true;
+            }
+          };
+
+          const toggleExpansion = () => {
+            if (isExpandable) {
+              toggleItemExpansion(key);
+            }
+          };
+
+          const getTitleTriggerProps: DynListViewItemRenderContext['getTitleTriggerProps'] = (
+            props = {}
+          ) => {
+            const {
+              onClick,
+              className,
+              id: providedId,
+              'aria-expanded': _ariaExpanded,
+              ...rest
+            } = props;
+            const finalId = providedId ?? labelId;
+            if (isExpandable) {
+              markCustomHandledExpansion();
+            }
+            optionLabelledBy = finalId;
+
+            return {
+              type: 'button',
+              id: finalId,
+              className: cn(
+                getStyleClass('option__label'),
+                getStyleClass('option__label--expandable'),
+                isExpanded && getStyleClass('option__label--expanded'),
+                className
+              ),
+              onClick: (event) => {
+                event.stopPropagation();
+                if (isExpandable) {
+                  toggleExpansion();
+                }
+                onClick?.(event);
+              },
+              'aria-expanded': isExpandable ? isExpanded : false,
+              ...rest,
+            };
+          };
+
+          const TitleButton: DynListViewItemRenderContext['TitleButton'] = ({
+            children,
+            ...buttonProps
+          }) => {
+            return (
+              <button {...getTitleTriggerProps(buttonProps)}>
+                {children ?? title}
+              </button>
+            );
+          };
+
+          const renderContext: DynListViewItemRenderContext = {
+            isExpandable,
+            isExpanded,
+            toggleExpansion,
+            getTitleTriggerProps,
+            TitleButton,
+            registerExpansionTrigger: markCustomHandledExpansion,
+            setOptionLabelledBy: (value) => {
+              optionLabelledBy = value;
+            },
+            setOptionDescribedBy: (value) => {
+              optionDescribedBy = value;
+            },
+            title,
+            description: desc,
+            labelId,
+            descriptionId,
+          };
+
+          const renderContent = () => {
+            if (renderItem) {
+              return renderItem(item, i, renderContext);
+            }
+
+            return (
+              <>
+                {usesTitleAsExpandTrigger ? (
+                  <button
+                    type="button"
+                    id={labelId}
+                    className={cn(
+                      getStyleClass('option__label'),
+                      getStyleClass('option__label--expandable'),
+                      isExpanded && getStyleClass('option__label--expanded')
+                    )}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      toggleExpansion();
+                    }}
+                    aria-expanded={isExpanded}
+                  >
+                    {title}
+                  </button>
+                ) : (
+                  <span id={labelId} className={getStyleClass('option__label')}>
+                    {title}
+                  </span>
+                )}
+                {desc && (
+                  <span id={descriptionId} className={getStyleClass('option__description')}>
+                    {desc}
+                  </span>
+                )}
+              </>
+            );
+          };
+
+          const content = renderContent();
+
+          const contentIncludesTitleButton = (node: React.ReactNode): boolean => {
+            if (node === null || node === undefined || typeof node === 'boolean') {
+              return false;
+            }
+
+            if (Array.isArray(node)) {
+              return node.some(contentIncludesTitleButton);
+            }
+
+            if (React.isValidElement(node)) {
+              if (node.type === TitleButton) {
+                return true;
+              }
+
+              return contentIncludesTitleButton(node.props?.children);
+            }
+
+            return false;
+          };
+
+          if (!customHandledExpansion && contentIncludesTitleButton(content)) {
+            markCustomHandledExpansion();
+            if (!optionLabelledBy) {
+              optionLabelledBy = labelId;
+            }
+          }
+          const renderSeparateExpandControl =
+            isExpandable && !usesDefaultRenderer && !customHandledExpansion;
           const shouldRenderControls = hasActions || renderSeparateExpandControl;
 
           return (
@@ -438,44 +605,7 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
                   />
                 )}
 
-                <div className={getStyleClass('option__content')}>
-                  {renderItem ? (
-                    renderItem(item, i)
-                  ) : (
-                    <>
-                      {usesTitleAsExpandTrigger ? (
-                        <button
-                          type="button"
-                          id={labelId}
-                          className={cn(
-                            getStyleClass('option__label'),
-                            getStyleClass('option__label--expandable'),
-                            isExpanded && getStyleClass('option__label--expanded')
-                          )}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            toggleItemExpansion(key);
-                          }}
-                          aria-expanded={isExpanded}
-                        >
-                          {title}
-                        </button>
-                      ) : (
-                        <span id={labelId} className={getStyleClass('option__label')}>
-                          {title}
-                        </span>
-                      )}
-                      {desc && (
-                        <span
-                          id={descriptionId}
-                          className={getStyleClass('option__description')}
-                        >
-                          {desc}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
+                <div className={getStyleClass('option__content')}>{content}</div>
               </div>
 
               {shouldRenderControls && (
@@ -495,7 +625,7 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
                       )}
                       onClick={(event) => {
                         event.stopPropagation();
-                        toggleItemExpansion(key);
+                        toggleExpansion();
                       }}
                     >
                       <span aria-hidden="true" className={getStyleClass('option__expandButtonIcon')}>
