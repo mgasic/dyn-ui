@@ -281,9 +281,9 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
 
   const rootClasses = cn(
     getStyleClass('root'),
-    size === 'small' && 'dyn-list-view--small',
-    size === 'large' && 'dyn-list-view--large',
-    bordered && getStyleClass('bordered'),
+    size === 'small' && getStyleClass('rootSmall'),
+    size === 'large' && getStyleClass('rootLarge'),
+    bordered && getStyleClass('rootBordered'),
     className
   );
 
