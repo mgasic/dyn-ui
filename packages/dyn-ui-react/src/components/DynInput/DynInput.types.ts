@@ -5,6 +5,7 @@ import type {
   ReactNode,
 } from 'react';
 import type { BaseComponentProps, AccessibilityProps } from '../../types';
+import type { DynFieldRef } from '../../types/field.types';
 
 /**
  * Input size variants using design token scale
@@ -154,6 +155,9 @@ export interface DynInputProps
   /** Whether to show clear button when input has value */
   showClearButton?: boolean;
 
+  /** @deprecated Use showClearButton instead */
+  showCleanButton?: boolean;
+
   /** Whether to show spin buttons for numeric inputs */
   showSpinButtons?: boolean;
 
@@ -197,31 +201,31 @@ export interface DynInputProps
 /**
  * Ref type for DynInput component
  */
-export interface DynInputRef {
+export type DynInputRef = Omit<DynFieldRef, 'getValue' | 'setValue'> & {
   /** Focus the input element */
   focus: () => void;
-  
+
   /** Blur the input element */
   blur: () => void;
-  
+
   /** Clear the input value */
   clear: () => void;
-  
+
   /** Get the current input value */
   getValue: () => string | number;
-  
+
   /** Set the input value programmatically */
-  setValue: (value: string | number) => void;
-  
+  setValue: (value: string | number | null | undefined) => void;
+
   /** Validate the input and return validation result (async for compatibility) */
   validate: () => Promise<boolean>;
-  
+
   /** Clear any validation errors */
   clearError: () => void;
-  
+
   /** Get the native input element */
   getElement: () => HTMLInputElement | null;
-}
+};
 
 /**
  * Default props type for DynInput
