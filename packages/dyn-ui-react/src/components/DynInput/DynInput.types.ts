@@ -1,11 +1,14 @@
 import type {
   InputHTMLAttributes,
   FocusEventHandler,
-  ChangeEventHandler,
   ReactNode,
 } from 'react';
 import type { BaseComponentProps, AccessibilityProps } from '../../types';
-import type { DynFieldRef } from '../../types/field.types';
+import type {
+  DynFieldRef,
+  ValidationRule,
+  CurrencyInputConfig as FieldCurrencyInputConfig,
+} from '../../types/field.types';
 
 /**
  * Input size variants using design token scale
@@ -26,9 +29,9 @@ export type DynInputType =
   | 'currency';
 
 /**
- * Validation rule function type
+ * Validation rule type compatible with form field validation helpers
  */
-export type DynInputValidationRule = (value: string) => string | null | undefined;
+export type DynInputValidationRule = ValidationRule;
 
 /**
  * Input mask configuration
@@ -45,24 +48,10 @@ export interface DynInputMask {
 /**
  * Currency input configuration
  */
-export interface CurrencyInputConfig {
-  /** ISO 4217 currency code */
-  currencyCode: string;
-  /** Number of decimal places */
-  precision?: number;
-  /** Character used to group thousands */
-  thousandSeparator?: string;
-  /** Character used for decimal separation */
-  decimalSeparator?: string;
-  /** Whether to render the currency symbol */
-  showSymbol?: boolean;
-  /** Custom currency symbol override */
-  symbol?: string;
-  /** Placement of the currency symbol */
-  symbolPosition?: 'prefix' | 'suffix';
-  /** Whether to automatically format values */
-  autoFormat?: boolean;
-}
+export type CurrencyInputConfig = FieldCurrencyInputConfig & {
+  /** Whether to append the currency code to the formatted symbol */
+  showCurrencyCode?: boolean;
+};
 
 /**
  * Props interface for DynInput component
@@ -137,10 +126,10 @@ export interface DynInputProps
   /** Success message when valid */
   successMessage?: string;
 
-  /** Validation rule function or array of functions */
+  /** Validation rules */
   validation?: DynInputValidationRule | DynInputValidationRule[];
-  
-  /** Validation rules array (alias) */
+
+  /** Additional validation rules (alias for backwards compatibility) */
   validationRules?: DynInputValidationRule[];
   
   /** Whether to validate on change */
