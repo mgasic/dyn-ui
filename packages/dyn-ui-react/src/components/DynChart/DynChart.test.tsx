@@ -67,6 +67,49 @@ describe('DynChart', () => {
     expect(canvas).toHaveAttribute('aria-label', 'Sales');
   });
 
+  it('applies custom aria-label to the canvas element', () => {
+    render(
+      <DynChart
+        id="custom-chart"
+        data={sampleData}
+        title="Sales"
+        aria-label="Revenue chart visualization"
+      />
+    );
+
+    const canvas = screen.getByRole('img', { name: 'Revenue chart visualization' });
+    expect(canvas).toHaveAttribute('aria-label', 'Revenue chart visualization');
+    expect(canvas).not.toHaveAttribute('aria-labelledby');
+  });
+
+  it('merges aria-labelledby values for figure and canvas elements', () => {
+    const { container } = render(
+      <>
+        <h2 id="external-heading">Dashboard charts</h2>
+        <DynChart
+          id="dashboard-chart"
+          data={sampleData}
+          title="KPI Overview"
+          aria-labelledby="external-heading"
+        />
+      </>
+    );
+
+    const figure = container.querySelector('figure');
+    expect(figure).not.toBeNull();
+    expect(figure as HTMLElement).toHaveAttribute(
+      'aria-labelledby',
+      'dashboard-chart-title external-heading'
+    );
+
+    const canvas = screen.getByRole('img', { name: 'KPI Overview Dashboard charts' });
+    expect(canvas).not.toHaveAttribute('aria-label');
+    expect(canvas).toHaveAttribute(
+      'aria-labelledby',
+      'dashboard-chart-title external-heading'
+    );
+  });
+
   it('merges base and custom class names', () => {
     const { container } = render(
       <DynChart data={sampleData} className="custom-chart" />
