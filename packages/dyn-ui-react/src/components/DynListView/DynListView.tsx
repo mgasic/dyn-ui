@@ -17,11 +17,25 @@ const getActionButtonVariantClass = (type?: ListAction['type']) => {
   return getStyleClass(variantKey) || getStyleClass('actionButtonDefault');
 };
 
-const isComplexItem = (item: any) => {
-  // Consider item complex if it has more than typical display fields
-  const displayKeys = new Set(['id','title','label','value','description','icon','disabled','selected']);
-  const keys = Object.keys(item || {});
-  return keys.filter(k => !displayKeys.has(k)).length >= 3; // threshold can be tuned
+const isComplexItem = (item: unknown) => {
+  if (item === null || typeof item !== 'object') {
+    return false;
+  }
+
+  const displayKeys = new Set([
+    'id',
+    'title',
+    'label',
+    'value',
+    'description',
+    'icon',
+    'disabled',
+    'selected',
+  ]);
+
+  return Object.keys(item as Record<string, unknown>).some(
+    (key) => !displayKeys.has(key)
+  );
 };
 
 const resolveBaseKey = (

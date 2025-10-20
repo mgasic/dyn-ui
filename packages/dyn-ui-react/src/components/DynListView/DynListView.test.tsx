@@ -150,6 +150,19 @@ describe('DynListView', () => {
       expect(expandTrigger).toBeInTheDocument();
     });
 
+    it('treats items with additional metadata as expandable', () => {
+      const dataWithExtras = [{
+        id: 1,
+        title: 'Status Only',
+        status: 'Ready',
+      }];
+
+      render(<DynListView data={dataWithExtras} />);
+
+      const expandTrigger = screen.getByRole('button', { name: 'Status Only' });
+      expect(expandTrigger).toBeInTheDocument();
+    });
+
     it('expands item details on click', () => {
       const complexData = [{
         id: 1,
