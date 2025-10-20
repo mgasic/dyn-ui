@@ -3,40 +3,40 @@
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
-  --dyn-page-header-padding: 1.5rem 2rem;
-  --dyn-page-content-padding: 1.5rem 2rem;
-  --dyn-page-title-size: 2rem;
-  --dyn-page-subtitle-size: 1.125rem;
+  --dyn-page-header-padding: var(--dyn-spacing-xl, 1.5rem) var(--dyn-spacing-2xl, 2rem);
+  --dyn-page-content-padding: var(--dyn-spacing-xl, 1.5rem) var(--dyn-spacing-2xl, 2rem);
+  --dyn-page-title-size: calc(var(--dyn-font-size-xl, 1.5rem) + var(--dyn-spacing-sm, 0.5rem));
+  --dyn-page-subtitle-size: var(--dyn-font-size-md, 1.125rem);
 }
 
 .backgroundPage {
-  background: var(--dyn-layout-bg-page);
+  background: var(--dyn-color-background-hover, #f1f5f9);
 }
 
 .backgroundSurface {
-  background: var(--dyn-layout-bg-surface);
+  background: var(--dyn-color-surface-hover, #f8fafc);
 }
 
 .isLoading,
 .isError {
   align-items: center;
   justify-content: center;
-  min-height: 400px;
+  min-height: var(--dyn-size-page-min-height, 25rem);
 }
 
 .loading {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  color: var(--dyn-layout-text-secondary);
+  gap: var(--dyn-spacing-lg, 1rem);
+  color: var(--dyn-color-text-secondary, #64748b);
 }
 
 .spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--dyn-layout-border);
-  border-top: 3px solid var(--color-primary);
+  width: var(--dyn-size-spinner-md, 2rem);
+  height: var(--dyn-size-spinner-md, 2rem);
+  border: var(--dyn-border-width-thick, 3px) solid var(--dyn-color-border-light, #e2e8f0);
+  border-top: var(--dyn-border-width-thick, 3px) solid var(--dyn-color-primary, #2563eb);
   border-radius: 50%;
   animation: dyn-spin 1s linear infinite;
 }
@@ -45,35 +45,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 2rem;
+  gap: var(--dyn-spacing-lg, 1rem);
+  padding: var(--dyn-spacing-2xl, 2rem);
   text-align: center;
 }
 
 .errorIcon {
-  font-size: 3rem;
-  color: var(--color-danger);
+  font-size: calc(var(--dyn-font-size-xl, 1.5rem) * 2);
+  color: var(--dyn-color-danger, #dc2626);
 }
 
 .errorMessage {
-  color: var(--dyn-layout-text-primary);
-  font-size: 1.125rem;
+  color: var(--dyn-color-text, #111827);
+  font-size: var(--dyn-font-size-md, 1.125rem);
 }
 
 .header {
   padding: var(--dyn-page-header-padding);
-  background: var(--dyn-layout-bg-card);
-  border-bottom: 1px solid var(--dyn-layout-border);
+  background: var(--dyn-color-surface, #ffffff);
+  border-bottom: var(--dyn-border-width-hairline, 1px) solid var(--dyn-color-border-light, #e2e8f0);
 }
 
 .breadcrumbs {
-  margin-bottom: 1rem;
+  margin-bottom: var(--dyn-spacing-lg, 1rem);
 }
 
 .breadcrumbList {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--dyn-spacing-sm, 0.5rem);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -82,37 +82,37 @@
 .breadcrumbItem {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--dyn-spacing-sm, 0.5rem);
 }
 
 .breadcrumbLink {
-  color: var(--color-primary);
+  color: var(--dyn-color-primary, #2563eb);
   text-decoration: none;
-  font-size: 0.875rem;
-  transition: color 0.2s ease;
+  font-size: var(--dyn-font-size-sm, 0.875rem);
+  transition: color var(--dyn-duration-normal, 200ms) var(--dyn-timing-standard, ease);
 }
 
 .breadcrumbLink:hover {
-  color: var(--color-primary-hover, var(--color-primary));
+  color: var(--dyn-color-primary-hover, #1d4ed8);
   text-decoration: underline;
 }
 
 .breadcrumbText {
-  color: var(--dyn-layout-text-primary);
-  font-size: 0.875rem;
+  color: var(--dyn-color-text, #111827);
+  font-size: var(--dyn-font-size-sm, 0.875rem);
   font-weight: 500;
 }
 
 .breadcrumbSeparator {
-  color: var(--dyn-layout-text-muted);
-  font-size: 0.875rem;
+  color: var(--dyn-color-text-tertiary, #64748b);
+  font-size: var(--dyn-font-size-sm, 0.875rem);
 }
 
 .titleSection {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 2rem;
+  gap: var(--dyn-spacing-2xl, 2rem);
 }
 
 .titleContent {
@@ -121,15 +121,15 @@
 
 .title {
   font-size: var(--dyn-page-title-size);
-  font-weight: 700;
-  color: var(--dyn-layout-text-primary);
-  margin: 0 0 0.5rem 0;
+  font-weight: var(--dyn-font-weight-bold, 700);
+  color: var(--dyn-color-text, #111827);
+  margin: 0 0 var(--dyn-spacing-sm, 0.5rem) 0;
   line-height: 1.2;
 }
 
 .subtitle {
   font-size: var(--dyn-page-subtitle-size);
-  color: var(--dyn-layout-text-secondary);
+  color: var(--dyn-color-text-secondary, #64748b);
   margin: 0;
   line-height: 1.4;
 }
@@ -137,7 +137,7 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--dyn-spacing-md, 0.75rem);
   flex-shrink: 0;
 }
 
@@ -148,15 +148,17 @@
 }
 
 .sizeSmall {
-  --dyn-page-header-padding: 1rem 1.5rem;
-  --dyn-page-title-size: 1.5rem;
-  --dyn-page-subtitle-size: 1rem;
+  --dyn-page-header-padding: var(--dyn-spacing-lg, 1rem) var(--dyn-spacing-xl, 1.5rem);
+  --dyn-page-title-size: var(--dyn-font-size-xl, 1.5rem);
+  --dyn-page-subtitle-size: var(--dyn-font-size-base, 1rem);
 }
 
 .sizeLarge {
-  --dyn-page-header-padding: 2rem 2.5rem;
-  --dyn-page-title-size: 2.5rem;
-  --dyn-page-subtitle-size: 1.25rem;
+  --dyn-page-header-padding: var(--dyn-spacing-2xl, 2rem)
+    calc(var(--dyn-spacing-2xl, 2rem) + var(--dyn-spacing-sm, 0.5rem));
+  --dyn-page-title-size:
+    calc(var(--dyn-font-size-xl, 1.5rem) + var(--dyn-spacing-xl, 1.5rem) - var(--dyn-spacing-sm, 0.5rem));
+  --dyn-page-subtitle-size: var(--dyn-font-size-lg, 1.25rem);
 }
 
 .paddingNone {
@@ -164,38 +166,40 @@
 }
 
 .paddingXs {
-  --dyn-page-content-padding: 0.5rem;
+  --dyn-page-content-padding: var(--dyn-spacing-sm, 0.5rem);
 }
 
 .paddingSm {
-  --dyn-page-content-padding: 1rem;
+  --dyn-page-content-padding: var(--dyn-spacing-lg, 1rem);
 }
 
 .paddingMd {
-  --dyn-page-content-padding: 1.5rem 2rem;
+  --dyn-page-content-padding: var(--dyn-spacing-xl, 1.5rem) var(--dyn-spacing-2xl, 2rem);
 }
 
 .paddingLg {
-  --dyn-page-content-padding: 2rem 2.5rem;
+  --dyn-page-content-padding: var(--dyn-spacing-2xl, 2rem)
+    calc(var(--dyn-spacing-2xl, 2rem) + var(--dyn-spacing-sm, 0.5rem));
 }
 
 .paddingXl {
-  --dyn-page-content-padding: 2.5rem 3rem;
+  --dyn-page-content-padding: calc(var(--dyn-spacing-2xl, 2rem) + var(--dyn-spacing-sm, 0.5rem))
+    var(--dyn-spacing-3xl, 3rem);
 }
 
 @media (max-width: 768px) {
   .header {
-    padding: 1rem;
+    padding: var(--dyn-spacing-lg, 1rem);
   }
 
   .titleSection {
     flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
+    gap: var(--dyn-spacing-lg, 1rem);
   }
 
   .title {
-    font-size: 1.5rem;
+    font-size: var(--dyn-font-size-xl, 1.5rem);
   }
 
   .actions {
@@ -205,7 +209,7 @@
   .paddingMd,
   .paddingLg,
   .paddingXl {
-    --dyn-page-content-padding: 1rem;
+    --dyn-page-content-padding: var(--dyn-spacing-lg, 1rem);
   }
 }
 
