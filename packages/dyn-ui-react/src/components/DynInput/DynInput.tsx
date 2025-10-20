@@ -457,7 +457,6 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
           )}
 
           <input
-            {...restProps}
             ref={inputRef}
             id={inputId}
             name={name}
