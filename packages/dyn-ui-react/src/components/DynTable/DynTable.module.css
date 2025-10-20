@@ -15,7 +15,7 @@
 }
 
 .dyn-table--fixed-height .dyn-table__wrapper {
-  max-height: var(--dyn-size-page-min-height, 25rem);
+  max-height: var(--dyn-size-page-min-height);
 }
 
 /* Table */
@@ -41,8 +41,7 @@
 
 .dyn-table__row {
   border-bottom: 1px solid var(--dyn-color-border-light);
-  transition: background-color var(--dyn-duration-normal, 200ms)
-    var(--dyn-timing-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: background-color var(--dyn-duration-normal) var(--dyn-timing-standard);
 }
 
 .dyn-table__row:last-child {
@@ -68,7 +67,7 @@
 
 /* Table Cells */
 .dyn-table__cell {
-  padding: var(--dyn-spacing-md, 0.75rem) var(--dyn-spacing-lg, 1rem);
+  padding: var(--dyn-spacing-md) var(--dyn-spacing-lg);
   text-align: left;
   font-size: var(--dyn-font-size-sm);
   line-height: var(--dyn-line-height-normal);
@@ -86,7 +85,7 @@
 }
 
 .dyn-table__cell--selection {
-  width: var(--dyn-size-md, 2.5rem);
+  width: var(--dyn-size-md);
   text-align: center;
 }
 
@@ -98,8 +97,7 @@
 .dyn-table__cell--sortable {
   cursor: pointer;
   user-select: none;
-  transition: background-color var(--dyn-duration-normal, 200ms)
-    var(--dyn-timing-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: background-color var(--dyn-duration-normal) var(--dyn-timing-standard);
 }
 
 .dyn-table__cell--sortable:hover {
@@ -127,21 +125,20 @@
 .dyn-table__cell-content {
   display: flex;
   align-items: center;
-  gap: var(--dyn-spacing-sm, 0.5rem);
+  gap: var(--dyn-spacing-sm);
 }
 
 .dyn-table__sort-icons {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--dyn-spacing-xxs, 0.125rem) / 2);
+  gap: calc(var(--dyn-spacing-xxs) / 2);
   margin-left: auto;
 }
 
 .dyn-table__sort-icon {
-  font-size: 10px;
+  font-size: calc(var(--dyn-font-size-xs) - var(--dyn-spacing-xxs));
   color: var(--dyn-color-text-disabled);
-  transition: color var(--dyn-duration-normal, 200ms)
-    var(--dyn-timing-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: color var(--dyn-duration-normal) var(--dyn-timing-standard);
 }
 
 .dyn-table__sort-icon--active {
@@ -157,7 +154,7 @@
 /* Actions */
 .dyn-table-actions {
   display: flex;
-  gap: var(--dyn-spacing-sm, 0.5rem);
+  gap: var(--dyn-spacing-sm);
   align-items: center;
 }
 
@@ -166,12 +163,11 @@
   color: var(--dyn-color-background);
   border: none;
   border-radius: var(--dyn-border-radius-sm);
-  padding: var(--dyn-spacing-xs, 0.25rem) var(--dyn-spacing-sm, 0.5rem);
+  padding: var(--dyn-spacing-xs) var(--dyn-spacing-sm);
   font-size: var(--dyn-font-size-xs);
   font-weight: var(--dyn-font-weight-medium);
   cursor: pointer;
-  transition: background-color var(--dyn-duration-normal, 200ms)
-    var(--dyn-timing-standard, cubic-bezier(0.4, 0, 0.2, 1));
+  transition: background-color var(--dyn-duration-normal) var(--dyn-timing-standard);
 }
 
 .dyn-table__action-button:hover {
@@ -186,12 +182,12 @@
 
 /* Size Variants */
 .dyn-table--small .dyn-table__cell {
-  padding: var(--dyn-spacing-sm, 0.5rem) var(--dyn-spacing-md, 0.75rem);
+  padding: var(--dyn-spacing-sm) var(--dyn-spacing-md);
   font-size: var(--dyn-font-size-xs);
 }
 
 .dyn-table--large .dyn-table__cell {
-  padding: var(--dyn-spacing-lg, 1rem) calc(var(--dyn-spacing-lg, 1rem) + var(--dyn-spacing-xs, 0.25rem));
+  padding: var(--dyn-spacing-lg) calc(var(--dyn-spacing-lg) + var(--dyn-spacing-xs));
   font-size: var(--dyn-font-size-base);
 }
 
@@ -200,9 +196,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--dyn-spacing-sm, 0.5rem);
-  padding: calc(var(--dyn-spacing-2xl, 2rem) + var(--dyn-spacing-sm, 0.5rem))
-    calc(var(--dyn-spacing-lg, 1rem) + var(--dyn-spacing-xs, 0.25rem));
+  gap: var(--dyn-spacing-sm);
+  padding: calc(var(--dyn-spacing-2xl) + var(--dyn-spacing-sm))
+    calc(var(--dyn-spacing-lg) + var(--dyn-spacing-xs));
   color: var(--dyn-color-text-secondary);
   font-size: var(--dyn-font-size-sm);
 }
@@ -212,9 +208,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--dyn-spacing-sm, 0.5rem);
-  padding: calc(var(--dyn-spacing-2xl, 2rem) + var(--dyn-spacing-sm, 0.5rem))
-    calc(var(--dyn-spacing-lg, 1rem) + var(--dyn-spacing-xs, 0.25rem));
+  gap: var(--dyn-spacing-sm);
+  padding: calc(var(--dyn-spacing-2xl) + var(--dyn-spacing-sm))
+    calc(var(--dyn-spacing-lg) + var(--dyn-spacing-xs));
   color: var(--dyn-color-text-secondary);
   font-size: var(--dyn-font-size-sm);
   text-align: center;
@@ -225,7 +221,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--dyn-spacing-md, 0.75rem) var(--dyn-spacing-lg, 1rem);
+  padding: var(--dyn-spacing-md) var(--dyn-spacing-lg);
   border-top: 1px solid var(--dyn-color-border);
   background: var(--dyn-color-background-secondary);
 }
@@ -238,7 +234,7 @@
 .dyn-table__pagination-controls {
   display: flex;
   align-items: center;
-  gap: var(--dyn-spacing-md, 0.75rem);
+  gap: var(--dyn-spacing-md);
 }
 
 .dyn-table__pagination-button {
@@ -246,11 +242,12 @@
   color: var(--dyn-color-text-primary);
   border: 1px solid var(--dyn-color-border);
   border-radius: var(--dyn-border-radius-sm);
-  padding: calc(var(--dyn-spacing-sm, 0.5rem) - var(--dyn-spacing-xxs, 0.125rem))
-    var(--dyn-spacing-md, 0.75rem);
+  padding: calc(var(--dyn-spacing-sm) - var(--dyn-spacing-xxs)) var(--dyn-spacing-md);
   font-size: var(--dyn-font-size-sm);
   cursor: pointer;
-  transition: var(--dyn-transition-base, all 0.2s ease-in-out);
+  transition: color var(--dyn-duration-normal) var(--dyn-timing-standard),
+    background-color var(--dyn-duration-normal) var(--dyn-timing-standard),
+    border-color var(--dyn-duration-normal) var(--dyn-timing-standard);
 }
 
 .dyn-table__pagination-button:hover:not(:disabled) {
@@ -288,13 +285,13 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .dyn-table__cell {
-    padding: var(--dyn-spacing-sm, 0.5rem) var(--dyn-spacing-md, 0.75rem);
+    padding: var(--dyn-spacing-sm) var(--dyn-spacing-md);
     font-size: var(--dyn-font-size-xs);
   }
 
   .dyn-table__pagination {
     flex-direction: column;
-    gap: var(--dyn-spacing-sm, 0.5rem);
+    gap: var(--dyn-spacing-sm);
     align-items: stretch;
   }
 
@@ -304,13 +301,13 @@
 
   .dyn-table-actions {
     flex-direction: column;
-    gap: var(--dyn-spacing-xs, 0.25rem);
+    gap: var(--dyn-spacing-xs);
   }
 
   .dyn-table__action-button {
     font-size: var(--dyn-font-size-xs);
-    padding: var(--dyn-spacing-xs, 0.25rem)
-      calc(var(--dyn-spacing-sm, 0.5rem) - var(--dyn-spacing-xxs, 0.125rem));
+    padding: var(--dyn-spacing-xs)
+      calc(var(--dyn-spacing-sm) - var(--dyn-spacing-xxs));
   }
 }
 
