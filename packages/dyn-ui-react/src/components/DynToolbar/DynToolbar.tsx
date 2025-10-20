@@ -66,6 +66,12 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
       return;
     }
 
+    if (!responsive) {
+      setVisibleItems(filteredItems);
+      setOverflowItems([]);
+      return;
+    }
+
     const thresholdValue = Math.max(1, overflowThreshold);
     const hasThresholdOverflow = filteredItems.length > thresholdValue;
 
@@ -81,7 +87,7 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
       setOverflowItems(filteredItems.slice(maxVisible));
     };
 
-    if (!responsive || !toolbarRef.current) {
+    if (!toolbarRef.current) {
       applyThreshold();
       return;
     }

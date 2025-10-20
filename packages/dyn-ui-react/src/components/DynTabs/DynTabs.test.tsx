@@ -256,6 +256,26 @@ describe('DynTabs', () => {
 
       expect(onTabClose).toHaveBeenCalledWith('tab-4');
     });
+
+    test('renders add button when addable and triggers onTabAdd', async () => {
+      const user = userEvent.setup();
+      const onTabAdd = vi.fn();
+
+      render(<DynTabs {...defaultProps} addable onTabAdd={onTabAdd} />);
+
+      const addButton = screen.getByTestId('test-tabs-add-button');
+      expect(addButton).toBeInTheDocument();
+
+      await user.click(addButton);
+
+      expect(onTabAdd).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not render add button when addable is false', () => {
+      render(<DynTabs {...defaultProps} addable={false} />);
+
+      expect(screen.queryByTestId('test-tabs-add-button')).not.toBeInTheDocument();
+    });
   });
 
   describe('Sizes and Variants', () => {
