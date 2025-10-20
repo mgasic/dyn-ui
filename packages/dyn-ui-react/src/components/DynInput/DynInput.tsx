@@ -103,6 +103,9 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
     // generate stable id for the input when not provided
     const generatedIdRef = useRef<string>(`dyn-input-${Math.random().toString(36).slice(2, 9)}`);
     const inputId = id ?? name ?? generatedIdRef.current;
+    const isReadOnly = Boolean(readOnly ?? readonly);
+    const fieldHelpText = helpText ?? help;
+    const shouldShowClearButton = Boolean(showClearButton ?? showCleanButton);
 
     const normalizedValidationRules = useMemo<ValidationRule[] | undefined>(() => {
       const collected: ValidationRule[] = [];
@@ -489,6 +492,7 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
             onFocus={handleFocus}
             aria-invalid={!!error}
             aria-describedby={describedBy}
+            {...restProps}
           />
 
           {shouldShowClearButton && inputValue && !isReadOnly && !disabled && (
