@@ -1,0 +1,101 @@
+.toggleGroup {
+  --theme-switcher-padding-block: var(--dyn-spacing-sm);
+  --theme-switcher-padding-inline: calc(var(--theme-switcher-padding-block) * 2);
+  --theme-switcher-font-size: var(--dyn-font-size-base);
+  --theme-switcher-radius: var(--dyn-border-radius-md);
+  --theme-switcher-min-width: 3.75rem;
+
+  display: inline-flex;
+  border: 1px solid var(--dyn-color-border);
+  border-radius: var(--theme-switcher-radius);
+  background-color: var(--dyn-color-surface-subtle);
+  overflow: hidden;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.toggleGroup:focus-within {
+  border-color: var(--dyn-color-primary);
+  box-shadow: 0 0 0 3px var(--dyn-color-primary-alpha);
+}
+
+.toggleGroupButton {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding-block: var(--theme-switcher-padding-block);
+  padding-inline: var(--theme-switcher-padding-inline);
+  font-size: var(--theme-switcher-font-size);
+  font-weight: var(--dyn-font-weight-medium);
+  color: var(--dyn-color-text-secondary);
+  line-height: 1.2;
+  min-width: var(--theme-switcher-min-width);
+  transition: color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dyn-spacing-xs);
+}
+
+.toggleGroupButton:hover {
+  background-color: var(--dyn-color-background-hover);
+  color: var(--dyn-color-text-primary);
+}
+
+.toggleGroupButton:active {
+  background-color: var(--dyn-color-background-selected);
+}
+
+.toggleGroupButton[data-active='true'] {
+  background-color: var(--dyn-color-primary);
+  color: var(--dyn-color-primary-contrast);
+  font-weight: var(--dyn-font-weight-semibold);
+}
+
+.toggleGroupButton[data-active='true']:hover {
+  background-color: var(--dyn-color-primary-hover);
+}
+
+.toggleGroupButton[data-active='true']:active {
+  background-color: var(--dyn-color-primary-active);
+}
+
+.toggleGroupButton:disabled {
+  cursor: not-allowed;
+  color: var(--dyn-color-text-disabled);
+  background-color: transparent;
+}
+
+.sizeSm {
+  --theme-switcher-padding-block: calc(var(--dyn-spacing-sm) - 0.125rem);
+  --theme-switcher-font-size: var(--dyn-font-size-sm);
+  --theme-switcher-min-width: 3.5rem;
+}
+
+.sizeMd {
+  --theme-switcher-padding-block: var(--dyn-spacing-sm);
+  --theme-switcher-font-size: var(--dyn-font-size-base);
+}
+
+.roundedSm {
+  --theme-switcher-radius: var(--dyn-border-radius-sm);
+}
+
+.roundedMd {
+  --theme-switcher-radius: var(--dyn-border-radius-md);
+}
+
+.roundedLg {
+  --theme-switcher-radius: var(--dyn-border-radius-lg);
+}
+
+.roundedFull {
+  --theme-switcher-radius: var(--dyn-border-radius-full);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggleGroup,
+  .toggleGroupButton {
+    transition: none;
+  }
+}
