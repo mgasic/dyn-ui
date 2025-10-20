@@ -36,6 +36,7 @@ export const DynFieldContainer = forwardRef<HTMLDivElement, DynFieldContainerPro
 
     const errorId = htmlFor ? `${htmlFor}-error` : undefined;
     const helpId = htmlFor ? `${htmlFor}-help` : undefined;
+    const labelId = label && htmlFor ? `${htmlFor}-label` : undefined;
 
     return (
       <div
@@ -46,7 +47,11 @@ export const DynFieldContainer = forwardRef<HTMLDivElement, DynFieldContainerPro
         data-testid={dataTestId}
       >
         {label && (
-          <label className={styles.label} htmlFor={htmlFor}>
+          <label
+            className={styles.label}
+            htmlFor={htmlFor}
+            id={labelId}
+          >
             {label}
             {required && (
               <span className={styles.required} aria-label="obrigatório">

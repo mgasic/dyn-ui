@@ -9,7 +9,8 @@ import React, {
   useRef,
   useState,
   useEffect,
-  useMemo
+  useMemo,
+  useId
 } from 'react';
 import classNames from 'classnames';
 import type { DynSelectProps, DynFieldRef, SelectOption } from '../../types/field.types';
@@ -23,6 +24,7 @@ const getStyleClass = (classKey: keyof typeof styles) => styles[classKey];
 export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
   (
     {
+      id: idProp,
       name,
       label,
       help,
@@ -54,6 +56,11 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
     const [focused, setFocused] = useState(false);
     const selectRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const generatedId = useId();
+    const sanitizedGeneratedId = generatedId.replace(/:/g, '');
+    const fieldId = idProp ?? name ?? `dyn-select-${sanitizedGeneratedId}`;
+    const labelId = label ? `${fieldId}-label` : undefined;
+    const listboxId = `${fieldId}-listbox`;
 
     const { error, validate, clearError } = useDynFieldValidation({
       value,
@@ -229,13 +236,14 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
 
     return (
       <DynFieldContainer
+        id={idProp}
         label={label}
         helpText={help}
         required={required}
         optional={optional}
         errorText={resolvedError}
         className={className}
-        htmlFor={name}
+        htmlFor={fieldId}
       >
         <div ref={selectRef} className={getStyleClass('container')}>
           <div
@@ -247,8 +255,16 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
             aria-expanded={isOpen}
             aria-haspopup="listbox"
             aria-invalid={Boolean(resolvedError)}
+            aria-disabled={disabled || undefined}
+            aria-readonly={readonly || undefined}
+            aria-labelledby={labelId}
+            aria-controls={isOpen ? listboxId : undefined}
             aria-describedby={
-              resolvedError ? `${name}-error` : help ? `${name}-help` : undefined
+              resolvedError
+                ? `${fieldId}-error`
+                : help
+                  ? `${fieldId}-help`
+                  : undefined
             }
             onBlur={handleBlur}
             onFocus={handleFocus}
@@ -256,7 +272,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
             <input
               ref={inputRef}
               type="hidden"
-              id={name}
+              id={fieldId}
               name={name}
               value={multiple && Array.isArray(value) ? value.join(',') : value || ''}
             />
@@ -307,17 +323,27 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                     value={searchTerm}
                     onChange={handleSearchChange}
                     className={getStyleClass('searchInput')}
+                    aria-label="Pesquisar opções"
                   />
                 </div>
               )}
 
-              <div className={getStyleClass('options')} role="listbox">
-                {filteredOptions.length === 0 ? (
-                  <div className={getStyleClass('emptyState')}>
-                    {searchTerm ? 'Nenhum resultado encontrado' : 'Nenhuma opção disponível'}
-                  </div>
-                ) : (
-                  filteredOptions.map((option) => {
+              {filteredOptions.length === 0 ? (
+                <div
+                  className={getStyleClass('emptyState')}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {searchTerm ? 'Nenhum resultado encontrado' : 'Nenhuma opção disponível'}
+                </div>
+              ) : (
+                <div
+                  className={getStyleClass('options')}
+                  role="listbox"
+                  id={listboxId}
+                  aria-multiselectable={multiple || undefined}
+                >
+                  {filteredOptions.map((option) => {
                     const isSelected = multiple && Array.isArray(value)
                       ? value.includes(option.value)
                       : value === option.value;
@@ -331,6 +357,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                         })}
                         role="option"
                         aria-selected={isSelected}
+                        aria-disabled={option.disabled || undefined}
                         onClick={() => handleOptionSelect(option)}
                       >
                         {multiple && (
@@ -343,9 +370,9 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                         <span className={getStyleClass('optionText')}>{option.label}</span>
                       </div>
                     );
-                  })
-                )}
-              </div>
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
