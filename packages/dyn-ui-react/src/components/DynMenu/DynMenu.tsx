@@ -25,7 +25,19 @@ export const DynMenu: React.FC<DynMenuProps> = ({
   );
   const isHorizontal = orientation === 'horizontal';
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [focusIndex, setFocusIndex] = useState<number>(0);
+  const firstEnabledIndex = useMemo(
+    () => resolvedItems.findIndex((item) => !item.disabled),
+    [resolvedItems]
+  );
+  const lastEnabledIndex = useMemo(() => {
+    for (let i = resolvedItems.length - 1; i >= 0; i -= 1) {
+      if (!resolvedItems[i]?.disabled) return i;
+    }
+    return -1;
+  }, [resolvedItems]);
+  const [focusIndex, setFocusIndex] = useState<number>(() =>
+    firstEnabledIndex >= 0 ? firstEnabledIndex : -1
+  );
 
   const menubarRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -34,13 +46,26 @@ export const DynMenu: React.FC<DynMenuProps> = ({
     if (focusIndex >= 0) itemRefs.current[focusIndex]?.focus();
   }, [focusIndex]);
 
+  useEffect(() => {
+    if (focusIndex === -1 && firstEnabledIndex >= 0) {
+      setFocusIndex(firstEnabledIndex);
+    }
+  }, [firstEnabledIndex, focusIndex]);
+
   const visibleMenuCount = useMemo(() => resolvedItems.length, [resolvedItems]);
 
   const moveFocus = (delta: number) => {
-    if (!visibleMenuCount) return;
+    if (!visibleMenuCount || firstEnabledIndex === -1) return;
     setFocusIndex((prev) => {
-      const next = (prev + delta + visibleMenuCount) % visibleMenuCount;
-      return next;
+      const start = prev >= 0 ? prev : firstEnabledIndex;
+      let next = start;
+      for (let i = 0; i < visibleMenuCount; i += 1) {
+        next = (next + delta + visibleMenuCount) % visibleMenuCount;
+        if (!resolvedItems[next]?.disabled) {
+          return next;
+        }
+      }
+      return start;
     });
   };
 
@@ -53,12 +78,24 @@ export const DynMenu: React.FC<DynMenuProps> = ({
       case 'ArrowLeft': if (horizontal) { e.preventDefault(); moveFocus(-1); } break;
       case 'ArrowDown': if (!horizontal) { e.preventDefault(); moveFocus(1); } else if (openIndex === focusIndex) { e.preventDefault(); /* focus first submenu item handled by browser tab */ } break;
       case 'ArrowUp': if (!horizontal) { e.preventDefault(); moveFocus(-1); } break;
-      case 'Home': e.preventDefault(); setFocusIndex(0); break;
-      case 'End': e.preventDefault(); setFocusIndex(Math.max(0, visibleMenuCount - 1)); break;
+      case 'Home':
+        if (firstEnabledIndex !== -1) {
+          e.preventDefault();
+          setFocusIndex(firstEnabledIndex);
+        }
+        break;
+      case 'End':
+        if (lastEnabledIndex !== -1) {
+          e.preventDefault();
+          setFocusIndex(lastEnabledIndex);
+        }
+        break;
       case 'Enter':
       case ' ': {
         e.preventDefault();
-        setOpenIndex((prev) => (prev === focusIndex ? null : focusIndex));
+        if (focusIndex >= 0 && !resolvedItems[focusIndex]?.disabled) {
+          setOpenIndex((prev) => (prev === focusIndex ? null : focusIndex));
+        }
         break;
       }
       case 'Escape':
@@ -68,6 +105,7 @@ export const DynMenu: React.FC<DynMenuProps> = ({
   };
 
   const handleItemClick = (index: number) => {
+    if (resolvedItems[index]?.disabled) return;
     setOpenIndex((prev) => (prev === index ? null : index));
     setFocusIndex(index);
   };
