@@ -82,11 +82,11 @@ export const Sizes: Story = {
 export const States: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1rem', maxWidth: 480 }}>
-      <DynInput label="Obavezno" required placeholder="Obavezno polje" />
-      <DynInput label="Opcionalno" optional placeholder="Opcionalno polje" />
-      <DynInput label="Sa greškom" errorMessage="Neispravan unos" />
-      <DynInput label="Disabled" disabled value="Onemogućeno" />
-      <DynInput label="Readonly" readonly value="Samo za čitanje" />
+      <DynInput name="states-required" label="Obavezno" required placeholder="Obavezno polje" />
+      <DynInput name="states-optional" label="Opcionalno" optional placeholder="Opcionalno polje" />
+      <DynInput name="states-error" label="Sa greškom" errorMessage="Neispravan unos" />
+      <DynInput name="states-disabled" label="Disabled" disabled value="Onemogućeno" />
+      <DynInput name="states-readonly" label="Readonly" readonly value="Samo za čitanje" />
     </div>
   )
 };
