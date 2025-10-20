@@ -3,12 +3,31 @@
  * Flexible toolbar with action buttons, responsive overflow, and multiple layout variants
  */
 
-import React, { forwardRef, useImperativeHandle, useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo
+} from 'react';
 import classNames from 'classnames';
 import { DynToolbarProps, ToolbarItem, DynToolbarRef, TOOLBAR_DEFAULTS } from './DynToolbar.types';
 import { DynIcon } from '../DynIcon';
 import { DynBadge } from '../DynBadge';
 import styles from './DynToolbar.module.css';
+
+const PICTOGRAPH_REGEX = /\p{Extended_Pictographic}/u;
+const SYMBOL_ONLY_REGEX = /^[\p{S}\p{P}]{1,3}$/u;
+
+const isSymbolicIcon = (icon: string) => {
+  if (!icon) {
+    return false;
+  }
+
+  return PICTOGRAPH_REGEX.test(icon) || SYMBOL_ONLY_REGEX.test(icon);
+};
 
 const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
   {
@@ -259,6 +278,40 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
     return <DynBadge size="small">{badge}</DynBadge>;
   }, []);
 
+  const renderIconContent = useCallback((icon: ToolbarItem['icon']) => {
+    if (React.isValidElement(icon)) {
+      return icon;
+    }
+
+    if (typeof icon === 'string') {
+      const normalizedIcon = icon.trim();
+
+      if (!normalizedIcon) {
+        return null;
+      }
+
+      if (isSymbolicIcon(normalizedIcon)) {
+        return (
+          <span
+            className={styles['toolbar-item-icon-text']}
+            data-testid={`icon-${normalizedIcon}`}
+            aria-hidden="true"
+          >
+            {normalizedIcon}
+          </span>
+        );
+      }
+
+      return <DynIcon icon={normalizedIcon} data-testid={`icon-${normalizedIcon}`} />;
+    }
+
+    if (icon == null) {
+      return null;
+    }
+
+    return icon as React.ReactNode;
+  }, []);
+
   const renderToolbarItem = (item: ToolbarItem, isInOverflow = false) => {
     if (item.type === 'separator') {
       return (
@@ -314,6 +367,8 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
       itemClassName
     );
 
+    const iconContent = renderIconContent(item.icon);
+
     return (
       <div key={item.id} className={styles['toolbar-item-wrapper']}>
         <button
@@ -326,17 +381,9 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
           aria-expanded={item.type === 'dropdown' ? activeDropdown === item.id : undefined}
           aria-haspopup={item.type === 'dropdown' ? 'menu' : undefined}
         >
-          {item.icon && (
+          {iconContent && (
             <span className={styles['toolbar-item-icon']}>
-              {typeof item.icon === 'string' ? (
-                <>
-                  {/* Expose a stable test id for icons to support tests that mock DynIcon */}
-                  <span data-testid={`icon-${item.icon}`} className={`toolbar-icon-${item.icon}`} />
-                  <DynIcon icon={item.icon} />
-                </>
-              ) : (
-                item.icon
-              )}
+              {iconContent}
             </span>
           )}
           {showLabels && item.label && (

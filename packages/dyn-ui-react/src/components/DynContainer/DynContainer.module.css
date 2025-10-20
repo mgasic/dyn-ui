@@ -2,18 +2,18 @@
   --dyn-container-padding: var(--dyn-spacing-md, var(--spacing-md, 1rem));
   --dyn-container-gap: var(--dyn-spacing-md, var(--spacing-md, 1rem));
   --dyn-container-margin: 0;
-  --dyn-container-border-color: var(--dyn-color-border, var(--color-border, rgba(15, 23, 42, 0.12)));
-  --dyn-container-surface: var(--dyn-layout-bg-surface, var(--color-surface, #f8fafc));
-  --dyn-container-card: var(--dyn-layout-bg-card, var(--color-background, #ffffff));
+  --dyn-container-border-color: var(--dyn-color-border-light, var(--dyn-color-border, #d0d5dd));
+  --dyn-container-surface: var(--dyn-color-surface-hover, var(--color-surface, #f8fafc));
+  --dyn-container-card: var(--dyn-color-surface, var(--color-background, #ffffff));
   --dyn-container-shadow: var(--dyn-shadow-md, var(--shadow-md, 0 10px 30px rgba(15, 23, 42, 0.12)));
-  --dyn-container-title-color: var(--dyn-color-text-primary, var(--color-text-primary, #0f172a));
+  --dyn-container-title-color: var(--dyn-color-text, var(--color-text-primary, #111827));
   --dyn-container-subtitle-color: var(--dyn-color-text-secondary, var(--color-text-secondary, #475569));
   --dyn-container-max-width: 100%;
-  --dyn-container-max-width-xs: var(--dyn-layout-container-width-xs, var(--container-max-width-xs, 20rem));
-  --dyn-container-max-width-sm: var(--dyn-layout-container-width-sm, var(--container-max-width-sm, 28rem));
-  --dyn-container-max-width-md: var(--dyn-layout-container-width-md, var(--container-max-width-md, 40rem));
-  --dyn-container-max-width-lg: var(--dyn-layout-container-width-lg, var(--container-max-width-lg, 64rem));
-  --dyn-container-max-width-xl: var(--dyn-layout-container-width-xl, var(--container-max-width-xl, 80rem));
+  --dyn-container-max-width-xs: var(--dyn-size-container-width-xs, 20rem);
+  --dyn-container-max-width-sm: var(--dyn-size-container-width-sm, 28rem);
+  --dyn-container-max-width-md: var(--dyn-size-container-width-md, 40rem);
+  --dyn-container-max-width-lg: var(--dyn-size-container-width-lg, 64rem);
+  --dyn-container-max-width-xl: var(--dyn-size-container-width-xl, 80rem);
 
   box-sizing: border-box;
   position: relative;

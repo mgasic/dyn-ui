@@ -1,0 +1,40 @@
+/* Size and dimension tokens */
+:root {
+  /* Layout container widths */
+  --dyn-size-container-width-xs: 20rem;
+  --dyn-size-container-width-sm: 28rem;
+  --dyn-size-container-width-md: 40rem;
+  --dyn-size-container-width-lg: 64rem;
+  --dyn-size-container-width-xl: 80rem;
+
+  /* Overlay & menu widths */
+  --dyn-size-overlay-width-sm: 12rem;
+  --dyn-size-overlay-width-md: 17.5rem;
+  --dyn-size-overlay-width-lg: 18rem;
+
+  /* Component minimum heights */
+  --dyn-size-panel-min-height: 12.5rem; /* 200px */
+  --dyn-size-page-min-height: 25rem; /* 400px */
+
+  /* Interactive element sizing */
+  --dyn-size-control-sm: 0.875rem; /* 14px */
+  --dyn-size-control-md: 1.125rem; /* 18px */
+  --dyn-size-control-lg: 1.375rem; /* 22px */
+  --dyn-size-spinner-sm: 1.5rem; /* 24px */
+  --dyn-size-spinner-md: 2rem; /* 32px */
+  --dyn-size-tooltip-max-width: 13.75rem; /* 220px */
+  
+  /* Control sizes */
+  --dyn-size-xs: 1rem; /* 16px icon buttons */
+  --dyn-size-sm: 2.25rem; /* 36px */
+  --dyn-size-md: 2.5rem; /* 40px */
+  --dyn-size-lg: 3rem; /* 48px */
+
+  /* Touch target guidelines */
+  --dyn-size-touch-target: 44px;
+  --dyn-size-touch-target-sm: 40px;
+  --dyn-size-touch-target-lg: 52px;
+
+  /* Opacity defaults */
+  --dyn-opacity-disabled: 0.56;
+}

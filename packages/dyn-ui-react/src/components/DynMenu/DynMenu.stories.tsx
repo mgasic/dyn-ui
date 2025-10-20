@@ -5,8 +5,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DynMenu } from './DynMenu';
-import { MenuItem } from './DynMenu.types';
-import React from 'react';
+import type { MenuItem } from './DynMenu.types';
 
 const meta: Meta<typeof DynMenu> = {
   title: 'Navigation/DynMenu',
@@ -16,15 +15,10 @@ const meta: Meta<typeof DynMenu> = {
     docs: {
       description: {
         component: `
-The DynMenu component provides a hierarchical navigation menu system with:
-
-- **Collapsible sidebar** - Toggle between expanded and collapsed states
-- **Hierarchical structure** - Support for nested menu items
-- **Search functionality** - Filter menu items with built-in search
-- **Responsive design** - Automatic collapse on mobile devices
-- **Badge support** - Display notification badges on menu items
-- **Custom icons** - Support for icon-based navigation
-- **Accessibility** - Full keyboard navigation and ARIA support
+The DynMenu component renders a simple hierarchical menu bar. Provide an array of menu
+items (or the legacy \`menus\` prop) and optionally change the orientation between
+horizontal and vertical layouts. Sub-items appear in a fly-out menu and can trigger the
+\`onAction\` callback when they expose string-based actions.
 
 ## Usage
 
@@ -34,49 +28,37 @@ import { DynMenu } from '@dyn-ui/react';
 const menuItems = [
   {
     label: 'Dashboard',
-    icon: 'dyn-icon-dashboard',
-    link: '/dashboard'
-  },
-  {
-    label: 'Products',
-    icon: 'dyn-icon-box',
     subItems: [
-      { label: 'All Products', link: '/products' },
-      { label: 'Categories', link: '/categories' }
+      { label: 'Overview', action: () => { /* track navigation */ } },
+      { label: 'Reports', action: 'open-reports' }
     ]
-  }
+  },
+  { label: 'Settings' }
 ];
 
-<DynMenu menus={menuItems} />
+<DynMenu items={menuItems} orientation="horizontal" />
 \`\`\`
         `
       }
     }
   },
   argTypes: {
-    menus: {
-      description: 'Array of menu items with hierarchical structure',
+    items: {
+      description: 'Collection of top-level menu entries to render.',
       control: { type: 'object' }
     },
-    collapsed: {
-      description: 'Controls whether the menu is collapsed',
-      control: { type: 'boolean' }
+    menus: {
+      description: 'Legacy alias for `items`. Used only when `items` is undefined.',
+      control: { type: 'object' }
     },
-    filter: {
-      description: 'Enable search filter functionality',
-      control: { type: 'boolean' }
+    orientation: {
+      description: 'Orientation of the menu bar.',
+      control: { type: 'inline-radio' },
+      options: ['horizontal', 'vertical']
     },
-    automaticToggle: {
-      description: 'Automatically collapse menu on mobile devices',
-      control: { type: 'boolean' }
-    },
-    onCollapse: {
-      description: 'Callback fired when menu collapse state changes',
-      action: 'collapsed'
-    },
-    onMenuClick: {
-      description: 'Callback fired when menu item is clicked',
-      action: 'menuClick'
+    onAction: {
+      description: 'Invoked with the string action value when a submenu item defines one.',
+      action: 'action'
     }
   }
 };
@@ -84,201 +66,62 @@ const menuItems = [
 export default meta;
 type Story = StoryObj<typeof DynMenu>;
 
-// Sample menu data
-const sampleMenus: MenuItem[] = [
+const hierarchicalItems: MenuItem[] = [
   {
     label: 'Dashboard',
-    icon: 'dyn-icon-dashboard',
-    shortLabel: 'Dash',
-    action: () => console.log('Dashboard clicked'),
-    badge: { count: 3, color: 'primary' }
-  },
-  {
-    type: 'divider'
-  },
-  {
-    label: 'Products',
-    icon: 'dyn-icon-box',
-    shortLabel: 'Prod',
     subItems: [
-      {
-        label: 'All Products',
-        icon: 'dyn-icon-list',
-        action: () => console.log('All Products clicked')
-      },
-      {
-        label: 'Categories',
-        icon: 'dyn-icon-folder',
-        action: () => console.log('Categories clicked')
-      },
-      {
-        label: 'Inventory',
-        icon: 'dyn-icon-warehouse',
-        badge: { count: 12, color: 'info' },
-        action: () => console.log('Inventory clicked')
-      }
+      { label: 'Overview', action: () => { /* handled by consumer */ } },
+      { label: 'Reports', action: 'open-reports' }
     ]
   },
   {
-    label: 'Orders',
-    icon: 'dyn-icon-shopping-cart',
-    shortLabel: 'Orders',
-    badge: { count: 5, color: 'secondary' },
+    label: 'Projects',
     subItems: [
-      {
-        label: 'Pending Orders',
-        icon: 'dyn-icon-clock',
-        badge: { count: 3, color: 'warning' },
-        action: () => console.log('Pending Orders clicked')
-      },
-      {
-        label: 'Completed Orders',
-        icon: 'dyn-icon-check',
-        action: () => console.log('Completed Orders clicked')
-      }
+      { label: 'Active', action: () => { /* handled by consumer */ } },
+      { label: 'Archived', disabled: true }
     ]
   },
-  {
-    label: 'Customers',
-    icon: 'dyn-icon-users',
-    shortLabel: 'Cust',
-    action: () => console.log('Customers clicked')
-  },
-  {
-    label: 'Analytics',
-    icon: 'dyn-icon-chart-line',
-    shortLabel: 'Analytics',
-    subItems: [
-      {
-        label: 'Sales Report',
-        icon: 'dyn-icon-chart-bar',
-        action: () => console.log('Sales Report clicked')
-      },
-      {
-        label: 'Traffic Report',
-        icon: 'dyn-icon-chart-area',
-        action: () => console.log('Traffic Report clicked')
-      }
-    ]
-  },
-  {
-    type: 'divider'
-  },
-  {
-    label: 'Settings',
-    icon: 'dyn-icon-settings',
-    shortLabel: 'Config',
-    action: () => console.log('Settings clicked')
-  },
-  {
-    label: 'Help & Support',
-    icon: 'dyn-icon-help',
-    shortLabel: 'Help',
-    disabled: false,
-    action: () => console.log('Help clicked')
-  }
+  { label: 'Settings' }
 ];
 
-const basicMenus: MenuItem[] = [
+const actionItems: MenuItem[] = [
   {
-    label: 'Home',
-    icon: 'dyn-icon-home',
-    action: () => console.log('Home clicked')
+    label: 'Teams',
+    subItems: [
+      { label: 'Engineering', action: 'team-engineering' },
+      { label: 'Design', action: 'team-design' }
+    ]
   },
   {
-    label: 'About',
-    icon: 'dyn-icon-info',
-    action: () => console.log('About clicked')
-  },
-  {
-    label: 'Contact',
-    icon: 'dyn-icon-envelope',
-    action: () => console.log('Contact clicked')
+    label: 'Help',
+    subItems: [
+      { label: 'Documentation', action: 'open-docs' },
+      { label: 'Contact support', action: 'open-support' }
+    ]
   }
 ];
 
 export const Default: Story = {
   args: {
-    menus: sampleMenus,
-    collapsed: false,
-    filter: true,
-    automaticToggle: true,
-    logo: 'https://via.placeholder.com/120x32/0066cc/ffffff?text=DynUI',
-    shortLogo: 'https://via.placeholder.com/32x32/0066cc/ffffff?text=D'
+    items: hierarchicalItems
   }
 };
 
-export const Collapsed: Story = {
+export const Vertical: Story = {
   args: {
-    menus: sampleMenus,
-    collapsed: true,
-    filter: false,
-    automaticToggle: false,
-    logo: 'https://via.placeholder.com/120x32/0066cc/ffffff?text=DynUI',
-    shortLogo: 'https://via.placeholder.com/32x32/0066cc/ffffff?text=D'
+    items: hierarchicalItems,
+    orientation: 'vertical'
   }
 };
 
-export const WithoutFilter: Story = {
+export const UsingMenusProp: Story = {
   args: {
-    menus: sampleMenus,
-    collapsed: false,
-    filter: false,
-    automaticToggle: true,
-    logo: 'https://via.placeholder.com/120x32/0066cc/ffffff?text=DynUI',
-    shortLogo: 'https://via.placeholder.com/32x32/0066cc/ffffff?text=D'
+    menus: hierarchicalItems
   }
 };
 
-export const BasicMenu: Story = {
+export const WithActionHandler: Story = {
   args: {
-    menus: basicMenus,
-    collapsed: false,
-    filter: false,
-    automaticToggle: false
-  }
-};
-
-export const CustomLiterals: Story = {
-  args: {
-    menus: sampleMenus,
-    collapsed: false,
-    filter: true,
-    automaticToggle: false,
-    literals: {
-      collapse: 'Minimize Menu',
-      expand: 'Maximize Menu',
-      search: 'Search menu items...'
-    },
-    logo: 'https://via.placeholder.com/120x32/28a745/ffffff?text=Custom',
-    shortLogo: 'https://via.placeholder.com/32x32/28a745/ffffff?text=C'
-  }
-};
-
-export const WithBadges: Story = {
-  args: {
-    menus: [
-      {
-        label: 'Notifications',
-        icon: 'dyn-icon-bell',
-        badge: { count: 15, color: 'secondary' },
-        action: () => console.log('Notifications clicked')
-      },
-      {
-        label: 'Messages',
-        icon: 'dyn-icon-envelope',
-        badge: { count: 3, color: 'warning' },
-        action: () => console.log('Messages clicked')
-      },
-      {
-        label: 'Tasks',
-        icon: 'dyn-icon-tasks',
-        badge: { count: 8, color: 'success' },
-        action: () => console.log('Tasks clicked')
-      }
-    ],
-    collapsed: false,
-    filter: false,
-    automaticToggle: false
+    items: actionItems
   }
 };

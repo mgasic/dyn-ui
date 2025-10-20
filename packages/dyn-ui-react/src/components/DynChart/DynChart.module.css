@@ -3,23 +3,23 @@
   flex-direction: column;
   background: var(--dyn-color-background);
   border-radius: var(--dyn-border-radius-md);
-  border: 1px solid var(--dyn-color-border);
-  padding: 16px;
+  border: var(--dyn-border-width-hairline, 1px) solid var(--dyn-color-border);
+  padding: var(--dyn-spacing-lg, 1rem);
   font-family: var(--dyn-font-family-base);
-  gap: 16px;
+  gap: var(--dyn-spacing-lg, 1rem);
 }
 
 .figure {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--dyn-spacing-lg, 1rem);
   margin: 0;
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--dyn-spacing-xs, 0.25rem);
 }
 
 .title {
@@ -53,14 +53,14 @@
 
 .tooltip {
   position: absolute;
-  max-width: 220px;
-  padding: 8px 12px;
-  border-radius: 6px;
+  max-width: var(--dyn-size-tooltip-max-width, 13.75rem);
+  padding: var(--dyn-spacing-sm, 0.5rem) var(--dyn-spacing-md, 0.75rem);
+  border-radius: calc(var(--dyn-border-radius-sm, 0.25rem) + var(--dyn-spacing-xxs, 0.125rem));
   background: var(--dyn-color-surface-elevated, rgba(33, 33, 33, 0.92));
   color: var(--dyn-color-text-inverse, #ffffff);
   font-size: var(--dyn-font-size-xs);
   line-height: 1.4;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--dyn-shadow-tooltip, 0 6px 16px rgba(15, 23, 42, 0.18));
   pointer-events: none;
   transform: translate(-50%, -120%);
   opacity: 0;
@@ -79,13 +79,13 @@
 .tooltipHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: var(--dyn-spacing-sm, 0.5rem);
+  margin-bottom: var(--dyn-spacing-xs, 0.25rem);
 }
 
 .tooltipColor {
-  width: 10px;
-  height: 10px;
+  width: calc(var(--dyn-spacing-sm, 0.5rem) + var(--dyn-spacing-xxs, 0.125rem));
+  height: calc(var(--dyn-spacing-sm, 0.5rem) + var(--dyn-spacing-xxs, 0.125rem));
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -103,7 +103,7 @@
 .tooltipValue {
   font-weight: var(--dyn-font-weight-semibold);
   font-size: var(--dyn-font-size-sm);
-  margin-bottom: 2px;
+  margin-bottom: var(--dyn-spacing-xxs, 0.125rem);
 }
 
 .tooltipLabel {
@@ -114,24 +114,24 @@
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--dyn-spacing-lg, 1rem);
   justify-content: center;
   align-items: center;
-  padding: 8px 0;
+  padding: var(--dyn-spacing-sm, 0.5rem) 0;
 }
 
 .legendItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--dyn-spacing-sm, 0.5rem);
   font-size: var(--dyn-font-size-sm);
   color: var(--dyn-color-text-secondary);
 }
 
 .legendColor {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: var(--dyn-spacing-md, 0.75rem);
+  height: var(--dyn-spacing-md, 0.75rem);
+  border-radius: calc(var(--dyn-border-radius-sm, 0.25rem) / 2);
   flex-shrink: 0;
 }
 
@@ -156,7 +156,7 @@
 
 .typeBar .legendColor,
 .typeBar .tooltipColor {
-  border-radius: 2px;
+  border-radius: calc(var(--dyn-border-radius-sm, 0.25rem) / 2);
 }
 
 .typePie {
@@ -174,7 +174,7 @@
 
 .typeArea .legendColor,
 .typeArea .tooltipColor {
-  border-radius: 4px;
+  border-radius: var(--dyn-border-radius-sm, 0.25rem);
   opacity: 0.9;
 }
 
@@ -191,10 +191,10 @@
 
 .visuallyHidden {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: var(--dyn-border-width-hairline, 1px);
+  height: var(--dyn-border-width-hairline, 1px);
   padding: 0;
-  margin: -1px;
+  margin: calc(var(--dyn-border-width-hairline, 1px) * -1);
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
@@ -203,7 +203,7 @@
 
 @media (max-width: 768px) {
   .root {
-    padding: 12px;
+    padding: var(--dyn-spacing-md, 0.75rem);
   }
 
   .title {
@@ -215,11 +215,11 @@
   }
 
   .legend {
-    gap: 12px;
+    gap: var(--dyn-spacing-md, 0.75rem);
   }
 
   .legendItem {
-    gap: 6px;
+    gap: calc(var(--dyn-spacing-sm, 0.5rem) - var(--dyn-spacing-xxs, 0.125rem));
     font-size: var(--dyn-font-size-xs);
   }
 }
@@ -240,6 +240,6 @@
 
 @media (prefers-contrast: high) {
   .root {
-    border-width: 2px;
+    border-width: var(--dyn-border-width-thin, 2px);
   }
 }

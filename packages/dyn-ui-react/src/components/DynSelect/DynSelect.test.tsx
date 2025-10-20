@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { DynSelect } from './DynSelect';
+import styles from './DynSelect.module.css';
 
 const DynSelectAny = DynSelect as any;
 
@@ -150,7 +151,7 @@ describe('DynSelect', () => {
   it('applies size classes', () => {
     render(<DynSelectAny name="test" label="Test" options={sampleOptions} size="large" />);
     const select = screen.getByRole('combobox');
-    expect(select).toHaveClass('dyn-select--large');
+    expect(select).toHaveClass(styles.selectSizeLarge);
   });
 
   it('applies custom className', () => {

@@ -2,17 +2,17 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--dyn-layout-bg-card);
-  border-radius: 8px;
+  background: var(--dyn-color-surface, #ffffff);
+  border-radius: var(--dyn-border-radius-md, 0.5rem);
   overflow: hidden;
 }
 
 .bordered {
-  border: 1px solid var(--dyn-layout-border);
+  border: var(--dyn-border-width-hairline, 1px) solid var(--dyn-color-border-light, #e2e8f0);
 }
 
 .loading {
-  min-height: 200px;
+  min-height: var(--dyn-size-panel-min-height, 12.5rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,23 +22,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  color: var(--dyn-layout-text-secondary);
+  gap: var(--dyn-spacing-lg, 1rem);
+  color: var(--dyn-color-text-secondary, #64748b);
 }
 
 .spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--dyn-layout-border);
-  border-top: 2px solid var(--color-primary);
+  width: var(--dyn-size-spinner-sm, 1.5rem);
+  height: var(--dyn-size-spinner-sm, 1.5rem);
+  border: var(--dyn-border-width-thin, 2px) solid var(--dyn-color-border-light, #e2e8f0);
+  border-top: var(--dyn-border-width-thin, 2px) solid var(--dyn-color-primary, #2563eb);
   border-radius: 50%;
   animation: dyn-spin 1s linear infinite;
 }
 
 .emptyState {
-  padding: 3rem;
+  padding: var(--dyn-spacing-3xl, 3rem);
   text-align: center;
-  color: var(--dyn-layout-text-muted);
+  color: var(--dyn-color-text-tertiary, #64748b);
 }
 
 .wrapper {
@@ -48,24 +48,24 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: var(--dyn-font-size-sm, 0.875rem);
 }
 
 .header {
-  background: var(--dyn-layout-bg-surface);
-  border-bottom: 2px solid var(--dyn-layout-border);
+  background: var(--dyn-color-surface-hover, #f8fafc);
+  border-bottom: var(--dyn-border-width-thin, 2px) solid var(--dyn-color-border-light, #e2e8f0);
 }
 
 .headerRow {
-  border-bottom: 1px solid var(--dyn-layout-border);
+  border-bottom: var(--dyn-border-width-hairline, 1px) solid var(--dyn-color-border-light, #e2e8f0);
 }
 
 .headerCell {
-  padding: 0.75rem 1rem;
+  padding: var(--dyn-spacing-md, 0.75rem) var(--dyn-spacing-lg, 1rem);
   text-align: left;
-  font-weight: 600;
-  color: var(--dyn-layout-text-primary);
-  border-right: 1px solid var(--dyn-layout-border);
+  font-weight: var(--dyn-font-weight-semibold, 600);
+  color: var(--dyn-color-text, #111827);
+  border-right: var(--dyn-border-width-hairline, 1px) solid var(--dyn-color-border-light, #e2e8f0);
   position: relative;
   user-select: none;
 }
@@ -79,11 +79,11 @@
 }
 
 .headerCellSortable:hover {
-  background: var(--dyn-layout-bg-card);
+  background: var(--dyn-color-surface, #ffffff);
 }
 
 .headerCellSorted {
-  color: var(--color-primary);
+  color: var(--dyn-color-primary, #2563eb);
 }
 
 .headerCellAlignCenter {
@@ -98,26 +98,27 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--dyn-spacing-sm, 0.5rem);
 }
 
 .sortIndicator {
-  color: var(--dyn-layout-text-muted);
-  font-size: 0.75rem;
+  color: var(--dyn-color-text-tertiary, #64748b);
+  font-size: var(--dyn-font-size-xs, 0.75rem);
 }
 
 .selectionCell {
-  width: 48px;
+  width: var(--dyn-spacing-3xl, 3rem);
   text-align: center;
 }
 
 .body {
-  background: var(--dyn-layout-bg-card);
+  background: var(--dyn-color-surface, #ffffff);
 }
 
 .row {
-  border-bottom: 1px solid var(--dyn-layout-border);
-  transition: background-color 0.2s ease;
+  border-bottom: var(--dyn-border-width-hairline, 1px) solid var(--dyn-color-border-light, #e2e8f0);
+  transition: background-color var(--dyn-duration-normal, 200ms)
+    var(--dyn-timing-standard, ease);
 }
 
 .row:last-child {
@@ -125,7 +126,7 @@
 }
 
 .rowSelected {
-  background: rgba(59, 130, 246, 0.1) !important;
+  background: var(--dyn-color-primary-alpha, rgba(37, 99, 235, 0.16)) !important;
 }
 
 .rowEven {
@@ -137,17 +138,17 @@
 }
 
 .hoverable .row:hover {
-  background: var(--dyn-layout-bg-surface);
+  background: var(--dyn-color-surface-hover, #f8fafc);
 }
 
 .striped .rowEven {
-  background: var(--dyn-layout-bg-surface);
+  background: var(--dyn-color-surface-hover, #f8fafc);
 }
 
 .cell {
-  padding: 0.75rem 1rem;
-  border-right: 1px solid var(--dyn-layout-border);
-  color: var(--dyn-layout-text-primary);
+  padding: var(--dyn-spacing-md, 0.75rem) var(--dyn-spacing-lg, 1rem);
+  border-right: var(--dyn-border-width-hairline, 1px) solid var(--dyn-color-border-light, #e2e8f0);
+  color: var(--dyn-color-text, #111827);
 }
 
 .cell:last-child {
@@ -163,41 +164,42 @@
 }
 
 .checkbox {
-  accent-color: var(--color-primary);
+  accent-color: var(--dyn-color-primary, #2563eb);
 }
 
 .sizeSmall .headerCell,
 .sizeSmall .cell {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
+  padding: var(--dyn-spacing-sm, 0.5rem) var(--dyn-spacing-md, 0.75rem);
+  font-size: var(--dyn-font-size-xs, 0.75rem);
 }
 
 .sizeLarge .headerCell,
 .sizeLarge .cell {
-  padding: 1rem 1.25rem;
-  font-size: 1rem;
+  padding: var(--dyn-spacing-lg, 1rem)
+    calc(var(--dyn-spacing-lg, 1rem) + var(--dyn-spacing-xxs, 0.125rem));
+  font-size: var(--dyn-font-size-base, 1rem);
 }
 
 .pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  border-top: 1px solid var(--dyn-layout-border);
-  background: var(--dyn-layout-bg-surface);
+  padding: var(--dyn-spacing-lg, 1rem);
+  border-top: var(--dyn-border-width-hairline, 1px) solid var(--dyn-color-border-light, #e2e8f0);
+  background: var(--dyn-color-surface-hover, #f8fafc);
 }
 
 .paginationInfo {
-  color: var(--dyn-layout-text-secondary);
-  font-size: 0.875rem;
+  color: var(--dyn-color-text-secondary, #64748b);
+  font-size: var(--dyn-font-size-sm, 0.875rem);
 }
 
 .paginationControls {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--dyn-layout-text-secondary);
-  font-size: 0.875rem;
+  gap: var(--dyn-spacing-sm, 0.5rem);
+  color: var(--dyn-color-text-secondary, #64748b);
+  font-size: var(--dyn-font-size-sm, 0.875rem);
 }
 
 @media (max-width: 768px) {

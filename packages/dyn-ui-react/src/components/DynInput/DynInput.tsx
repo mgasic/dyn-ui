@@ -12,30 +12,15 @@ import React, {
   useMemo,
   useCallback
 } from 'react';
+import styles from './DynInput.module.css';
+import { cn } from '../../utils/classNames';
 
-function classNames(
-  ...args: Array<string | Record<string, boolean> | undefined | null | any[]>
-): string {
-  const classes: string[] = [];
-  for (const arg of args) {
-    if (!arg) continue;
-    if (typeof arg === 'string') {
-      classes.push(arg);
-    } else if (Array.isArray(arg)) {
-      const inner = classNames(...arg);
-      if (inner) classes.push(inner);
-    } else if (typeof arg === 'object') {
-      for (const key in arg) {
-        if (Object.prototype.hasOwnProperty.call(arg, key) && (arg as any)[key]) {
-          classes.push(key);
-        }
-      }
-    }
-  }
-  return classes.join(' ');
-}
-
-import type { DynInputProps, DynFieldRef, CurrencyInputConfig } from '../../types/field.types';
+import type {
+  DynInputProps,
+  DynInputRef,
+  CurrencyInputConfig,
+} from './DynInput.types';
+import type { ValidationRule } from '../../types/field.types';
 import type { DynCurrencyConfig } from '../../utils/dynFormatters';
 import { DynFieldContainer } from '../DynFieldContainer';
 import { useDynFieldValidation } from '../../hooks/useDynFieldValidation';
@@ -59,16 +44,20 @@ interface ResolvedCurrencyConfig {
 const DEFAULT_CURRENCY_CODE = 'BRL';
 const DEFAULT_PRECISION = 2;
 
-export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
+const getStyleClass = (className: string): string => styles[className] ?? className;
+
+export const DynInput = forwardRef<DynInputRef, DynInputProps>(
   (
     {
       name,
       id,
       label,
       help,
+      helpText,
       placeholder,
       disabled = false,
-      readonly = false,
+      readOnly,
+      readonly,
       required = false,
       optional = false,
       visible = true,
@@ -76,6 +65,7 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       showSpinButtons = false,
       errorMessage,
       validation,
+      validationRules,
       className,
       type = 'text',
       size = 'medium',
@@ -85,17 +75,22 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       maskFormatModel = false,
       pattern,
       icon,
-      showCleanButton = false,
+      showClearButton,
+      showCleanButton,
       step,
       min,
       max,
       currencyConfig,
       onChange,
       onBlur,
-      onFocus
+      onFocus,
+      ...rest
     },
     ref
   ) => {
+    const isReadOnly = (readOnly ?? readonly) ?? false;
+    const shouldShowClearButton = (showClearButton ?? showCleanButton) ?? false;
+    const fieldHelpText = help ?? helpText;
     const isCurrencyType = type === 'currency';
     const resolvedCurrencyConfig = useMemo(
       () => resolveCurrencyConfig(currencyConfig, type),
@@ -111,26 +106,59 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
     const generatedIdRef = useRef<string>(`dyn-input-${Math.random().toString(36).slice(2, 9)}`);
     const inputId = id ?? name ?? generatedIdRef.current;
 
-    const { error, validate, clearError } = useDynFieldValidation({
+    const normalizedValidationRules = useMemo<ValidationRule[] | undefined>(() => {
+      const collected: ValidationRule[] = [];
+
+      const pushRules = (rules?: DynInputProps['validation']) => {
+        if (!rules) {
+          return;
+        }
+
+        if (Array.isArray(rules)) {
+          collected.push(...rules);
+        } else {
+          collected.push(rules);
+        }
+      };
+
+      pushRules(validation);
+      if (validationRules?.length) {
+        collected.push(...validationRules);
+      }
+
+      return collected.length > 0 ? collected : undefined;
+    }, [validation, validationRules]);
+
+    const { error, validate, clearError: clearValidationError } = useDynFieldValidation({
       value: inputValue,
       required,
-      validation,
+      validation: normalizedValidationRules,
       customError: errorMessage
     });
 
+    const resolvedMaskPattern = typeof mask === 'string' ? mask : mask?.pattern;
+    const resolvedMaskFormatModel =
+      typeof mask === 'object' && mask !== null
+        ? mask.formatModel ?? maskFormatModel
+        : maskFormatModel;
+
     const { maskedValue, unmaskValue, handleMaskedChange } = useDynMask(
-      mask,
+      resolvedMaskPattern,
       inputValue,
-      maskFormatModel
+      resolvedMaskFormatModel
     );
 
     useImperativeHandle(ref, () => ({
       focus: () => inputRef.current?.focus(),
+      blur: () => inputRef.current?.blur(),
       validate: () => validate(),
       clear: () => {
         setInputValue('');
         onChange?.('');
-        clearError();
+        clearValidationError();
+      },
+      clearError: () => {
+        clearValidationError();
       },
       getValue: () => {
         if (isCurrencyType) {
@@ -139,7 +167,7 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
         }
         return mask && !maskFormatModel ? unmaskValue(inputValue) : inputValue;
       },
-      setValue: (newValue: any) => {
+      setValue: (newValue: string | number | null | undefined) => {
         if (isCurrencyType) {
           const numericValue = parseCurrencyLikeValue(newValue, resolvedCurrencyConfig);
           if (numericValue == null) {
@@ -161,7 +189,8 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
         const stringValue = newValue == null ? '' : String(newValue);
         setInputValue(stringValue);
         onChange?.(stringValue);
-      }
+      },
+      getElement: () => inputRef.current
     }));
 
     const mergedCurrencyConfig = useMemo<Required<DynCurrencyConfig> & {
@@ -306,12 +335,12 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
         }
       }
 
-      clearError();
+      clearValidationError();
     };
 
     const handleStepChange = useCallback(
       (direction: 1 | -1) => {
-        if (disabled || readonly) return;
+        if (disabled || isReadOnly) return;
 
         const stepValue = step ?? 1;
         const currentNumeric = type === 'currency'
@@ -343,70 +372,70 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
           onChange?.(type === 'number' ? nextValue : nextValueString);
         }
 
-        clearError();
+        clearValidationError();
       },
       [
-        clearError,
+        clearValidationError,
         disabled,
         inputValue,
+        isReadOnly,
         max,
         min,
         onChange,
-        readonly,
         resolvedCurrencyConfig,
         step,
         type
       ]
     );
 
-    const handleBlur = () => {
+    const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
       setFocused(false);
       validate();
-      onBlur?.();
+      onBlur?.(event);
     };
 
-    const handleFocus = () => {
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
       setFocused(true);
-      clearError();
-      onFocus?.();
+      clearValidationError();
+      onFocus?.(event);
     };
 
     const handleClean = () => {
       setInputValue('');
       onChange?.('');
-      clearError();
+      clearValidationError();
       inputRef.current?.focus();
     };
 
     if (!visible) return null;
 
-    const inputClasses = classNames(
-      'dyn-input',
-      `dyn-input--${size}`,
-      {
-        'dyn-input--focused': focused,
-        'dyn-input--error': !!error,
-        'dyn-input--disabled': disabled,
-        'dyn-input--readonly': readonly,
-        'dyn-input--with-icon': !!icon,
-        'dyn-input--cleanable': !!(showCleanButton && inputValue && !readonly && !disabled)
-      }
+    const showSpin = showSpinButtons && (type === 'number' || type === 'currency');
+
+    const inputClasses = cn(
+      getStyleClass('dyn-input'),
+      getStyleClass(`dyn-input--${size}`),
+      focused && getStyleClass('dyn-input--focused'),
+      !!error && getStyleClass('dyn-input--error'),
+      disabled && getStyleClass('dyn-input--disabled'),
+      isReadOnly && getStyleClass('dyn-input--readonly'),
+      !!icon && getStyleClass('dyn-input--with-icon'),
+      !!(shouldShowClearButton && inputValue && !isReadOnly && !disabled) &&
+        getStyleClass('dyn-input--cleanable')
     );
 
     const displayValue = mask ? maskedValue : inputValue;
 
-    const containerDivClass = classNames('dyn-input-container', className, {
-      'dyn-input-container--currency': type === 'currency',
-      'dyn-input-container--with-spin-buttons':
-        showSpinButtons && (type === 'number' || type === 'currency')
-    });
-
-    const showSpin = showSpinButtons && (type === 'number' || type === 'currency');
+    const containerDivClass = cn(
+      getStyleClass('dyn-input-container'),
+      className,
+      type === 'currency' && getStyleClass('dyn-input-container--currency'),
+      showSpin && getStyleClass('dyn-input-container--with-spin-buttons')
+    );
 
     return (
       <DynFieldContainer
         label={label}
-        helpText={help}
+        helpText={fieldHelpText}
         required={required}
         optional={optional}
         errorText={error}
@@ -416,18 +445,19 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
       >
         <div className={containerDivClass}>
           {type === 'currency' && resolvedCurrencyConfig.symbol && (
-            <span className="dyn-input-currency-symbol" aria-hidden="true">
+            <span className={getStyleClass('dyn-input-currency-symbol')} aria-hidden="true">
               {resolvedCurrencyConfig.symbol}
             </span>
           )}
 
           {icon && (
-            <div className="dyn-input-icon-container">
+            <div className={getStyleClass('dyn-input-icon-container')}>
               <DynIcon icon={icon} />
             </div>
           )}
 
           <input
+            {...restProps}
             ref={inputRef}
             id={inputId}
             name={name}
@@ -436,7 +466,7 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
             placeholder={placeholder}
             value={displayValue}
             disabled={disabled}
-            readOnly={readonly}
+            readOnly={isReadOnly}
             required={required}
             aria-required={required}
             aria-disabled={disabled}
@@ -451,13 +481,14 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
             onBlur={handleBlur}
             onFocus={handleFocus}
             aria-invalid={!!error}
-            aria-describedby={error ? `${name}-error` : undefined}
+            aria-describedby={error ? `${inputId}-error` : undefined}
+            {...rest}
           />
 
-          {showCleanButton && inputValue && !readonly && !disabled && (
+          {shouldShowClearButton && inputValue && !isReadOnly && !disabled && (
             <button
               type="button"
-              className="dyn-input-clean-button"
+              className={getStyleClass('dyn-input-clean-button')}
               onClick={handleClean}
               tabIndex={-1}
               aria-label="Limpar campo"
@@ -467,24 +498,33 @@ export const DynInput = forwardRef<DynFieldRef, DynInputProps>(
           )}
 
           {showSpin && (
-            <div className="dyn-input-spin-buttons" aria-hidden={disabled || readonly}>
+            <div
+              className={getStyleClass('dyn-input-spin-buttons')}
+              aria-hidden={disabled || isReadOnly}
+            >
               <button
                 type="button"
-                className="dyn-input-spin-button dyn-input-spin-button--increment"
+                className={cn(
+                  getStyleClass('dyn-input-spin-button'),
+                  getStyleClass('dyn-input-spin-button--increment')
+                )}
                 onClick={() => handleStepChange(1)}
                 tabIndex={-1}
                 aria-label="Increase value"
-                disabled={disabled || readonly}
+                disabled={disabled || isReadOnly}
               >
                 ▲
               </button>
               <button
                 type="button"
-                className="dyn-input-spin-button dyn-input-spin-button--decrement"
+                className={cn(
+                  getStyleClass('dyn-input-spin-button'),
+                  getStyleClass('dyn-input-spin-button--decrement')
+                )}
                 onClick={() => handleStepChange(-1)}
                 tabIndex={-1}
                 aria-label="Decrease value"
-                disabled={disabled || readonly}
+                disabled={disabled || isReadOnly}
               >
                 ▼
               </button>
