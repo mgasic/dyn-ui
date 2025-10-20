@@ -36,26 +36,42 @@ const NON_DOM_PROPS = new Set([
  * @returns Unique key string
  */
 const getRowKey = (row: any, index: number, rowKey?: DynTableProps['rowKey']): string => {
+  const normalizeKey = (value: unknown): string | undefined => {
+    if (value === null || value === undefined) return undefined;
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'bigint') {
+      return String(value);
+    }
+
+    return undefined;
+  };
+
   // Priority 1: Custom function
   if (typeof rowKey === 'function') {
-    const result = rowKey(row);
-    return `row-${String(result)}`;
+    const result = normalizeKey(rowKey(row));
+    if (result !== undefined) {
+      return result;
+    }
   }
-  
+
   // Priority 2: Property name
-  if (typeof rowKey === 'string' && rowKey in row && row[rowKey] != null) {
-    return `row-${String(row[rowKey])}`;
+  if (typeof rowKey === 'string' && rowKey in row) {
+    const result = normalizeKey(row[rowKey]);
+    if (result !== undefined) {
+      return result;
+    }
   }
-  
+
   // Priority 3: Common id fields
-  if (row.id != null) {
-    return `row-${String(row.id)}`;
+  const commonIdFields = ['id', 'key'] as const;
+  for (const field of commonIdFields) {
+    if (field in row) {
+      const result = normalizeKey(row[field]);
+      if (result !== undefined) {
+        return result;
+      }
+    }
   }
-  
-  if (row.key != null) {
-    return `row-${String(row.key)}`;
-  }
-  
+
   // Priority 4: Attempt unique field combination
   const uniqueFields = ['uuid', 'guid', 'identifier', 'code', 'name'];
   for (const field of uniqueFields) {
@@ -63,14 +79,14 @@ const getRowKey = (row: any, index: number, rowKey?: DynTableProps['rowKey']): s
       return `row-${field}-${String(row[field])}`;
     }
   }
-  
+
   // Fallback: Use index with warning
   if (process.env.NODE_ENV === 'development') {
     console.warn(
       `DynTable: Using index as key for row ${index}. Consider providing a unique 'rowKey' prop or ensure your data has 'id' property for better performance.`
     );
   }
-  
+
   return `row-index-${index}`;
 };
 

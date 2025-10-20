@@ -227,7 +227,7 @@ describe('DynTable', () => {
     });
 
     it('handles controlled selection state', () => {
-      const selectedKeys = ['row-1', 'row-3'];
+      const selectedKeys = ['1', '3'];
       render(
         <DynTable
           data={sampleData}
