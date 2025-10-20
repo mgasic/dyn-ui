@@ -122,6 +122,27 @@
   color: var(--dyn-color-text-primary);
   line-height: var(--dyn-line-height-tight);
   word-wrap: break-word;
+  font-family: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dyn-spacing-xxs, 0.125rem);
+}
+
+.option__label--expandable {
+  cursor: pointer;
+}
+
+.option__label--expandable:focus-visible {
+  outline: 2px solid var(--dyn-color-focus-ring, var(--dyn-color-primary));
+  outline-offset: 2px;
+}
+
+.option__label--expanded {
+  color: var(--dyn-color-primary, #2563eb);
 }
 
 .option__description,
@@ -225,25 +246,6 @@
 .action-button--danger:hover:not(:disabled),
 :global(.dyn-list-view__action-button--danger:hover) {
   background: var(--dyn-color-danger-hover, #b91c1c);
-}
-
-.option__expand,
-:global(.dyn-list-view__expand-button) {
-  background: none;
-  border: none;
-  padding: var(--dyn-spacing-xs, 0.25rem);
-  cursor: pointer;
-  color: var(--dyn-color-text-secondary);
-  border-radius: var(--dyn-border-radius-sm);
-  transition:
-    background-color var(--dyn-transition-base, 0.2s ease),
-    color var(--dyn-transition-base, 0.2s ease);
-}
-
-.option__expand:hover,
-:global(.dyn-list-view__expand-button:hover) {
-  background-color: var(--dyn-color-background-hover);
-  color: var(--dyn-color-text-primary);
 }
 
 .option__details,

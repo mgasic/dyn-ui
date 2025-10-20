@@ -140,8 +140,8 @@ describe('DynListView', () => {
       }];
 
       render(<DynListView data={complexData} />);
-      const expandButton = screen.getByRole('button');
-      expect(expandButton).toBeInTheDocument();
+      const expandTrigger = screen.getByRole('button', { name: 'Complex Item' });
+      expect(expandTrigger).toBeInTheDocument();
     });
 
     it('expands item details on click', () => {
@@ -155,8 +155,8 @@ describe('DynListView', () => {
       }];
 
       render(<DynListView data={complexData} />);
-      const expandButton = screen.getByRole('button');
-      fireEvent.click(expandButton);
+      const expandTrigger = screen.getByRole('button', { name: 'Complex Item' });
+      fireEvent.click(expandTrigger);
 
       expect(screen.getByText(/prop1:/)).toBeInTheDocument();
       expect(screen.getByText(/value1/)).toBeInTheDocument();
