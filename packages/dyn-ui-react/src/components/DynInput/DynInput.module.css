@@ -1,4 +1,4 @@
-.container {
+.dyn-input-container {
   --dyn-input-bg: var(--dyn-color-surface, var(--color-surface, #ffffff));
   --dyn-input-color: var(--dyn-color-text-primary, var(--color-text-primary, #111827));
   --dyn-input-border: var(--dyn-color-border, var(--color-border, #d1d5db));
@@ -11,104 +11,121 @@
   --dyn-input-readonly-bg: var(--dyn-color-surface-readonly, var(--color-surface-readonly, #f9fafb));
   --dyn-input-error: var(--dyn-color-danger, var(--color-danger, #d32f2f));
 
+  position: relative;
   display: flex;
   align-items: center;
-  position: relative;
 }
 
-.input {
+.dyn-input-container--currency .dyn-input {
+  padding-left: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)));
+}
+
+.dyn-input-container--with-spin-buttons .dyn-input {
+  padding-right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)) + 0.5rem);
+}
+
+.dyn-input {
   appearance: none;
   width: 100%;
   color: var(--dyn-input-color);
-  background: var(--dyn-input-bg);
+  background-color: var(--dyn-input-bg);
   border: 1px solid var(--dyn-input-border);
   border-radius: var(--dyn-border-radius-md, var(--border-radius-md, 0.5rem));
-  padding: var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem)) var(--dyn-spacing-md, var(--spacing-md, 1rem));
-  font-family: var(--dyn-font-family-base, var(--font-family-base, system-ui, -apple-system, sans-serif));
+  padding: var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem))
+    var(--dyn-spacing-md, var(--spacing-md, 1rem));
+  font-family: var(
+    --dyn-font-family-base,
+    var(--font-family-base, system-ui, -apple-system, sans-serif)
+  );
   font-size: var(--dyn-font-size-base, var(--font-size-base, 1rem));
   line-height: var(--dyn-line-height-base, var(--line-height-base, 1.5));
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
-.input::placeholder {
+.dyn-input::placeholder {
   color: var(--dyn-input-placeholder);
 }
 
-/* Hover */
-.input:hover:not(.input--disabled):not(.input--readonly) {
+.dyn-input:hover:not(.dyn-input--disabled):not(.dyn-input--readonly) {
   border-color: var(--dyn-input-border-hover);
 }
 
-/* Focus */
-.input:focus-visible {
+.dyn-input:focus-visible,
+.dyn-input--focused {
   outline: none;
   border-color: var(--dyn-input-border-focus);
   box-shadow: 0 0 0 3px var(--dyn-input-focus-ring);
 }
 
-/* Disabled */
-.input--disabled,
-.input:disabled {
-  background: var(--dyn-input-disabled-bg);
+.dyn-input--error {
+  border-color: var(--dyn-input-error);
+}
+
+.dyn-input--error:focus-visible {
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.25);
+}
+
+.dyn-input--disabled,
+.dyn-input:disabled {
+  background-color: var(--dyn-input-disabled-bg);
   color: var(--dyn-input-disabled-color);
   cursor: not-allowed;
 }
 
-/* Readonly */
-.input--readonly,
-.input[readonly] {
-  background: var(--dyn-input-readonly-bg);
+.dyn-input--readonly,
+.dyn-input[readonly] {
+  background-color: var(--dyn-input-readonly-bg);
 }
 
-/* Sizes */
-.input--small {
-  --dyn-input-height: 2.25rem;
-  height: var(--dyn-input-height);
+.dyn-input--small {
+  padding: var(--dyn-spacing-xs, var(--spacing-xs, 0.375rem))
+    var(--dyn-spacing-sm, var(--spacing-sm, 0.75rem));
   font-size: var(--dyn-font-size-sm, var(--font-size-sm, 0.875rem));
-  padding: var(--dyn-spacing-xs, var(--spacing-xs, 0.375rem)) var(--dyn-spacing-sm, var(--spacing-sm, 0.75rem));
+  height: 2.25rem;
 }
 
-.input--medium {
-  --dyn-input-height: 2.5rem;
-  height: var(--dyn-input-height);
+.dyn-input--medium {
+  height: 2.5rem;
 }
 
-.input--large {
-  --dyn-input-height: 3rem;
-  height: var(--dyn-input-height);
+.dyn-input--large {
+  padding: var(--dyn-spacing-md, var(--spacing-md, 0.75rem))
+    var(--dyn-spacing-lg, var(--spacing-lg, 1.5rem));
   font-size: var(--dyn-font-size-md, var(--font-size-md, 1rem));
-  padding: var(--dyn-spacing-md, var(--spacing-md, 0.75rem)) var(--dyn-spacing-lg, var(--spacing-lg, 1.5rem));
+  height: 3rem;
 }
 
-/* States */
-.input--error {
-  border-color: var(--dyn-input-error);
-}
-
-.input--focused {
-  border-color: var(--dyn-input-border-focus);
-}
-
-.input--with-icon {
+.dyn-input--with-icon {
   padding-left: var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem));
 }
 
-.input--clearable {
+.dyn-input--cleanable {
   padding-right: var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem));
 }
 
-/* Icon container */
-.icon-container {
+.dyn-input-currency-symbol {
+  position: absolute;
+  left: var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem));
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dyn-color-text-secondary, var(--color-text-secondary, #6b7280));
+  font-weight: var(--dyn-font-weight-medium, var(--font-weight-medium, 500));
+  pointer-events: none;
+}
+
+.dyn-input-icon-container {
   position: absolute;
   left: var(--dyn-spacing-md, var(--spacing-md, 1rem));
   top: 50%;
   transform: translateY(-50%);
   color: var(--dyn-color-text-secondary, var(--color-text-secondary, #6b7280));
   pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Clear button */
-.clear-button {
+.dyn-input-clean-button {
   position: absolute;
   right: var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem));
   top: 50%;
@@ -125,42 +142,14 @@
   transition: background-color 0.18s ease, color 0.18s ease;
 }
 
-.clear-button:hover {
+.dyn-input-clean-button:hover {
   color: var(--dyn-color-text-primary, var(--color-text-primary, #111827));
   background-color: var(--dyn-color-surface-hover, var(--color-surface-hover, #f3f4f6));
 }
 
-.clear-button:focus-visible {
+.dyn-input-clean-button:focus-visible {
   outline: 2px solid var(--dyn-input-border-focus);
   outline-offset: 2px;
-}
-
-.dyn-input-container--currency .dyn-input {
-  padding-left: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)));
-}
-
-.dyn-input-currency-symbol {
-  position: absolute;
-  left: var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem));
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--dyn-color-text-secondary, var(--color-text-secondary, #6b7280));
-  font-weight: var(--dyn-font-weight-medium, var(--font-weight-medium, 500));
-  pointer-events: none;
-}
-
-.dyn-input-currency-code {
-  position: absolute;
-  right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)) + 0.25rem);
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--dyn-color-text-secondary, var(--color-text-secondary, #6b7280));
-  font-size: var(--dyn-font-size-sm, var(--font-size-sm, 0.875rem));
-  pointer-events: none;
-}
-
-.dyn-input--with-spin-buttons {
-  padding-right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)) + 0.5rem);
 }
 
 .dyn-input-spin-buttons {
@@ -197,6 +186,16 @@
 .dyn-input-spin-button:not(:disabled):hover {
   background: var(--dyn-color-surface-hover, var(--color-surface-hover, #f3f4f6));
   color: var(--dyn-color-text-primary, var(--color-text-primary, #111827));
+}
+
+.dyn-input-spin-button--increment {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.dyn-input-spin-button--decrement {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .dyn-input-spin-button:focus-visible {
