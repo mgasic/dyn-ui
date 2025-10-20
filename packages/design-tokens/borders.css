@@ -7,6 +7,7 @@
   --dyn-border-radius-xl: 1rem;
   --dyn-border-radius-pill: 999px;
   --dyn-border-radius-full: 9999px;
+  --dyn-border-radius-control: 0.1875rem; /* 3px */
 
   --dyn-border-width-hairline: 1px;
   --dyn-border-width-thin: 2px;

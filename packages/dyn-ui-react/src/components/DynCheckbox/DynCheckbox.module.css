@@ -48,7 +48,7 @@
 }
 
 .input:focus + .box {
-  box-shadow: 0 0 0 3px var(--dyn-color-primary-alpha, rgba(0, 102, 204, 0.1));
+  box-shadow: var(--dyn-shadow-focus, 0 0 0 3px var(--dyn-color-focus-ring, rgba(37, 99, 235, 0.35)));
 }
 
 .input:focus:not(:focus-visible) + .box {
@@ -60,14 +60,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: var(--dyn-size-control-md, 1.125rem);
+  height: var(--dyn-size-control-md, 1.125rem);
   background-color: var(--dyn-color-surface, #fff);
-  border: 2px solid var(--dyn-color-border, #d1d5db);
-  border-radius: var(--dyn-border-radius-sm, 3px);
+  border: var(--dyn-border-width-thin, 2px) solid var(--dyn-color-border, #d1d5db);
+  border-radius: var(--dyn-border-radius-control, 3px);
   transition: all 0.2s ease;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: var(--dyn-border-width-hairline, 1px);
 }
 
 .box.boxChecked,
@@ -103,30 +103,30 @@
 }
 
 .boxSmall {
-  width: 14px;
-  height: 14px;
-  border-width: 1px;
+  width: var(--dyn-size-control-sm, 0.875rem);
+  height: var(--dyn-size-control-sm, 0.875rem);
+  border-width: var(--dyn-border-width-hairline, 1px);
 }
 
 .boxSmall .checkMark {
-  font-size: 10px;
+  font-size: calc(var(--dyn-font-size-xs, 0.75rem) - var(--dyn-spacing-xxs, 0.125rem));
 }
 
 .boxSmall .indeterminateMark {
-  font-size: 12px;
+  font-size: var(--dyn-font-size-xs, 0.75rem);
 }
 
 .boxLarge {
-  width: 22px;
-  height: 22px;
+  width: var(--dyn-size-control-lg, 1.375rem);
+  height: var(--dyn-size-control-lg, 1.375rem);
 }
 
 .boxLarge .checkMark {
-  font-size: 14px;
+  font-size: var(--dyn-font-size-sm, 0.875rem);
 }
 
 .boxLarge .indeterminateMark {
-  font-size: 16px;
+  font-size: var(--dyn-font-size-base, 1rem);
 }
 
 .checkmark {
@@ -143,14 +143,14 @@
 
 .checkMark {
   color: var(--dyn-color-surface, #fff);
-  font-size: 12px;
+  font-size: var(--dyn-font-size-xs, 0.75rem);
   font-weight: bold;
   line-height: 1;
 }
 
 .indeterminateMark {
   color: var(--dyn-color-surface, #fff);
-  font-size: 14px;
+  font-size: var(--dyn-font-size-sm, 0.875rem);
   font-weight: bold;
   line-height: 1;
 }

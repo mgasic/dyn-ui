@@ -16,7 +16,9 @@ import type { DynSelectProps, DynFieldRef, SelectOption } from '../../types/fiel
 import { DynFieldContainer } from '../DynFieldContainer';
 import { useDynFieldValidation } from '../../hooks/useDynFieldValidation';
 import { DynIcon } from '../DynIcon';
-import './DynSelect.module.css';
+import styles from './DynSelect.module.css';
+
+const getStyleClass = (classKey: keyof typeof styles) => styles[classKey];
 
 export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
   (
@@ -189,18 +191,24 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
 
     const resolvedError = errorMessage ?? (error || undefined);
 
+    const sizeClassName = (() => {
+      const capitalizedSize = size.charAt(0).toUpperCase() + size.slice(1);
+      const key = `selectSize${capitalizedSize}` as keyof typeof styles;
+      return styles[key];
+    })();
+
     const selectClasses = classNames(
-      'dyn-select',
-      `dyn-select--${size}`,
+      getStyleClass('select'),
+      sizeClassName,
       {
-        'dyn-select--open': isOpen,
-        'dyn-select--focused': focused,
-        'dyn-select--error': Boolean(resolvedError),
-        'dyn-select--disabled': disabled,
-        'dyn-select--readonly': readonly,
-        'dyn-select--searchable': searchable,
-        'dyn-select--multiple': multiple,
-        'dyn-select--loading': loading
+        [getStyleClass('selectOpen')]: isOpen,
+        [getStyleClass('selectFocused')]: focused,
+        [getStyleClass('selectError')]: Boolean(resolvedError),
+        [getStyleClass('selectDisabled')]: disabled,
+        [getStyleClass('selectReadonly')]: readonly,
+        [getStyleClass('selectSearchable')]: searchable,
+        [getStyleClass('selectMultiple')]: multiple,
+        [getStyleClass('selectLoading')]: loading
       }
     );
 
@@ -229,7 +237,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
         className={className}
         htmlFor={name}
       >
-        <div ref={selectRef} className="dyn-select-container">
+        <div ref={selectRef} className={getStyleClass('container')}>
           <div
             className={selectClasses}
             onClick={handleToggle}
@@ -253,15 +261,15 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
               value={multiple && Array.isArray(value) ? value.join(',') : value || ''}
             />
 
-            <div className="dyn-select-content">
+            <div className={getStyleClass('selectContent')}>
               {multiple && Array.isArray(selectedOptions) && selectedOptions.length > 0 ? (
-                <div className="dyn-select-tags">
+                <div className={getStyleClass('tags')}>
                   {selectedOptions.map((option) => (
-                    <span key={option.value} className="dyn-select-tag">
+                    <span key={option.value} className={getStyleClass('tag')}>
                       {option.label}
                       <button
                         type="button"
-                        className="dyn-select-tag-remove"
+                        className={getStyleClass('tagRemove')}
                         onClick={(e) => handleRemoveOption(option.value, e)}
                         aria-label={`Remover ${option.label}`}
                       >
@@ -271,41 +279,41 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                   ))}
                 </div>
               ) : (
-                <span className={classNames('dyn-select-text', {
-                  'dyn-select-placeholder': showPlaceholder
+                <span className={classNames(getStyleClass('selectText'), {
+                  [getStyleClass('selectPlaceholder')]: showPlaceholder
                 })}>
                   {getDisplayText()}
                 </span>
               )}
             </div>
 
-            <div className="dyn-select-arrow">
+            <div className={getStyleClass('arrow')}>
               <DynIcon
                 icon={loading ? "dyn-icon-loading" : "dyn-icon-arrow-down"}
                 className={classNames({
-                  'dyn-select-arrow--up': isOpen && !loading
+                  [getStyleClass('arrowUp')]: isOpen && !loading
                 })}
               />
             </div>
           </div>
 
           {isOpen && (
-            <div className="dyn-select-dropdown">
+            <div className={getStyleClass('dropdown')}>
               {searchable && (
-                <div className="dyn-select-search">
+                <div className={getStyleClass('search')}>
                   <input
                     type="text"
                     placeholder="Pesquisar..."
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    className="dyn-select-search-input"
+                    className={getStyleClass('searchInput')}
                   />
                 </div>
               )}
 
-              <div className="dyn-select-options" role="listbox">
+              <div className={getStyleClass('options')} role="listbox">
                 {filteredOptions.length === 0 ? (
-                  <div className="dyn-select-empty">
+                  <div className={getStyleClass('emptyState')}>
                     {searchTerm ? 'Nenhum resultado encontrado' : 'Nenhuma opção disponível'}
                   </div>
                 ) : (
@@ -317,22 +325,22 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                     return (
                       <div
                         key={option.value}
-                        className={classNames('dyn-select-option', {
-                          'dyn-select-option--selected': isSelected,
-                          'dyn-select-option--disabled': option.disabled
+                        className={classNames(getStyleClass('option'), {
+                          [getStyleClass('optionSelected')]: isSelected,
+                          [getStyleClass('optionDisabled')]: option.disabled
                         })}
                         role="option"
                         aria-selected={isSelected}
                         onClick={() => handleOptionSelect(option)}
                       >
                         {multiple && (
-                          <span className={classNames('dyn-select-checkbox', {
-                            'dyn-select-checkbox--checked': isSelected
+                          <span className={classNames(getStyleClass('checkbox'), {
+                            [getStyleClass('checkboxChecked')]: isSelected
                           })}>
                             {isSelected && <DynIcon icon="dyn-icon-check" />}
                           </span>
                         )}
-                        <span className="dyn-select-option-text">{option.label}</span>
+                        <span className={getStyleClass('optionText')}>{option.label}</span>
                       </div>
                     );
                   })

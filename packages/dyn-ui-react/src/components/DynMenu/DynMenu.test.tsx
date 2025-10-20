@@ -122,4 +122,15 @@ describe('DynMenu', () => {
 
     expect(menuRoot).toHaveClass('custom-class');
   });
+
+  it('applies orientation specific class names', () => {
+    const { rerender } = renderMenu();
+
+    let menubar = screen.getByRole('menubar');
+    expect(menubar).toHaveClass('dyn-menu--horizontal');
+
+    rerender(<DynMenu items={menuItems} orientation="vertical" />);
+    menubar = screen.getByRole('menubar');
+    expect(menubar).toHaveClass('dyn-menu--vertical');
+  });
 });

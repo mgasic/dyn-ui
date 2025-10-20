@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useMemo, useState } from 'react';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import styles from './DynListView.module.css';
@@ -11,6 +11,177 @@ const isComplexItem = (item: any) => {
   const displayKeys = new Set(['id','title','label','value','description','icon','disabled','selected']);
   const keys = Object.keys(item || {});
   return keys.filter(k => !displayKeys.has(k)).length >= 3; // threshold can be tuned
+};
+
+const resolveBaseKey = (
+  item: ListViewItem,
+  index: number,
+  itemKey?: DynListViewProps['itemKey']
+): string => {
+  let candidate: unknown;
+  if (typeof itemKey === 'function') {
+    candidate = itemKey(item);
+  } else if (typeof itemKey === 'string') {
+    candidate = (item as Record<string, unknown>)[itemKey];
+  } else if (item.id !== undefined && item.id !== null) {
+    candidate = item.id;
+  } else if (item.value !== undefined && item.value !== null) {
+    candidate = item.value;
+  }
+
+  const normalized = candidate === undefined || candidate === null || candidate === ''
+    ? String(index)
+    : String(candidate);
+
+  return normalized;
+};
+
+const createUniqueKeys = (
+  items: ListViewItem[],
+  itemKey?: DynListViewProps['itemKey']
+) => {
+  const occurrences = new Map<string, number>();
+
+  return items.map((item, index) => {
+    const baseKey = resolveBaseKey(item, index, itemKey);
+    const seen = occurrences.get(baseKey) ?? 0;
+    occurrences.set(baseKey, seen + 1);
+
+    if (seen === 0) return baseKey;
+    return `${baseKey}-${seen}`;
+  });
+};
+
+const createKeyToItemMap = (items: ListViewItem[], keys: string[]) => {
+  const map = new Map<string, ListViewItem>();
+  keys.forEach((key, index) => {
+    map.set(key, items[index]);
+  });
+  return map;
+};
+
+type SelectionInput = string[] | string | undefined;
+
+const toInternalValue = (value: SelectionInput, multi: boolean): string[] | string | undefined => {
+  if (multi) {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string' && value !== '') return [value];
+    return [];
+  }
+
+  if (Array.isArray(value)) return value[0];
+  return value;
+};
+
+const toKeyArray = (value: string[] | string | undefined, multi: boolean): string[] => {
+  if (multi) {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string' && value !== '') return [value];
+    return [];
+  }
+
+  return typeof value === 'string' && value !== '' ? [value] : [];
+};
+
+interface SelectionManagerConfig {
+  multi: boolean;
+  disabled: boolean;
+  controlledValue?: string | string[];
+  defaultValue?: string | string[];
+  onChange?: DynListViewProps['onChange'];
+  onSelectionChange?: DynListViewProps['onSelectionChange'];
+  getSelectedItems: (keys: string[]) => ListViewItem[];
+}
+
+const useSelectionManager = ({
+  multi,
+  disabled,
+  controlledValue,
+  defaultValue,
+  onChange,
+  onSelectionChange,
+  getSelectedItems,
+}: SelectionManagerConfig) => {
+  const isControlled = controlledValue !== undefined;
+  const [selected, setSelected] = useState<string[] | string | undefined>(() => {
+    const initial = isControlled ? controlledValue : defaultValue;
+    return toInternalValue(initial, multi);
+  });
+
+  const updateFromExternal = useCallback(
+    (value?: string | string[]) => {
+      setSelected(toInternalValue(value, multi));
+    },
+    [multi]
+  );
+
+  React.useEffect(() => {
+    if (isControlled) {
+      updateFromExternal(controlledValue);
+    }
+  }, [controlledValue, isControlled, updateFromExternal]);
+
+  const selectedKeys = useMemo(() => toKeyArray(selected, multi), [selected, multi]);
+
+  const updateSelection = useCallback(
+    (next: SelectionInput) => {
+      const internalValue = toInternalValue(next, multi);
+
+      if (!isControlled) {
+        setSelected(internalValue);
+      }
+
+      const keysArray = toKeyArray(internalValue, multi);
+      const items = getSelectedItems(keysArray);
+      const valueForChange = multi ? keysArray : keysArray[0];
+
+      onChange?.(valueForChange as any, multi ? items : items[0]);
+      onSelectionChange?.(keysArray, items);
+    },
+    [getSelectedItems, isControlled, multi, onChange, onSelectionChange]
+  );
+
+  const toggle = useCallback(
+    (key: string) => {
+      if (disabled) return;
+
+      if (multi) {
+        const current = new Set(selectedKeys);
+        if (current.has(key)) {
+          current.delete(key);
+        } else {
+          current.add(key);
+        }
+        updateSelection(Array.from(current));
+      } else {
+        updateSelection(selectedKeys[0] === key ? undefined : key);
+      }
+    },
+    [disabled, multi, selectedKeys, updateSelection]
+  );
+
+  const selectAll = useCallback(
+    (keys: string[]) => {
+      if (disabled) return;
+      updateSelection(multi ? keys : keys[0]);
+    },
+    [disabled, multi, updateSelection]
+  );
+
+  const clearSelection = useCallback(() => {
+    if (disabled) return;
+    updateSelection(multi ? [] : undefined);
+  }, [disabled, multi, updateSelection]);
+
+  const isSelected = useCallback((key: string) => selectedKeys.includes(key), [selectedKeys]);
+
+  return {
+    selectedKeys,
+    isSelected,
+    toggle,
+    selectAll,
+    clearSelection,
+  } as const;
 };
 
 export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function DynListView(
@@ -29,7 +200,7 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
     size,
     height,
     bordered = false,
-    selectedKeys = [],
+    selectedKeys,
     itemKey,
     onChange,
     onSelectionChange,
@@ -45,55 +216,44 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
   const listItems = items.length > 0 ? items : data;
   
   const [internalId] = useState(() => id || generateId('listview'));
-  const isControlled = value !== undefined;
-  const [selected, setSelected] = useState<string[] | string | undefined>(
-    value ?? (multiSelect ? [] : defaultValue)
-  );
   const [activeIndex, setActiveIndex] = useState(0);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-  useEffect(() => { 
-    if (isControlled) setSelected(value as any); 
-  }, [isControlled, value]);
-
-  const itemIds = useMemo(() => 
-    listItems.map((_, i) => `${internalId}-option-${i}`), 
+  const itemIds = useMemo(
+    () => listItems.map((_, i) => `${internalId}-option-${i}`),
     [listItems, internalId]
   );
 
-  const getItemKey = (item: ListViewItem, index: number): string => {
-    if (typeof itemKey === 'function') return itemKey(item);
-    if (typeof itemKey === 'string') return String((item as any)[itemKey]);
-    return item.id ? String(item.id) : item.value ? String(item.value) : String(index);
-  };
+  const uniqueItemKeys = useMemo(
+    () => createUniqueKeys(listItems, itemKey),
+    [itemKey, listItems]
+  );
 
-  const isSelected = (val: string) => {
-    return multiSelect || selectable ? Array.isArray(selected) && selected.includes(val) : selected === val;
-  };
+  const keyToItemMap = useMemo(
+    () => createKeyToItemMap(listItems, uniqueItemKeys),
+    [listItems, uniqueItemKeys]
+  );
 
-  const commit = (vals: string[] | string) => {
-    if (!isControlled) setSelected(vals as any);
-    
-    const valArray = Array.isArray(vals) ? vals : [vals];
-    const selectedItems = listItems.filter((item, idx) => valArray.includes(getItemKey(item, idx)));
-    
-    onChange?.(vals as any, (multiSelect || selectable) ? selectedItems : selectedItems[0]);
-    onSelectionChange?.(valArray, selectedItems);
-  };
+  const getItemsByKeys = useCallback(
+    (keys: string[]) =>
+      keys
+        .map((key) => keyToItemMap.get(key))
+        .filter((item): item is ListViewItem => Boolean(item)),
+    [keyToItemMap]
+  );
 
-  const toggle = (val: string) => {
-    if (disabled) return;
-    if (multiSelect || selectable) {
-      const current = Array.isArray(selected) ? selected : [];
-      const next = current.includes(val) ? current.filter(v => v !== val) : [...current, val];
-      commit(next);
-    } else {
-      commit(val);
-    }
-  };
+  const selection = useSelectionManager({
+    multi: multiSelect || selectable,
+    disabled,
+    controlledValue: selectedKeys ?? value,
+    defaultValue,
+    onChange,
+    onSelectionChange,
+    getSelectedItems: getItemsByKeys,
+  });
 
   const moveActive = (delta: number) => {
-    const count = listItems.length; 
+    const count = listItems.length;
     if (!count) return;
     setActiveIndex(idx => (idx + delta + count) % count);
   };
@@ -109,8 +269,10 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
         e.preventDefault();
         const item = listItems[activeIndex];
         if (item) {
-          const key = getItemKey(item, activeIndex);
-          toggle(key);
+          const key = uniqueItemKeys[activeIndex];
+          if (key) {
+            selection.toggle(key);
+          }
         }
         break;
       }
@@ -129,8 +291,11 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
     height: typeof height === 'number' ? `${height}px` : String(height) 
   } : undefined;
 
-  const allKeys = listItems.map((item, i) => getItemKey(item, i));
-  const allChecked = (multiSelect || selectable) && allKeys.length > 0 && allKeys.every(k => isSelected(k));
+  const allKeys = uniqueItemKeys;
+  const allChecked =
+    (multiSelect || selectable) &&
+    allKeys.length > 0 &&
+    allKeys.every((key) => selection.isSelected(key));
 
   return (
     <div
@@ -158,7 +323,7 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
             role="checkbox"
             aria-checked={allChecked}
             checked={allChecked}
-            onChange={() => commit(allChecked ? [] : allKeys)}
+            onChange={() => selection.selectAll(allChecked ? [] : allKeys)}
           />
           <span className={getStyleClass('option__label')}>Select All</span>
         </div>
@@ -174,8 +339,8 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
         </div>
       ) : (
         listItems.map((item, i) => {
-          const key = getItemKey(item, i);
-          const selectedState = isSelected(key);
+          const key = uniqueItemKeys[i];
+          const selectedState = selection.isSelected(key);
           const title = (item as any).title ?? (item as any).label ?? (item as any).value ?? String((item as any).id ?? i + 1);
           const desc = (item as any).description;
           const complex = isComplexItem(item);
@@ -194,7 +359,7 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
               )}
               onMouseEnter={() => !item.disabled && setActiveIndex(i)}
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => !item.disabled && toggle(key)}
+              onClick={() => !item.disabled && selection.toggle(key)}
             >
               {(selectable || multiSelect) && (
                 <input
@@ -203,7 +368,7 @@ export const DynListView = forwardRef<HTMLDivElement, DynListViewProps>(function
                   aria-checked={!!selectedState}
                   checked={!!selectedState}
                   disabled={item.disabled}
-                  onChange={() => !item.disabled && toggle(key)}
+                  onChange={() => !item.disabled && selection.toggle(key)}
                   onClick={(e) => e.stopPropagation()}
                   className={getStyleClass('option__checkbox')}
                 />
