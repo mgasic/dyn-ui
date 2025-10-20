@@ -47,14 +47,14 @@ const menuItems = [
   }
 ];
 
-<DynMenu menus={menuItems} />
+<DynMenu items={menuItems} />
 \`\`\`
         `
       }
     }
   },
   argTypes: {
-    menus: {
+    items: {
       description: 'Array of menu items with hierarchical structure',
       control: { type: 'object' }
     },
@@ -199,7 +199,7 @@ const basicMenus: MenuItem[] = [
 
 export const Default: Story = {
   args: {
-    menus: sampleMenus,
+    items: sampleMenus,
     collapsed: false,
     filter: true,
     automaticToggle: true,
@@ -210,7 +210,7 @@ export const Default: Story = {
 
 export const Collapsed: Story = {
   args: {
-    menus: sampleMenus,
+    items: sampleMenus,
     collapsed: true,
     filter: false,
     automaticToggle: false,
@@ -221,7 +221,7 @@ export const Collapsed: Story = {
 
 export const WithoutFilter: Story = {
   args: {
-    menus: sampleMenus,
+    items: sampleMenus,
     collapsed: false,
     filter: false,
     automaticToggle: true,
@@ -232,7 +232,7 @@ export const WithoutFilter: Story = {
 
 export const BasicMenu: Story = {
   args: {
-    menus: basicMenus,
+    items: basicMenus,
     collapsed: false,
     filter: false,
     automaticToggle: false
@@ -241,7 +241,7 @@ export const BasicMenu: Story = {
 
 export const CustomLiterals: Story = {
   args: {
-    menus: sampleMenus,
+    items: sampleMenus,
     collapsed: false,
     filter: true,
     automaticToggle: false,
@@ -257,7 +257,7 @@ export const CustomLiterals: Story = {
 
 export const WithBadges: Story = {
   args: {
-    menus: [
+    items: [
       {
         label: 'Notifications',
         icon: 'dyn-icon-bell',
@@ -280,5 +280,17 @@ export const WithBadges: Story = {
     collapsed: false,
     filter: false,
     automaticToggle: false
+  }
+};
+
+export const Vertical: Story = {
+  args: {
+    items: sampleMenus,
+    orientation: 'vertical',
+    collapsed: false,
+    filter: true,
+    automaticToggle: false,
+    logo: 'https://via.placeholder.com/120x32/0066cc/ffffff?text=DynUI',
+    shortLogo: 'https://via.placeholder.com/32x32/0066cc/ffffff?text=D'
   }
 };
