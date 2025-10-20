@@ -3,7 +3,7 @@
  * Part of DYN UI Form Components Group - SCOPE 6
  */
 
-import type { ReactNode } from 'react';
+import type { InputHTMLAttributes, ReactNode } from 'react';
 import type { BaseComponentProps } from './theme';
 export type { DynFieldContainerProps } from '../components/DynFieldContainer/DynFieldContainer.types';
 export type {
@@ -85,7 +85,12 @@ export interface DynCurrencyConfig {
 export type FormatCurrencyValue = (value: number | string, config: DynCurrencyConfig) => string;
 export type ParseCurrencyValue = (value: string, config: DynCurrencyConfig) => number;
 
-export interface DynInputProps extends DynFieldBase {
+export interface DynInputProps
+  extends DynFieldBase,
+    Omit<
+      InputHTMLAttributes<HTMLInputElement>,
+      'size' | 'type' | 'value' | 'defaultValue' | 'onChange' | 'onBlur' | 'onFocus'
+    > {
   type?: InputType;
   size?: InputSize;
   maxLength?: number;
