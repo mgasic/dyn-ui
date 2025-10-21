@@ -38,6 +38,19 @@ describe('DynContainer', () => {
     expect(screen.getByTestId('dyn-container')).toHaveClass('custom-container');
   });
 
+  it('renders a custom element when using the as prop', () => {
+    render(
+      <DynContainer as="section" role="region">
+        <div>Semantic content</div>
+      </DynContainer>
+    );
+
+    const element = screen.getByTestId('dyn-container');
+
+    expect(element.tagName).toBe('SECTION');
+    expect(element).toHaveAttribute('role', 'region');
+  });
+
   it('applies layout modifiers through props', () => {
     render(
       <DynContainer spacing="lg" size="large" direction="horizontal" align="center" justify="between">

@@ -1,4 +1,10 @@
-import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
+import type {
+  ComponentPropsWithoutRef,
+  ComponentRef,
+  CSSProperties,
+  ElementType,
+  ReactNode,
+} from 'react';
 import type { BaseComponentProps } from '../../types/theme';
 import type {
   LayoutAlignment,
@@ -12,6 +18,9 @@ export type DynContainerBackground = 'none' | 'surface' | 'card';
 export type DynContainerLayout = 'fluid' | 'fixed';
 export type DynContainerMaxWidthToken = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type DynContainerSpaceValue = LayoutSpacing | number | string;
+
+type PolymorphicComponentProps<E extends ElementType, P> = P &
+  Omit<ComponentPropsWithoutRef<E>, keyof P>;
 
 export interface DynContainerOwnProps {
   /** Optional title displayed above the content */
@@ -54,14 +63,14 @@ export interface DynContainerOwnProps {
   style?: CSSProperties;
 }
 
-export type DynContainerProps = BaseComponentProps &
-  DynContainerOwnProps &
-  Omit<
-    HTMLAttributes<HTMLDivElement>,
-    keyof BaseComponentProps | keyof DynContainerOwnProps
-  >;
+export type DynContainerBaseProps = BaseComponentProps & DynContainerOwnProps;
 
-export type DynContainerRef = HTMLDivElement;
+export type DynContainerProps<E extends ElementType = 'div'> =
+  PolymorphicComponentProps<E, DynContainerBaseProps> & {
+    as?: E;
+  };
+
+export type DynContainerRef<E extends ElementType = 'div'> = ComponentRef<E>;
 
 export interface DynContainerDefaultProps {
   direction: LayoutDirection;
