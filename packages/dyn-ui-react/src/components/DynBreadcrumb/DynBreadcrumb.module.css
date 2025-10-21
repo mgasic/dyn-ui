@@ -86,6 +86,37 @@
   background-color: var(--dyn-color-primary-alpha-strong);
 }
 
+.breadcrumbLink[data-state='hover'] {
+  color: var(--dyn-color-primary);
+  background-color: var(--dyn-color-primary-alpha);
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+}
+
+.breadcrumbLink[data-state='active'],
+.breadcrumbCurrent[data-state='active'] {
+  color: var(--dyn-color-primary);
+  background-color: var(--dyn-color-primary-alpha-strong);
+}
+
+.breadcrumbLink[data-state='disabled'],
+.breadcrumbLink[aria-disabled='true'] {
+  color: var(--dyn-color-text-disabled);
+  pointer-events: none;
+  cursor: not-allowed;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.breadcrumbLink[data-state='loading'],
+.breadcrumbLink[data-loading],
+.breadcrumbCurrent[data-state='loading'] {
+  cursor: progress;
+  color: var(--dyn-color-text-secondary);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
 .breadcrumbCurrent {
   color: var(--dyn-color-text-primary);
   font-weight: var(--dyn-font-weight-medium);
