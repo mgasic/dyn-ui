@@ -1,91 +1,84 @@
 import '../../../test-setup';
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DynMenuTrigger } from './DynMenuTrigger';
 
 describe('DynMenuTrigger', () => {
-  it('renders a button element by default with menu trigger styling', () => {
-    render(<DynMenuTrigger>Menu</DynMenuTrigger>);
+  it('renders a button element by default with type="button"', () => {
+    render(<DynMenuTrigger>Trigger</DynMenuTrigger>);
 
-    const trigger = screen.getByRole('button', { name: 'Menu' });
-    expect(trigger).toBeInTheDocument();
-    expect(trigger).toHaveAttribute('type', 'button');
-    expect(trigger).toHaveAttribute('data-state', 'closed');
-    expect(trigger).toHaveClass('dyn-menu-trigger');
+    const button = screen.getByRole('button', { name: 'Trigger' });
+    expect(button).toBeInstanceOf(HTMLButtonElement);
+    expect(button).toHaveAttribute('type', 'button');
   });
 
-  it('allows rendering a custom element via the `as` prop', () => {
-    render(
-      <DynMenuTrigger as="a" href="#" role="menuitem" aria-label="Open menu">
-        Open
-      </DynMenuTrigger>
-    );
-
-    const trigger = screen.getByRole('menuitem');
-    expect(trigger.tagName.toLowerCase()).toBe('a');
-    expect(trigger).toHaveAttribute('aria-label', 'Open menu');
-    expect(trigger).not.toHaveAttribute('disabled');
-  });
-
-  it('marks the trigger as open when `isOpen` is provided', () => {
-    render(
-      <DynMenuTrigger isOpen aria-haspopup="menu">
-        Products
-      </DynMenuTrigger>
-    );
-
-    const trigger = screen.getByRole('button', { name: 'Products' });
-    expect(trigger).toHaveAttribute('data-state', 'open');
-    expect(trigger).toHaveClass('dyn-menu-trigger-active');
-  });
-
-  it('prevents user interaction when disabled', async () => {
-    const onClick = vi.fn();
+  it('supports rendering a custom element via the `as` prop', async () => {
     const user = userEvent.setup();
+    const onClick = vi.fn();
     render(
-      <DynMenuTrigger disabled onClick={onClick}>
-        Disabled
+      <DynMenuTrigger as="a" href="#details" onClick={onClick}>
+        Details
       </DynMenuTrigger>
     );
 
-    const trigger = screen.getByRole('button', { name: 'Disabled' });
-    expect(trigger).toBeDisabled();
+    const link = screen.getByRole('link', { name: 'Details' });
+    expect(link).toHaveAttribute('href', '#details');
+
+    await user.click(link);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('prevents interaction when disabled, including custom elements', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <DynMenuTrigger as="div" role="button" disabled onClick={onClick}>
+        Disabled trigger
+      </DynMenuTrigger>
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Disabled trigger' });
+    expect(trigger).toHaveAttribute('aria-disabled', 'true');
+    expect(trigger).toHaveAttribute('tabindex', '-1');
 
     await user.click(trigger);
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('exposes a pressed state data attribute on pointer interaction', () => {
-    render(<DynMenuTrigger>Interact</DynMenuTrigger>);
+  it('toggles pressed state for pointer interactions', () => {
+    render(<DynMenuTrigger>Press me</DynMenuTrigger>);
 
-    const trigger = screen.getByRole('button', { name: 'Interact' });
+    const trigger = screen.getByRole('button', { name: 'Press me' });
+    expect(trigger).not.toHaveAttribute('data-pressed');
 
     fireEvent.pointerDown(trigger);
     expect(trigger).toHaveAttribute('data-pressed', 'true');
 
     fireEvent.pointerUp(trigger);
     expect(trigger).not.toHaveAttribute('data-pressed');
+
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerLeave(trigger);
+    expect(trigger).not.toHaveAttribute('data-pressed');
   });
 
-  it('handles keyboard activation for non-button elements', async () => {
-    const onClick = vi.fn();
-    const user = userEvent.setup();
-    render(
-      <DynMenuTrigger as="div" role="menuitem" tabIndex={0} onClick={onClick}>
-        Keyboard
-      </DynMenuTrigger>
-    );
+  it('sets pressed state on keyboard activation keys', () => {
+    render(<DynMenuTrigger>Keyboard</DynMenuTrigger>);
 
-    const trigger = screen.getByRole('menuitem');
+    const trigger = screen.getByRole('button', { name: 'Keyboard' });
 
-    trigger.focus();
+    fireEvent.keyDown(trigger, { key: ' ' });
+    expect(trigger).toHaveAttribute('data-pressed', 'true');
 
-    await user.keyboard('{Enter}');
-    await waitFor(() => expect(onClick).toHaveBeenCalledTimes(1));
+    fireEvent.keyUp(trigger, { key: ' ' });
+    expect(trigger).not.toHaveAttribute('data-pressed');
 
-    await user.keyboard('[Space]');
-    await waitFor(() => expect(onClick).toHaveBeenCalledTimes(2));
+    fireEvent.keyDown(trigger, { key: 'Enter' });
+    expect(trigger).toHaveAttribute('data-pressed', 'true');
+
+    fireEvent.blur(trigger);
+    expect(trigger).not.toHaveAttribute('data-pressed');
   });
 });

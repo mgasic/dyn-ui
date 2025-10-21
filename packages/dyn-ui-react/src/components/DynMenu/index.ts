@@ -6,4 +6,4 @@ export type {
   DynMenuItem,
   MenuOrientation
 } from './DynMenu.types';
-export type { DynMenuTriggerProps, DynMenuTriggerRef } from '../DynMenuTrigger';
+export type { DynMenuTriggerProps } from '../DynMenuTrigger';

@@ -1,27 +1,17 @@
-.root,
-:global(.dyn-menu-trigger) {
-  --dyn-menu-trigger-hover: var(
-    --dyn-menu-item-hover,
-    var(--dyn-color-surface-hover, #f8fafc)
-  );
-  --dyn-menu-trigger-active: var(
-    --dyn-menu-item-active,
-    var(--dyn-color-primary-subtle, #dbeafe)
-  );
-  --dyn-menu-trigger-focus: var(
-    --dyn-menu-focus,
-    var(--dyn-color-focus-ring, rgba(37, 99, 235, 0.35))
-  );
-  display: flex;
+.trigger {
+  --dyn-menu-trigger-background: transparent;
+  --dyn-menu-trigger-hover: var(--dyn-menu-item-hover, var(--dyn-color-surface-hover, #f8fafc));
+  --dyn-menu-trigger-active: var(--dyn-menu-item-active, var(--dyn-color-primary-subtle, #dbeafe));
+  --dyn-menu-trigger-focus: var(--dyn-menu-focus, rgba(37, 99, 235, 0.35));
+  display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--dyn-spacing-sm, 0.5rem);
-  width: 100%;
+  gap: var(--dyn-spacing-xs, 0.25rem);
   padding: calc(var(--dyn-spacing-sm, 0.5rem) + var(--dyn-spacing-xxs, 0.125rem))
     var(--dyn-spacing-md, 0.75rem);
   border: none;
   border-radius: var(--dyn-border-radius-md, 0.5rem);
-  background-color: transparent;
+  background: var(--dyn-menu-trigger-background);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -31,37 +21,23 @@
     color var(--dyn-duration-normal, 200ms) var(--dyn-timing-standard, ease);
 }
 
-.root:not([data-disabled='true']):hover,
-.root[data-pressed='true'],
-.root:not([data-disabled='true']):active,
-:global(.dyn-menu-trigger:not([data-disabled='true']):hover),
-:global(.dyn-menu-trigger[data-pressed='true']),
-:global(.dyn-menu-trigger:not([data-disabled='true']):active) {
+.trigger[data-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.trigger:not([data-disabled='true']):hover,
+.trigger[data-pressed='true'] {
   background-color: var(--dyn-menu-trigger-hover);
 }
 
-.open,
-.root[data-state='open'],
-:global(.dyn-menu-trigger[data-state='open']) {
+.triggerActive,
+.trigger[data-pressed='true'][data-active='true'] {
   background-color: var(--dyn-menu-trigger-active);
   font-weight: var(--dyn-font-weight-semibold, 600);
 }
 
-.disabled,
-.root[data-disabled='true'],
-:global(.dyn-menu-trigger[data-disabled='true']) {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pressed,
-.root[data-pressed='true'],
-:global(.dyn-menu-trigger[data-pressed='true']) {
-  background-color: var(--dyn-menu-trigger-hover);
-}
-
-.root:focus-visible,
-:global(.dyn-menu-trigger:focus-visible) {
+.trigger:focus-visible {
   outline: var(--dyn-border-width-thin, 2px) solid var(--dyn-menu-trigger-focus);
   outline-offset: var(--dyn-spacing-xxs, 0.125rem);
 }
