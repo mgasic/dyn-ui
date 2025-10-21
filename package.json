@@ -46,16 +46,20 @@
     "release": "pnpm run release:version && pnpm install --frozen-lockfile && pnpm run release:publish",
     "changelog:generate": "bash -c 'mkdir -p reports/changelog && pnpm exec changeset status --output reports/changelog/status.json || (echo \"{\\\"error\\\":\\\"changeset status failed\\\"}\" > reports/changelog/status.json)'",
     "metrics:collect": "pnpm exec tsx scripts/collect-metrics.ts",
-    "clean": "rimraf dist && rimraf packages/*/dist && rimraf **/.tsbuildinfo && rimraf node_modules/.cache",
+
+    "clean": "node scripts/clean.mjs",
     "clean:ts": "rimraf **/.tsbuildinfo && pnpm exec tsc --build --clean",
+
     "typecheck:dyn-ui": "pnpm exec tsc --project packages/dyn-ui-react/tsconfig.json --noEmit",
     "typecheck:strict": "pnpm exec tsc --project packages/dyn-ui-react/tsconfig.json --noEmit --skipLibCheck false",
     "typecheck:watch": "pnpm exec tsc --project packages/dyn-ui-react/tsconfig.json --noEmit --watch",
     "typecheck:trace": "pnpm exec tsc --project packages/dyn-ui-react/tsconfig.json --traceResolution --noEmit",
     "typecheck:list": "pnpm exec tsc --project packages/dyn-ui-react/tsconfig.json --listFiles --noEmit",
     "typecheck:build": "pnpm exec tsc --build --verbose --listFiles",
+
     "debug:deps": "pnpm exec tsc --showConfig --project packages/dyn-ui-react/tsconfig.json",
     "debug:resolution": "pnpm exec tsc --project packages/dyn-ui-react/tsconfig.json --traceResolution --noEmit 2>&1 | tee typescript-debug.log",
+
     "validate:all": "pnpm run typecheck && pnpm run lint && pnpm run format:check"
   },
   "devDependencies": {
