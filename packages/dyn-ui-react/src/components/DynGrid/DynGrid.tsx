@@ -53,6 +53,10 @@ const DynGrid = forwardRef<HTMLDivElement, DynGridProps>((props, ref) => {
     className,
     id,
     'data-testid': dataTestId = DYN_GRID_DEFAULT_PROPS['data-testid'],
+    role,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': ariaDescribedBy,
     ...rest
   } = props;
 
@@ -219,7 +223,17 @@ const DynGrid = forwardRef<HTMLDivElement, DynGridProps>((props, ref) => {
 
   if (loading) {
     return (
-      <div ref={ref} className={gridClassName} id={id} data-testid={dataTestId} {...rest}>
+      <div
+        ref={ref}
+        className={gridClassName}
+        id={id}
+        data-testid={dataTestId}
+        role={role}
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
+        aria-describedby={ariaDescribedBy}
+        {...rest}
+      >
         <div className={styles.loadingState} role="status" aria-live="polite">
           <div className={styles.spinner} aria-hidden="true" />
           <span>Loading data…</span>
@@ -230,7 +244,17 @@ const DynGrid = forwardRef<HTMLDivElement, DynGridProps>((props, ref) => {
 
   if (data.length === 0) {
     return (
-      <div ref={ref} className={gridClassName} id={id} data-testid={dataTestId} {...rest}>
+      <div
+        ref={ref}
+        className={gridClassName}
+        id={id}
+        data-testid={dataTestId}
+        role={role}
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
+        aria-describedby={ariaDescribedBy}
+        {...rest}
+      >
         <div className={styles.emptyState}>
           {typeof emptyText === 'string' ? (
             <span>{emptyText}</span>
@@ -243,7 +267,17 @@ const DynGrid = forwardRef<HTMLDivElement, DynGridProps>((props, ref) => {
   }
 
   return (
-    <div ref={ref} className={gridClassName} id={id} data-testid={dataTestId} {...rest}>
+    <div
+      ref={ref}
+      className={gridClassName}
+      id={id}
+      data-testid={dataTestId}
+      role={role}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      aria-describedby={ariaDescribedBy}
+      {...rest}
+    >
       <div className={styles.wrapper}>
         <table className={styles.table} role="table">
           <thead className={styles.header}>
