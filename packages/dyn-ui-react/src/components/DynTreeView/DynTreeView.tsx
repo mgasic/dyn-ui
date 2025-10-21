@@ -210,32 +210,27 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
   }, [visibleNodes, focusedKey, firstFocusableKey]);
 
   useEffect(() => {
-    if (focusedKey) {
-      const treeElement = treeRef.current;
-      const ref = nodeRefs.current[focusedKey];
-      const activeElement = document.activeElement as HTMLElement | null;
+    if (!focusedKey) {
+      return;
+    }
 
-      if (!treeElement || !ref || !activeElement || !treeElement.contains(activeElement)) {
-        return;
-      }
+    const treeElement = treeRef.current;
+    const ref = nodeRefs.current[focusedKey];
+    const activeElement = document.activeElement as HTMLElement | null;
 
-      const isTreeRoot = activeElement === treeElement;
-      const isTreeItem = activeElement.getAttribute('role') === 'treeitem';
-      if (!isTreeRoot && !isTreeItem) {
-        return;
-      }
-
-      ref.focus();
+    if (!treeElement || !ref || !activeElement || !treeElement.contains(activeElement)) {
+      return;
     }
 
     const isTreeRoot = activeElement === treeElement;
     const isTreeItem = activeElement.getAttribute('role') === 'treeitem';
-
     if (!isTreeRoot && !isTreeItem) {
       return;
     }
 
-    ref.focus();
+    if (activeElement !== ref) {
+      ref.focus();
+    }
   }, [focusedKey, visibleNodes]);
 
   const renderTreeNode = useCallback(
