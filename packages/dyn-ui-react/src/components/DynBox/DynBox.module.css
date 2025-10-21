@@ -51,6 +51,48 @@
   row-gap: var(--dyn-box-row-gap, var(--dyn-box-gap, 0));
   column-gap: var(--dyn-box-column-gap, var(--dyn-box-gap, 0));
 
+  --dyn-box-padding-sm-down: var(--dyn-box-padding-sm, var(--dyn-box-padding, 0));
+  --dyn-box-padding-md-down: var(
+    --dyn-box-padding-md,
+    var(--dyn-box-padding-sm-down)
+  );
+  --dyn-box-padding-lg-down: var(
+    --dyn-box-padding-lg,
+    var(--dyn-box-padding-md-down)
+  );
+  --dyn-box-padding-xl-down: var(
+    --dyn-box-padding-xl,
+    var(--dyn-box-padding-lg-down)
+  );
+
+  --dyn-box-margin-sm-down: var(--dyn-box-margin-sm, var(--dyn-box-margin, 0));
+  --dyn-box-margin-md-down: var(
+    --dyn-box-margin-md,
+    var(--dyn-box-margin-sm-down)
+  );
+  --dyn-box-margin-lg-down: var(
+    --dyn-box-margin-lg,
+    var(--dyn-box-margin-md-down)
+  );
+  --dyn-box-margin-xl-down: var(
+    --dyn-box-margin-xl,
+    var(--dyn-box-margin-lg-down)
+  );
+
+  --dyn-box-gap-sm-down: var(--dyn-box-gap-sm, var(--dyn-box-gap, 0));
+  --dyn-box-gap-md-down: var(
+    --dyn-box-gap-md,
+    var(--dyn-box-gap-sm-down)
+  );
+  --dyn-box-gap-lg-down: var(
+    --dyn-box-gap-lg,
+    var(--dyn-box-gap-md-down)
+  );
+  --dyn-box-gap-xl-down: var(
+    --dyn-box-gap-xl,
+    var(--dyn-box-gap-lg-down)
+  );
+
   transition: var(
     --dyn-box-transition,
     var(--dyn-transition-base, var(--transition-base, 150ms ease-in-out))
@@ -59,7 +101,7 @@
 
 @media (min-width: 40rem) {
   .box {
-    padding: var(--dyn-box-padding-sm, var(--dyn-box-padding, 0));
+    padding: var(--dyn-box-padding-sm-down);
     padding-top: var(
       --dyn-box-padding-top-sm,
       var(
@@ -101,7 +143,7 @@
       )
     );
 
-    margin: var(--dyn-box-margin-sm, var(--dyn-box-margin, 0));
+    margin: var(--dyn-box-margin-sm-down);
     margin-top: var(
       --dyn-box-margin-top-sm,
       var(
@@ -143,7 +185,7 @@
       )
     );
 
-    gap: var(--dyn-box-gap-sm, var(--dyn-box-gap, 0));
+    gap: var(--dyn-box-gap-sm-down);
     row-gap: var(
       --dyn-box-row-gap-sm,
       var(--dyn-box-gap-sm, var(--dyn-box-row-gap, var(--dyn-box-gap, 0)))
@@ -157,10 +199,7 @@
 
 @media (min-width: 48rem) {
   .box {
-    padding: var(
-      --dyn-box-padding-md,
-      var(--dyn-box-padding-sm, var(--dyn-box-padding, 0))
-    );
+    padding: var(--dyn-box-padding-md-down);
     padding-top: var(
       --dyn-box-padding-top-md,
       var(
@@ -250,10 +289,7 @@
       )
     );
 
-    margin: var(
-      --dyn-box-margin-md,
-      var(--dyn-box-margin-sm, var(--dyn-box-margin, 0))
-    );
+    margin: var(--dyn-box-margin-md-down);
     margin-top: var(
       --dyn-box-margin-top-md,
       var(
@@ -343,10 +379,7 @@
       )
     );
 
-    gap: var(
-      --dyn-box-gap-md,
-      var(--dyn-box-gap-sm, var(--dyn-box-gap, 0))
-    );
+    gap: var(--dyn-box-gap-md-down);
     row-gap: var(
       --dyn-box-row-gap-md,
       var(
@@ -372,13 +405,7 @@
 
 @media (min-width: 64rem) {
   .box {
-    padding: var(
-      --dyn-box-padding-lg,
-      var(
-        --dyn-box-padding-md,
-        var(--dyn-box-padding-sm, var(--dyn-box-padding, 0))
-      )
-    );
+    padding: var(--dyn-box-padding-lg-down);
     padding-top: var(
       --dyn-box-padding-top-lg,
       var(
@@ -504,13 +531,7 @@
       )
     );
 
-    margin: var(
-      --dyn-box-margin-lg,
-      var(
-        --dyn-box-margin-md,
-        var(--dyn-box-margin-sm, var(--dyn-box-margin, 0))
-      )
-    );
+    margin: var(--dyn-box-margin-lg-down);
     margin-top: var(
       --dyn-box-margin-top-lg,
       var(
@@ -636,13 +657,7 @@
       )
     );
 
-    gap: var(
-      --dyn-box-gap-lg,
-      var(
-        --dyn-box-gap-md,
-        var(--dyn-box-gap-sm, var(--dyn-box-gap, 0))
-      )
-    );
+    gap: var(--dyn-box-gap-lg-down);
     row-gap: var(
       --dyn-box-row-gap-lg,
       var(
@@ -680,16 +695,7 @@
 
 @media (min-width: 80rem) {
   .box {
-    padding: var(
-      --dyn-box-padding-xl,
-      var(
-        --dyn-box-padding-lg,
-        var(
-          --dyn-box-padding-md,
-          var(--dyn-box-padding-sm, var(--dyn-box-padding, 0))
-        )
-      )
-    );
+    padding: var(--dyn-box-padding-xl-down);
     padding-top: var(
       --dyn-box-padding-top-xl,
       var(
@@ -863,16 +869,7 @@
       )
     );
 
-    margin: var(
-      --dyn-box-margin-xl,
-      var(
-        --dyn-box-margin-lg,
-        var(
-          --dyn-box-margin-md,
-          var(--dyn-box-margin-sm, var(--dyn-box-margin, 0))
-        )
-      )
-    );
+    margin: var(--dyn-box-margin-xl-down);
     margin-top: var(
       --dyn-box-margin-top-xl,
       var(
@@ -1046,16 +1043,7 @@
       )
     );
 
-    gap: var(
-      --dyn-box-gap-xl,
-      var(
-        --dyn-box-gap-lg,
-        var(
-          --dyn-box-gap-md,
-          var(--dyn-box-gap-sm, var(--dyn-box-gap, 0))
-        )
-      )
-    );
+    gap: var(--dyn-box-gap-xl-down);
     row-gap: var(
       --dyn-box-row-gap-xl,
       var(
