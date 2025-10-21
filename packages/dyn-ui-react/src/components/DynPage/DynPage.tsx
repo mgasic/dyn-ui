@@ -101,19 +101,30 @@ const renderActionButtons = (actions: DynPageAction[], size: LayoutSize | undefi
 
   return (
     <div className={styles.actions}>
-      {actions.map((action) => (
-        <DynButton
-          key={action.key}
-          kind={(action.type ?? 'secondary') as DynButtonKind}
-          size={size === 'large' ? 'large' : 'medium'}
-          disabled={action.disabled}
-          loading={action.loading}
-          onClick={action.onClick}
-          icon={action.icon}
-        >
-          {action.title}
-        </DynButton>
-      ))}
+      {actions.map((action) => {
+        const variant: DynButtonVariant =
+          action.type === 'primary'
+            ? 'primary'
+            : action.type === 'secondary'
+              ? 'secondary'
+              : 'primary';
+        const isDanger = action.type === 'danger';
+
+        return (
+          <DynButton
+            key={action.key}
+            variant={variant}
+            danger={isDanger}
+            size={size === 'large' ? 'large' : 'medium'}
+            disabled={action.disabled}
+            loading={action.loading}
+            onClick={action.onClick}
+            startIcon={action.icon}
+          >
+            {action.title}
+          </DynButton>
+        );
+      })}
     </div>
   );
 };
@@ -206,35 +217,59 @@ const DynPageComponent = <E extends ElementType = 'main'>(
     return renderBreadcrumbItems(breadcrumbs);
   }, [breadcrumbs]);
 
-    return (
-      <div className={styles.actions}>
-        {actions.map((action) => {
-          const variant: DynButtonVariant =
-            action.type === 'primary'
-              ? 'primary'
-              : action.type === 'secondary'
-                ? 'secondary'
-                : 'primary';
-          const isDanger = action.type === 'danger';
+  const computedActions = useMemo(
+    () => renderActionButtons(actions, size),
+    [actions, size]
+  );
 
-          return (
-            <DynButton
-              key={action.key}
-              variant={variant}
-              danger={isDanger}
-              size={size === 'large' ? 'large' : 'medium'}
-              disabled={action.disabled}
-              loading={action.loading}
-              onClick={action.onClick}
-              startIcon={action.icon}
-            >
-              {action.title}
-            </DynButton>
-          );
-        })}
-      </div>
+  const headerContent = useMemo(() => {
+    if (slots?.header) {
+      return slots.header({
+        title,
+        subtitle,
+        breadcrumbs,
+        actions,
+        titleId,
+        renderBreadcrumbs: memoizedRenderBreadcrumbs,
+        renderActions: () => computedActions,
+      });
+    }
+
+    const breadcrumbsElement = memoizedRenderBreadcrumbs();
+    const hasTitleContent = Boolean(title || subtitle || computedActions);
+
+    if (!breadcrumbsElement && !hasTitleContent) {
+      return null;
+    }
+
+    return (
+      <>
+        {breadcrumbsElement}
+        {hasTitleContent && (
+          <div className={styles.titleSection}>
+            <div className={styles.titleContent}>
+              {title ? (
+                <h1 id={titleId} className={styles.title}>
+                  {title}
+                </h1>
+              ) : null}
+              {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
+            </div>
+            {computedActions}
+          </div>
+        )}
+      </>
     );
-  };
+  }, [
+    actions,
+    breadcrumbs,
+    computedActions,
+    memoizedRenderBreadcrumbs,
+    slots,
+    subtitle,
+    title,
+    titleId,
+  ]);
 
   if (loading) {
     return (
