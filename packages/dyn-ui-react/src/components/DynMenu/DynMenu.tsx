@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { DynMenuTrigger } from '../DynMenuTrigger';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import { DynMenuItem as DynMenuButton } from '../DynMenuItem';
@@ -35,7 +36,11 @@ const findNextEnabled = (items: DynMenuEntry[], start: number, delta: number) =>
   return start;
 };
 
-export const DynMenu: React.FC<DynMenuProps> = ({
+type DynMenuComponentType = React.FC<DynMenuProps> & {
+  Trigger: typeof DynMenuTrigger;
+};
+
+const DynMenuComponent: React.FC<DynMenuProps> = ({
   items,
   menus,
   orientation = 'horizontal',
@@ -241,7 +246,7 @@ export const DynMenu: React.FC<DynMenuProps> = ({
   };
 
   const handleItemClick = (index: number) => {
-    if (resolvedItems[index]?.disabled) return;
+    if (isMenuItemDisabled(resolvedItems[index])) return;
     if (ignoreClickRef.current !== null) {
       if (ignoreClickRef.current === index) {
         ignoreClickRef.current = null;
@@ -454,5 +459,9 @@ export const DynMenu: React.FC<DynMenuProps> = ({
     </div>
   );
 };
+
+export const DynMenu = Object.assign(DynMenuComponent, {
+  Trigger: DynMenuTrigger
+}) as DynMenuComponentType;
 
 export default DynMenu;
