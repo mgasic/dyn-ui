@@ -272,7 +272,11 @@ export const DynStepper = forwardRef<DynStepperRef, DynStepperProps>(
       return cn(...classes);
     };
 
-  const getStepId = (index: number) => `${internalId}-step-${index}`;
+    const getStepLabel = (step: StepItem, index: number) => {
+      return step.title || step.label || `Step ${index + 1}`;
+    };
+
+    const getStepId = (index: number) => `${internalId}-step-${index}`;
     const getPanelId = (index: number) => `${internalId}-panel-${index}`;
     const getStepDescId = (index: number) => `${internalId}-step-${index}-desc`;
 
@@ -327,7 +331,7 @@ export const DynStepper = forwardRef<DynStepperRef, DynStepperProps>(
           {steps.map((step, index) => (
             <li key={step.id || index} className={getItemClassName(index)}>
               <button
-                aria-label={step.title ? `${step.title} ${step.title}` : undefined}
+                aria-label={getStepLabel(step, index)}
                 aria-current={index === clampedActiveStep ? 'step' : undefined}
                 aria-selected={variant === 'tabs' ? index === clampedActiveStep : undefined}
                 className={getButtonClassName(index)}
@@ -350,7 +354,7 @@ export const DynStepper = forwardRef<DynStepperRef, DynStepperProps>(
                     </span>
                     {showLabels && (
                       <span className={getStyleClass('button__label')}>
-                        {step.title || step.label || `Step ${index + 1}`}
+                        {getStepLabel(step, index)}
                       </span>
                     )}
                   </>
