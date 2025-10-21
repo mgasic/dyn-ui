@@ -36,6 +36,8 @@ const DynDividerComponent = (
   const ariaLabel =
     ariaLabelProp ?? (!labelId && typeof labelContent === 'string' ? labelContent : undefined);
 
+  const role = _role ?? 'separator';
+
   const variantClass = styles[`variant${toPascalCase(variant)}` as keyof typeof styles];
   const sizeClass = styles[`size${toPascalCase(size)}` as keyof typeof styles];
   const colorClass = styles[`color${toPascalCase(color)}` as keyof typeof styles];
@@ -57,7 +59,7 @@ const DynDividerComponent = (
     <div
       ref={ref}
       id={id}
-      role="separator"
+      role={role}
       aria-orientation={orientation}
       aria-labelledby={ariaLabelledByProp ?? labelId}
       aria-label={ariaLabel}
