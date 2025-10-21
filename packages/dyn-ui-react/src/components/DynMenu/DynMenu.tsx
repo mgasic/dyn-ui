@@ -1,11 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
+import { DynMenuItem as DynMenuItemElement } from '../DynMenuItem';
 import styles from './DynMenu.module.css';
 import type { DynMenuProps, DynMenuItem } from './DynMenu.types';
 import { DynMenuTrigger } from '../DynMenuTrigger';
 
 const getStyleClass = (n: string) => (styles as Record<string, string>)[n] || '';
+
+const isMenuItemDisabled = (item?: MenuItem | null) => Boolean(item?.disabled || item?.loading);
 
 export const DynMenu: React.FC<DynMenuProps> = ({
   items,
@@ -20,19 +29,20 @@ export const DynMenu: React.FC<DynMenuProps> = ({
   ...rest
 }) => {
   const [internalId] = useState(() => id || generateId('menu'));
-  const resolvedItems = useMemo<DynMenuItem[]>(
+  const resolvedItems = useMemo<MenuItem[]>(
     () => (items && items.length ? items : menus ?? []),
     [items, menus]
   );
   const isHorizontal = orientation === 'horizontal';
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [submenuFocusIndex, setSubmenuFocusIndex] = useState<Record<number, number>>({});
   const firstEnabledIndex = useMemo(
-    () => resolvedItems.findIndex((item) => !item.disabled),
+    () => resolvedItems.findIndex((item) => !isMenuItemDisabled(item)),
     [resolvedItems]
   );
   const lastEnabledIndex = useMemo(() => {
     for (let i = resolvedItems.length - 1; i >= 0; i -= 1) {
-      if (!resolvedItems[i]?.disabled) return i;
+      if (!isMenuItemDisabled(resolvedItems[i])) return i;
     }
     return -1;
   }, [resolvedItems]);
@@ -42,7 +52,7 @@ export const DynMenu: React.FC<DynMenuProps> = ({
   const [subFocusIndex, setSubFocusIndex] = useState<Record<number, number>>({});
 
   const menubarRef = useRef<HTMLDivElement | null>(null);
-  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const itemRefs = useRef<Array<HTMLElement | null>>([]);
   const submenuRefs = useRef<Array<HTMLDivElement | null>>([]);
   const ignoreClickRef = useRef<number | null>(null);
 
@@ -70,8 +80,8 @@ export const DynMenu: React.FC<DynMenuProps> = ({
     }
 
     const item = resolvedItems[openIndex];
-    const subItems = (item?.children ?? item?.subItems ?? []) as DynMenuItem[];
-    const firstEnabledSubIndex = subItems.findIndex((sub) => !sub.disabled);
+    const subItems = (item?.children ?? item?.subItems ?? []) as MenuItem[];
+    const firstEnabledSubIndex = subItems.findIndex((sub) => !isMenuItemDisabled(sub));
     setSubFocusIndex(() =>
       firstEnabledSubIndex >= 0 ? { [openIndex]: firstEnabledSubIndex } : {}
     );
@@ -122,13 +132,91 @@ export const DynMenu: React.FC<DynMenuProps> = ({
       let next = start;
       for (let i = 0; i < visibleMenuCount; i += 1) {
         next = (next + delta + visibleMenuCount) % visibleMenuCount;
-        if (!resolvedItems[next]?.disabled) {
+        if (!isMenuItemDisabled(resolvedItems[next])) {
           return next;
         }
       }
       return start;
     });
   };
+
+  const closeAll = useCallback(() => {
+    setOpenIndex(null);
+    setSubmenuFocusIndex({});
+  }, []);
+
+  useEffect(() => {
+    if (openIndex === null) return;
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (target && menubarRef.current?.contains(target)) return;
+      closeAll();
+    };
+
+    const handleFocusIn = (event: FocusEvent) => {
+      const target = event.target as Node | null;
+      if (target && menubarRef.current?.contains(target)) return;
+      closeAll();
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+    document.addEventListener('focusin', handleFocusIn);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+      document.removeEventListener('focusin', handleFocusIn);
+    };
+  }, [closeAll, openIndex]);
+
+  const focusSubmenuItem = useCallback((menuIdx: number, subIdx: number) => {
+    const button = submenuItemRefs.current[menuIdx]?.[subIdx];
+    if (button) {
+      button.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (openIndex === null) return;
+
+    const childItems =
+      resolvedItems[openIndex]?.children ?? resolvedItems[openIndex]?.subItems ?? [];
+
+    if (!childItems.length) return;
+
+    const firstEnabled = childItems.findIndex((child) => !child.disabled);
+    setSubmenuFocusIndex((prev) => ({
+      ...prev,
+      [openIndex]: firstEnabled
+    }));
+
+    if (firstEnabled >= 0) {
+      // Defer focusing until refs have been updated in the DOM
+      const focusTask = () => {
+        focusSubmenuItem(openIndex, firstEnabled);
+      };
+      if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+        window.requestAnimationFrame(focusTask);
+      } else {
+        setTimeout(focusTask, 0);
+      }
+    }
+  }, [focusSubmenuItem, openIndex, resolvedItems]);
+
+  const updateSubmenuFocus = useCallback(
+    (menuIdx: number, nextIdx: number) => {
+      setSubmenuFocusIndex((prev) => ({
+        ...prev,
+        [menuIdx]: nextIdx
+      }));
+      if (nextIdx >= 0) {
+        focusSubmenuItem(menuIdx, nextIdx);
+      }
+    },
+    [focusSubmenuItem]
+  );
 
   const onMenubarKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const horizontal = isHorizontal;
@@ -172,7 +260,7 @@ export const DynMenu: React.FC<DynMenuProps> = ({
       case 'Enter':
       case ' ': {
         e.preventDefault();
-        if (focusIndex >= 0 && !resolvedItems[focusIndex]?.disabled) {
+        if (focusIndex >= 0 && !isMenuItemDisabled(resolvedItems[focusIndex])) {
           setOpenIndex((prev) => (prev === focusIndex ? null : focusIndex));
         }
         break;
@@ -184,7 +272,7 @@ export const DynMenu: React.FC<DynMenuProps> = ({
   };
 
   const findNextEnabledSubIndex = (
-    items: DynMenuItem[],
+    items: MenuItem[],
     start: number,
     delta: number
   ) => {
@@ -192,7 +280,7 @@ export const DynMenu: React.FC<DynMenuProps> = ({
     let next = start;
     for (let i = 0; i < items.length; i += 1) {
       next = (next + delta + items.length) % items.length;
-      if (!items[next]?.disabled) {
+      if (!isMenuItemDisabled(items[next])) {
         return next;
       }
     }
@@ -200,7 +288,7 @@ export const DynMenu: React.FC<DynMenuProps> = ({
   };
 
   const handleItemClick = (index: number) => {
-    if (resolvedItems[index]?.disabled) return;
+    if (isMenuItemDisabled(resolvedItems[index])) return;
     if (ignoreClickRef.current !== null) {
       if (ignoreClickRef.current === index) {
         ignoreClickRef.current = null;
@@ -223,6 +311,94 @@ export const DynMenu: React.FC<DynMenuProps> = ({
       }
     }
     closeAll();
+  };
+
+  const onSubmenuKeyDown = (
+    menuIdx: number,
+    childItems: DynMenuItem[]
+  ) => (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const visibleCount = childItems.length;
+    if (!visibleCount) return;
+
+    const findNextEnabled = (start: number, delta: number) => {
+      if (!visibleCount) return -1;
+      let next = start;
+      for (let i = 0; i < visibleCount; i += 1) {
+        next = (next + delta + visibleCount) % visibleCount;
+        if (!childItems[next]?.disabled) {
+          return next;
+        }
+      }
+      return start;
+    };
+
+    const current = submenuFocusIndex[menuIdx] ?? -1;
+
+    switch (e.key) {
+      case 'ArrowDown': {
+        e.preventDefault();
+        e.stopPropagation();
+        const startIndex = current >= 0 ? current : findNextEnabled(-1, 1);
+        if (startIndex === -1) return;
+        const nextIdx = findNextEnabled(startIndex, 1);
+        updateSubmenuFocus(menuIdx, nextIdx);
+        break;
+      }
+      case 'ArrowUp': {
+        e.preventDefault();
+        e.stopPropagation();
+        const startIndex = current >= 0 ? current : findNextEnabled(1, -1);
+        if (startIndex === -1) return;
+        const nextIdx = findNextEnabled(startIndex, -1);
+        updateSubmenuFocus(menuIdx, nextIdx);
+        break;
+      }
+      case 'Home': {
+        e.preventDefault();
+        e.stopPropagation();
+        const firstEnabledSub = findNextEnabled(-1, 1);
+        updateSubmenuFocus(menuIdx, firstEnabledSub);
+        break;
+      }
+      case 'End': {
+        e.preventDefault();
+        e.stopPropagation();
+        const lastEnabledSub = findNextEnabled(0, -1);
+        updateSubmenuFocus(menuIdx, lastEnabledSub);
+        break;
+      }
+      case 'Enter':
+      case ' ': {
+        e.preventDefault();
+        e.stopPropagation();
+        if (current >= 0) {
+          const currentItem = childItems[current];
+          if (!currentItem?.disabled) {
+            onSubItemClick(currentItem?.action);
+          }
+        }
+        break;
+      }
+      case 'Escape':
+      case 'ArrowLeft': {
+        e.preventDefault();
+        e.stopPropagation();
+        closeAll();
+        itemRefs.current[menuIdx]?.focus();
+        break;
+      }
+      case 'ArrowRight': {
+        if (isHorizontal) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeAll();
+          moveFocus(1);
+        }
+        break;
+      }
+      default:
+        break;
+    }
   };
 
   return (
@@ -250,10 +426,10 @@ export const DynMenu: React.FC<DynMenuProps> = ({
         const menuId = `${internalId}-submenu-${idx}`;
         const childItems = item.children ?? item.subItems ?? [];
         const activeSubIndex = subFocusIndex[idx];
-        const firstEnabledSubIndex = childItems.findIndex((sub) => !sub.disabled);
+        const firstEnabledSubIndex = childItems.findIndex((sub) => !isMenuItemDisabled(sub));
         const lastEnabledSubIndex = (() => {
           for (let s = childItems.length - 1; s >= 0; s -= 1) {
-            if (!childItems[s]?.disabled) return s;
+            if (!isMenuItemDisabled(childItems[s])) return s;
           }
           return -1;
         })();
@@ -263,7 +439,7 @@ export const DynMenu: React.FC<DynMenuProps> = ({
           event: React.KeyboardEvent<HTMLDivElement>
         ) => {
           if (!childItems.length) return;
-          const items = childItems as DynMenuItem[];
+          const items = childItems as MenuItem[];
           switch (event.key) {
             case 'ArrowDown':
               event.preventDefault();
@@ -319,7 +495,7 @@ export const DynMenu: React.FC<DynMenuProps> = ({
                   : -1;
               const activeItem =
                 activeIndex === -1 ? undefined : items[activeIndex];
-              if (!activeItem || activeItem.disabled) return;
+              if (!activeItem || isMenuItemDisabled(activeItem)) return;
               ignoreClickRef.current = idx;
               onSubItemClick(activeItem.action);
               setFocusIndex(idx);
@@ -344,9 +520,8 @@ export const DynMenu: React.FC<DynMenuProps> = ({
               className={cn(
                 getStyleClass('menubar__button'),
                 isOpen && getStyleClass('menubar__button--open'),
-                'dyn-menu-item',
                 isOpen && 'dyn-menu-item-active',
-                item.disabled && 'dyn-menu-item-disabled'
+                (item.disabled || item.loading) && 'dyn-menu-item-disabled'
               )}
               aria-haspopup={childItems.length ? 'menu' : undefined}
               aria-expanded={childItems.length ? isOpen : undefined}
@@ -363,36 +538,35 @@ export const DynMenu: React.FC<DynMenuProps> = ({
                 role="menu"
                 aria-labelledby={buttonId}
                 aria-activedescendant={
-                  currentSubIndex !== -1 ? `${menuId}-opt-${currentSubIndex}` : undefined
+                  submenuFocusIndex[idx] !== undefined && submenuFocusIndex[idx] >= 0
+                    ? `${menuId}-opt-${submenuFocusIndex[idx]}`
+                    : undefined
                 }
-                tabIndex={-1}
                 className={cn(getStyleClass('menu'), 'dyn-menu-subitems')}
-                ref={(el) => {
-                  submenuRefs.current[idx] = el;
-                }}
-                onKeyDown={handleSubmenuKeyDown}
+                tabIndex={-1}
+                onKeyDown={onSubmenuKeyDown(idx, childItems)}
               >
                 {childItems.map((sub, sidx) => (
-                  <button
+                  <DynMenuItemElement
                     key={`${menuId}-opt-${sidx}`}
                     id={`${menuId}-opt-${sidx}`}
-                    role="menuitem"
-                    type="button"
                     className={cn(
                       getStyleClass('menu__item'),
-                      'dyn-menu-item',
                       currentSubIndex === sidx && 'dyn-menu-item-active'
                     )}
                     tabIndex={-1}
-                    data-active={currentSubIndex === sidx ? 'true' : undefined}
+                    active={currentSubIndex === sidx}
                     disabled={sub.disabled}
+                    loading={sub.loading}
+                    ariaLabel={sub.ariaLabel}
+                    aria-labelledby={sub.ariaLabelledBy}
+                    aria-describedby={sub.ariaDescribedBy}
+                    label={sub.label}
                     onClick={() => {
-                      if (sub.disabled) return;
+                      if (isMenuItemDisabled(sub)) return;
                       onSubItemClick(sub.action);
                     }}
-                  >
-                    {sub.label}
-                  </button>
+                  />
                 ))}
               </div>
             )}
