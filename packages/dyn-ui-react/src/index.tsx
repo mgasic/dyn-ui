@@ -1,6 +1,6 @@
 // Core Components
 export { DynButton } from './components/DynButton';
-export type { DynButtonProps } from './components/DynButton';
+export type { DynButtonProps, DynButtonRef, DynButtonVariant, DynButtonSize } from './components/DynButton';
 
 // Display Components - SCOPE 5
 export { DynBadge, DynAvatar, DynLabel, DynIcon } from './components';

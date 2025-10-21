@@ -1,0 +1,209 @@
+name: Quality Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  NODE_VERSION: '20.11.1'
+
+jobs:
+  gate_a_static_analysis:
+    name: Gate A · Static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run gate A
+        run: pnpm run gate:a
+
+  gate_b_tests:
+    name: Gate B · Tests
+    runs-on: ubuntu-latest
+    needs: gate_a_static_analysis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+      - name: Run unit tests
+        run: pnpm run test:unit
+      - name: Run Storybook interaction tests
+        run: pnpm run test:interaction
+      - name: Run Playwright E2E tests
+        run: pnpm run test:e2e
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-b-coverage
+          path: reports/coverage
+          if-no-files-found: warn
+      - name: Upload Storybook test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-b-storybook
+          path: reports/storybook
+          if-no-files-found: warn
+      - name: Upload Playwright E2E report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-b-e2e
+          path: reports/playwright/e2e
+          if-no-files-found: warn
+
+  gate_c_accessibility:
+    name: Gate C · Accessibility
+    runs-on: ubuntu-latest
+    needs: gate_b_tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+      - name: Run axe audit
+        run: pnpm run test:axe
+      - name: Upload axe report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-c-axe
+          path: reports/playwright/a11y
+          if-no-files-found: warn
+
+  gate_d_visual:
+    name: Gate D · Visual regression
+    runs-on: ubuntu-latest
+    needs: gate_c_accessibility
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+      - name: Run visual regression tests
+        run: pnpm run test:visual
+      - name: Upload visual report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-d-visual
+          path: reports/playwright/visual
+          if-no-files-found: warn
+
+  gate_e_api:
+    name: Gate E · API contract
+    runs-on: ubuntu-latest
+    needs: gate_d_visual
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run API snapshot tests
+        run: pnpm run test:api
+      - name: Upload API report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-e-api
+          path: reports/api
+          if-no-files-found: warn
+
+  gate_f_bundle:
+    name: Gate F · Bundle budgets
+    runs-on: ubuntu-latest
+    needs: gate_e_api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Check bundle budgets
+        run: pnpm run bundle:check
+      - name: Upload bundle reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-f-bundle
+          path: reports/bundle
+          if-no-files-found: warn
+
+  collect_release_metrics:
+    name: Metrics · Aggregation
+    runs-on: ubuntu-latest
+    needs:
+      - gate_f_bundle
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download QA artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gate-*
+          path: reports
+          merge-multiple: true
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Collect QA metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm run metrics:collect
+      - name: Upload metrics artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-metrics
+          path: reports/metrics
+          if-no-files-found: error

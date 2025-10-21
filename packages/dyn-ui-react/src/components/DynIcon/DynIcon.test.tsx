@@ -5,7 +5,8 @@ import DynIcon from './DynIcon';
 import { IconDictionaryProvider } from '../../providers/IconDictionaryProvider';
 import styles from './DynIcon.module.css';
 
-const successClassName = styles.success ?? 'success';
+const mutedVariantClassName =
+  styles['dyn-icon-variant-muted'] ?? 'dyn-icon-variant-muted';
 const largeSizeClassName = styles['dyn-icon-size-large'] ?? 'dyn-icon-size-large';
 const spinningClassName = styles.spinning ?? 'spinning';
 
@@ -69,11 +70,36 @@ describe('DynIcon', () => {
     expect(icon.className).toContain('dyn-fonts-icon');
   });
 
-  it('applies tone classes for semantic colors', () => {
-    renderIcon('ok', { tone: 'success' });
+  it('renders sprite icons when sprite reference is provided', () => {
+    renderIcon('sprite:#check');
 
     const icon = screen.getByTestId('dyn-icon');
-    expect(icon).toHaveClass(successClassName);
+    const useElement = icon.querySelector('use');
+    expect(useElement).toBeInTheDocument();
+    expect(useElement?.getAttribute('href')).toBe('#check');
+  });
+
+  it('applies variant classes for visual styling', () => {
+    renderIcon('ok', { variant: 'muted' });
+
+    const icon = screen.getByTestId('dyn-icon');
+    expect(icon).toHaveClass(mutedVariantClassName);
+  });
+
+  it('maps semantic color tokens to CSS variables', () => {
+    renderIcon('ok', { color: 'success' });
+
+    const icon = screen.getByTestId('dyn-icon');
+    expect(icon.style.getPropertyValue('--dyn-icon-color')).toBe(
+      'var(--dyn-color-success)'
+    );
+  });
+
+  it('supports custom color overrides via inline CSS variable', () => {
+    renderIcon('ok', { color: '#123456' });
+
+    const icon = screen.getByTestId('dyn-icon');
+    expect(icon.style.getPropertyValue('--dyn-icon-color')).toBe('#123456');
   });
 
   it('applies predefined size classes', () => {
@@ -83,12 +109,11 @@ describe('DynIcon', () => {
     expect(icon).toHaveClass(largeSizeClassName);
   });
 
-  it('applies inline styles for numeric sizes', () => {
+  it('applies inline CSS variable for numeric sizes', () => {
     renderIcon('ok', { size: 32 });
 
     const icon = screen.getByTestId('dyn-icon');
-    expect(icon.style.width).toBe('32px');
-    expect(icon.style.height).toBe('32px');
+    expect(icon.style.getPropertyValue('--dyn-icon-size')).toBe('32px');
   });
 
   it('applies spinning class when spin is true', () => {
@@ -128,12 +153,34 @@ describe('DynIcon', () => {
     expect(icon).toHaveAttribute('aria-hidden', 'true');
   });
 
-  it('allows overriding aria attributes', () => {
+  it('exposes icon to assistive tech when aria-label is provided', () => {
     renderIcon('ok', { 'aria-label': 'Status OK' });
 
     const icon = screen.getByTestId('dyn-icon');
     expect(icon).not.toHaveAttribute('aria-hidden');
     expect(icon).toHaveAttribute('aria-label', 'Status OK');
+  });
+
+  it('exposes icon when aria-labelledby is provided', () => {
+    renderIcon('ok', { 'aria-labelledby': 'label-id' });
+
+    const icon = screen.getByTestId('dyn-icon');
+    expect(icon).not.toHaveAttribute('aria-hidden');
+    expect(icon).toHaveAttribute('aria-labelledby', 'label-id');
+  });
+
+  it('ignores explicit aria-hidden when accessible label is present', () => {
+    renderIcon('ok', { 'aria-label': 'Info', 'aria-hidden': true });
+
+    const icon = screen.getByTestId('dyn-icon');
+    expect(icon).not.toHaveAttribute('aria-hidden');
+  });
+
+  it('honors explicit aria-hidden when no label is present', () => {
+    renderIcon('ok', { 'aria-hidden': 'false' });
+
+    const icon = screen.getByTestId('dyn-icon');
+    expect(icon).toHaveAttribute('aria-hidden', 'false');
   });
 
   it('renders children when icon is omitted', () => {
