@@ -1,7 +1,7 @@
 import { Children, cloneElement, forwardRef, isValidElement, useId } from 'react';
 import type { ElementType, ForwardedRef, ReactElement } from 'react';
 import { DynBox } from '../DynBox';
-import type { DynBoxRef } from '../DynBox';
+import type { DynBoxProps, DynBoxRef } from '../DynBox';
 import { cn } from '../../utils/classNames';
 import {
   DYN_FIELD_CONTAINER_DEFAULT_PROPS,
@@ -70,11 +70,15 @@ export const DynFieldContainer = forwardRef(
       mr,
       mb: marginBottomProp = DYN_FIELD_CONTAINER_DEFAULT_PROPS.mb,
       ml,
+      background: backgroundProp,
+      border: borderProp,
+      radius: radiusProp,
       'data-testid': dataTestIdProp,
       'aria-describedby': ariaDescribedByProp,
       'aria-labelledby': ariaLabelledByProp,
       ...rest
-    } = props;
+    } = props as DynFieldContainerProps<E> &
+      Partial<Pick<DynBoxProps, 'background' | 'border' | 'radius'>>;
 
     const generatedId = useId();
     const baseId = htmlFor ?? generatedId;
@@ -193,6 +197,9 @@ export const DynFieldContainer = forwardRef(
         mr={mr}
         mb={marginBottomProp}
         ml={ml}
+        background={backgroundProp ?? 'none'}
+        border={borderProp ?? 'none'}
+        radius={radiusProp ?? 'none'}
       >
         {labelElement}
         {hasAugmentedChild ? augmentedChildren : children}
