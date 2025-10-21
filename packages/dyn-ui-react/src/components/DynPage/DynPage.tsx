@@ -96,6 +96,17 @@ const renderBreadcrumbItems = (breadcrumbs: DynPageBreadcrumb[]) => (
   </nav>
 );
 
+const resolveActionVariant = (type: DynPageAction['type']): DynButtonVariant => {
+  switch (type) {
+    case 'primary':
+      return 'primary';
+    case 'secondary':
+      return 'secondary';
+    default:
+      return 'secondary';
+  }
+};
+
 const renderActionButtons = (actions: DynPageAction[], size: LayoutSize | undefined) => {
   if (actions.length === 0) return null;
 
