@@ -9,7 +9,8 @@ const meta: Meta<typeof DynGauge> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Gauge component for displaying progress and metrics with customizable appearance.',
+        component:
+          'Gauge component for displaying progress and metrics with customizable appearance. Automatically derives accessible progressbar labels using provided titles, aria-labels, and value formatting.',
       },
     },
   },
@@ -96,4 +97,21 @@ export const BothTypes: Story = {
       </div>
     </div>
   ),
+};
+
+export const AccessibleUsage: Story = {
+  args: {
+    value: 72,
+    showValue: false,
+    format: value => `${Math.round(value)}% utilized`,
+    'aria-label': 'Database CPU utilization',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'When `showValue` is hidden, the gauge still announces its formatted value to assistive technologies via `aria-valuetext`. You can override the accessible label with `aria-label` and provide custom text with `aria-valuetext` if needed.',
+      },
+    },
+  },
 };
