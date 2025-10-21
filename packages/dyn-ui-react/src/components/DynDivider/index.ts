@@ -1,11 +1,9 @@
 export { DynDivider } from './DynDivider';
-export type { 
+export type {
   DynDividerProps,
   DynDividerRef,
+  DynDividerVariant,
+  DynDividerSize,
   DynDividerColor,
   DynDividerLabelPosition,
-  DynDividerLineStyle,
-  DynDividerThickness,
-  LayoutDirection,
-  LayoutSpacing
 } from './DynDivider.types';
