@@ -4,8 +4,9 @@ exports[`DynIcon snapshots > matches default render 1`] = `
 <div>
   <span
     aria-hidden="true"
-    class="_dynIcon_398cbd _dyn-icon-size-medium_398cbd dyn-icon dyn-icon-ok"
+    class="_dynIcon_760c34 _dyn-icon-size-medium_760c34 _dyn-icon-variant-default_760c34 dyn-icon dyn-icon-ok"
     role="img"
+    style="--dyn-icon-color: var(--dyn-color-text-secondary);"
   />
 </div>
 `;
@@ -14,15 +15,18 @@ exports[`DynIcon snapshots > matches registry icon render 1`] = `
 <div>
   <span
     aria-hidden="true"
-    class="_dynIcon_398cbd _dyn-icon-size-large_398cbd"
+    class="_dynIcon_760c34 _dyn-icon-size-large_760c34 _dyn-icon-variant-default_760c34"
     role="img"
+    style="--dyn-icon-color: var(--dyn-color-text-secondary);"
   >
     <span
       aria-hidden="true"
-      class="_dynIconSvg_398cbd"
+      class="_dynIconSvg_760c34"
     >
       <svg
+        aria-hidden="true"
         fill="none"
+        focusable="false"
         stroke="currentColor"
         stroke-width="2"
         viewBox="0 0 24 24"

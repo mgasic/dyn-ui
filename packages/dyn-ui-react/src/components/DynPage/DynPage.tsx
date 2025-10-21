@@ -23,7 +23,7 @@ import {
 import { generateId } from '../../utils/accessibility';
 import { classNames } from '../../utils/classNames';
 import { DynButton } from '../DynButton';
-import type { DynButtonKind } from '../DynButton/DynButton.types';
+import type { DynButtonVariant } from '../DynButton/DynButton.types';
 import styles from './DynPage.module.css';
 
 type CSSVarStyles = CSSProperties & Record<string, string | number | undefined>;
