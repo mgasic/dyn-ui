@@ -41,6 +41,12 @@
   overflow: hidden;
 }
 
+.modal[data-disabled='true'] {
+  pointer-events: none;
+  opacity: var(--dyn-modal-disabled-opacity, 0.75);
+  cursor: not-allowed;
+}
+
 .fullscreen {
   max-width: none;
   width: 100%;
