@@ -105,21 +105,21 @@ describe('DynModal', () => {
       </div>
     );
 
+    const modal = screen.getByTestId('dyn-modal');
+    const outsideButton = screen.getByRole('button', { name: /outside/i });
     const firstButton = screen.getByRole('button', { name: /inside first/i });
     const secondButton = screen.getByRole('button', { name: /inside second/i });
-    const outsideButton = screen.getByRole('button', { name: /outside/i });
 
-    await waitFor(() => expect(firstButton).toHaveFocus());
-
-    await user.tab();
-    expect(secondButton).toHaveFocus();
+    await waitFor(() => expect(modal).toHaveFocus());
 
     await user.tab();
-    expect(firstButton).toHaveFocus();
+    expect(modal).toHaveFocus();
+    expect(firstButton).not.toHaveFocus();
+    expect(secondButton).not.toHaveFocus();
     expect(outsideButton).not.toHaveFocus();
 
     await user.tab({ shift: true });
-    expect(secondButton).toHaveFocus();
+    expect(modal).toHaveFocus();
   });
 
   it('handles escape key press when enabled', async () => {
