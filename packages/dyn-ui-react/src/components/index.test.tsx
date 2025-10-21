@@ -38,6 +38,7 @@ import {
   DynMenu,
   DynBreadcrumb,
   DynTabs,
+  DynStep,
   DynStepper,
   DynToolbar,
   DynModal,
@@ -106,6 +107,7 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynMenu)).toBe(true);
     expect(isComponentExport(DynBreadcrumb)).toBe(true);
     expect(isComponentExport(DynTabs)).toBe(true);
+    expect(isComponentExport(DynStep)).toBe(true);
     expect(isComponentExport(DynStepper)).toBe(true);
     expect(isComponentExport(DynToolbar)).toBe(true);
     expect(isComponentExport(DynModal)).toBe(true);

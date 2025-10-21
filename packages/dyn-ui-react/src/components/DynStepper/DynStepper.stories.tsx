@@ -6,6 +6,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState, useRef } from 'react';
 import DynStepper from './DynStepper';
+import { DynStep } from '../DynStep';
 import { DynStepperHandle, StepItem } from './DynStepper.types';
 import React from 'react';
 
@@ -98,28 +99,77 @@ const sampleSteps: StepItem[] = [
     description: 'Enter your basic details',
     icon: '👤',
     content: (
-      <div style={{ padding: '24px' }}>
-        <h3>👤 Personal Information</h3>
-        <p>Please provide your personal details to continue with the process.</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
+      <DynStep padding="xl" spacing="md">
+        <header>
+          <h3>👤 Personal Information</h3>
+          <p>Please provide your personal details to continue with the process.</p>
+        </header>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 'var(--dyn-spacing-lg, 1rem)',
+            width: '100%',
+          }}
+        >
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>First Name:</label>
-            <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <label style={{ display: 'block', marginBottom: 'var(--dyn-spacing-sm, 0.5rem)', fontWeight: 500 }}>
+              First Name:
+            </label>
+            <input
+              type="text"
+              style={{
+                width: '100%',
+                padding: 'var(--dyn-spacing-sm, 0.5rem)',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+              }}
+            />
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Last Name:</label>
-            <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <label style={{ display: 'block', marginBottom: 'var(--dyn-spacing-sm, 0.5rem)', fontWeight: 500 }}>
+              Last Name:
+            </label>
+            <input
+              type="text"
+              style={{
+                width: '100%',
+                padding: 'var(--dyn-spacing-sm, 0.5rem)',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+              }}
+            />
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Email:</label>
-            <input type="email" style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <label style={{ display: 'block', marginBottom: 'var(--dyn-spacing-sm, 0.5rem)', fontWeight: 500 }}>
+              Email:
+            </label>
+            <input
+              type="email"
+              style={{
+                width: '100%',
+                padding: 'var(--dyn-spacing-sm, 0.5rem)',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+              }}
+            />
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Phone:</label>
-            <input type="tel" style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <label style={{ display: 'block', marginBottom: 'var(--dyn-spacing-sm, 0.5rem)', fontWeight: 500 }}>
+              Phone:
+            </label>
+            <input
+              type="tel"
+              style={{
+                width: '100%',
+                padding: 'var(--dyn-spacing-sm, 0.5rem)',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+              }}
+            />
           </div>
         </div>
-      </div>
+      </DynStep>
     )
   },
   {
@@ -128,22 +178,59 @@ const sampleSteps: StepItem[] = [
     description: 'Provide your address information',
     icon: '🏠',
     content: (
-      <div style={{ padding: '24px' }}>
-        <h3>🏠 Address Information</h3>
-        <p>Enter your current address details for delivery and billing purposes.</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+      <DynStep padding="xl" spacing="md">
+        <header>
+          <h3>🏠 Address Information</h3>
+          <p>Enter your current address details for delivery and billing purposes.</p>
+        </header>
+        <DynStep spacing="sm">
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Street Address:</label>
-            <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <label style={{ display: 'block', marginBottom: 'var(--dyn-spacing-sm, 0.5rem)', fontWeight: 500 }}>
+              Street Address:
+            </label>
+            <input
+              type="text"
+              style={{
+                width: '100%',
+                padding: 'var(--dyn-spacing-sm, 0.5rem)',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+              }}
+            />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px', gap: '16px' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 100px',
+              gap: 'var(--dyn-spacing-lg, 1rem)',
+            }}
+          >
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>City:</label>
-              <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+              <label style={{ display: 'block', marginBottom: 'var(--dyn-spacing-sm, 0.5rem)', fontWeight: 500 }}>
+                City:
+              </label>
+              <input
+                type="text"
+                style={{
+                  width: '100%',
+                  padding: 'var(--dyn-spacing-sm, 0.5rem)',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                }}
+              />
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>State:</label>
-              <select style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}>
+              <label style={{ display: 'block', marginBottom: 'var(--dyn-spacing-sm, 0.5rem)', fontWeight: 500 }}>
+                State:
+              </label>
+              <select
+                style={{
+                  width: '100%',
+                  padding: 'var(--dyn-spacing-sm, 0.5rem)',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                }}
+              >
                 <option>Select State</option>
                 <option>CA</option>
                 <option>NY</option>
@@ -151,12 +238,22 @@ const sampleSteps: StepItem[] = [
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>ZIP:</label>
-              <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }} />
+              <label style={{ display: 'block', marginBottom: 'var(--dyn-spacing-sm, 0.5rem)', fontWeight: 500 }}>
+                ZIP:
+              </label>
+              <input
+                type="text"
+                style={{
+                  width: '100%',
+                  padding: 'var(--dyn-spacing-sm, 0.5rem)',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                }}
+              />
             </div>
           </div>
-        </div>
-      </div>
+        </DynStep>
+      </DynStep>
     )
   },
   {
@@ -166,27 +263,63 @@ const sampleSteps: StepItem[] = [
     icon: '💳',
     optional: true,
     content: (
-      <div style={{ padding: '24px' }}>
-        <h3>💳 Payment Method (Optional)</h3>
-        <p>Select your preferred payment method. You can skip this step and add payment later.</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}>
+      <DynStep padding="xl" spacing="md">
+        <header>
+          <h3>💳 Payment Method (Optional)</h3>
+          <p>Select your preferred payment method. You can skip this step and add payment later.</p>
+        </header>
+        <DynStep spacing="sm">
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--dyn-spacing-sm, 0.5rem)',
+              padding: 'var(--dyn-spacing-md, 0.75rem)',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+            }}
+          >
             <input type="radio" name="payment" id="credit-card" />
             <label htmlFor="credit-card" style={{ flex: 1 }}>💳 Credit/Debit Card</label>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--dyn-spacing-sm, 0.5rem)',
+              padding: 'var(--dyn-spacing-md, 0.75rem)',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+            }}
+          >
             <input type="radio" name="payment" id="paypal" />
             <label htmlFor="paypal" style={{ flex: 1 }}>💰 PayPal</label>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--dyn-spacing-sm, 0.5rem)',
+              padding: 'var(--dyn-spacing-md, 0.75rem)',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+            }}
+          >
             <input type="radio" name="payment" id="bank-transfer" />
             <label htmlFor="bank-transfer" style={{ flex: 1 }}>🏛️ Bank Transfer</label>
           </div>
-          <div style={{ marginTop: '16px', padding: '12px', background: '#f0f8ff', borderRadius: '8px' }}>
-            <strong>💡 Note:</strong> This step is optional. You can complete your registration and add payment information later from your account settings.
+          <div
+            style={{
+              padding: 'var(--dyn-spacing-md, 0.75rem)',
+              background: '#f0f8ff',
+              borderRadius: '8px',
+            }}
+          >
+            <strong>💡 Note:</strong> This step is optional. You can complete your registration and add payment information later
+            from your account settings.
           </div>
-        </div>
-      </div>
+        </DynStep>
+      </DynStep>
     )
   },
   {
@@ -195,32 +328,64 @@ const sampleSteps: StepItem[] = [
     description: 'Review your information',
     icon: '✅',
     content: (
-      <div style={{ padding: '24px' }}>
-        <h3>✅ Review Your Information</h3>
-        <p>Please review all information before submitting your registration.</p>
-        <div style={{ marginTop: '16px', display: 'grid', gap: '16px' }}>
-          <div style={{ padding: '16px', background: '#f8f9fa', borderRadius: '8px' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>Personal Information</h4>
+      <DynStep padding="xl" spacing="lg">
+        <header>
+          <h3>✅ Review Your Information</h3>
+          <p>Please review all information before submitting your registration.</p>
+        </header>
+        <div
+          style={{
+            display: 'grid',
+            gap: 'var(--dyn-spacing-lg, 1rem)',
+          }}
+        >
+          <div style={{ padding: 'var(--dyn-spacing-md, 0.75rem)', background: '#f8f9fa', borderRadius: '8px' }}>
+            <h4 style={{ margin: '0 0 var(--dyn-spacing-sm, 0.5rem) 0', color: '#333' }}>Personal Information</h4>
             <p style={{ margin: 0, color: '#666' }}>John Doe • john.doe@example.com • (555) 123-4567</p>
           </div>
-          <div style={{ padding: '16px', background: '#f8f9fa', borderRadius: '8px' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>Address</h4>
+          <div style={{ padding: 'var(--dyn-spacing-md, 0.75rem)', background: '#f8f9fa', borderRadius: '8px' }}>
+            <h4 style={{ margin: '0 0 var(--dyn-spacing-sm, 0.5rem) 0', color: '#333' }}>Address</h4>
             <p style={{ margin: 0, color: '#666' }}>123 Main Street, San Francisco, CA 94105</p>
           </div>
-          <div style={{ padding: '16px', background: '#f8f9fa', borderRadius: '8px' }}>
-            <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>Payment Method</h4>
+          <div style={{ padding: 'var(--dyn-spacing-md, 0.75rem)', background: '#f8f9fa', borderRadius: '8px' }}>
+            <h4 style={{ margin: '0 0 var(--dyn-spacing-sm, 0.5rem) 0', color: '#333' }}>Payment Method</h4>
             <p style={{ margin: 0, color: '#666' }}>💳 Credit Card ending in 1234 (Optional step skipped)</p>
           </div>
-          <div style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
-            <button style={{ padding: '12px 24px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 'var(--dyn-spacing-sm, 0.5rem)',
+              marginTop: 'var(--dyn-spacing-md, 0.75rem)',
+              flexWrap: 'wrap',
+            }}
+          >
+            <button
+              style={{
+                padding: 'var(--dyn-spacing-md, 0.75rem) var(--dyn-spacing-xl, 1.5rem)',
+                backgroundColor: '#2563eb',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+            >
               Submit Registration
             </button>
-            <button style={{ padding: '12px 24px', backgroundColor: '#f3f4f6', color: '#333', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer' }}>
+            <button
+              style={{
+                padding: 'var(--dyn-spacing-md, 0.75rem) var(--dyn-spacing-xl, 1.5rem)',
+                backgroundColor: '#f3f4f6',
+                color: '#333',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+            >
               Save Draft
             </button>
           </div>
         </div>
-      </div>
+      </DynStep>
     )
   }
 ];
@@ -394,25 +559,25 @@ export const CustomIcons: Story = {
         id: 'user',
         title: 'User Account',
         icon: '👤',
-        content: <div style={{ padding: '20px' }}>Create your user account</div>
+        content: <DynStep padding="lg">Create your user account</DynStep>
       },
       {
         id: 'profile',
         title: 'Profile Setup',
         icon: '📋',
-        content: <div style={{ padding: '20px' }}>Complete your profile</div>
+        content: <DynStep padding="lg">Complete your profile</DynStep>
       },
       {
         id: 'preferences',
         title: 'Preferences',
         icon: '⚙️',
-        content: <div style={{ padding: '20px' }}>Set your preferences</div>
+        content: <DynStep padding="lg">Set your preferences</DynStep>
       },
       {
         id: 'finish',
         title: 'Finish',
         icon: '🎉',
-        content: <div style={{ padding: '20px' }}>All done!</div>
+        content: <DynStep padding="lg">All done!</DynStep>
       }
     ],
     defaultActiveStep: 0
@@ -452,25 +617,35 @@ export const AccessibilityDemo: Story = {
         icon: '♿',
         tooltip: 'This step shows accessibility features',
         content: (
-          <div style={{ padding: '20px' }}>
+          <DynStep padding="lg" spacing="md">
             <h3>♿ Accessibility Features</h3>
-            <div style={{ marginTop: '16px' }}>
-              <h4>ARIA Support:</h4>
-              <ul>
-                <li>Proper ARIA roles (tablist, step indicators)</li>
-                <li>ARIA labels and descriptions</li>
-                <li>Screen reader announcements</li>
-                <li>Progress indication</li>
-              </ul>
+            <DynStep spacing="sm">
+              <div>
+                <h4>ARIA Support:</h4>
+                <ul>
+                  <li>Proper ARIA roles (tablist, step indicators)</li>
+                  <li>ARIA labels and descriptions</li>
+                  <li>Screen reader announcements</li>
+                  <li>Progress indication</li>
+                </ul>
+              </div>
 
-              <h4 style={{ marginTop: '16px' }}>Keyboard Navigation:</h4>
-              <ul>
-                <li><kbd>Tab</kbd> - Focus step indicators</li>
-                <li><kbd>Enter/Space</kbd> - Activate focused step</li>
-                <li><kbd>Arrow Keys</kbd> - Navigate between steps (non-linear mode)</li>
-              </ul>
-            </div>
-          </div>
+              <div>
+                <h4>Keyboard Navigation:</h4>
+                <ul>
+                  <li>
+                    <kbd>Tab</kbd> - Focus step indicators
+                  </li>
+                  <li>
+                    <kbd>Enter/Space</kbd> - Activate focused step
+                  </li>
+                  <li>
+                    <kbd>Arrow Keys</kbd> - Navigate between steps (non-linear mode)
+                  </li>
+                </ul>
+              </div>
+            </DynStep>
+          </DynStep>
         )
       },
       {
@@ -478,13 +653,20 @@ export const AccessibilityDemo: Story = {
         title: 'Keyboard Navigation',
         icon: '⌨️',
         content: (
-          <div style={{ padding: '20px' }}>
+          <DynStep padding="lg" spacing="md">
             <h3>⌨️ Try Keyboard Navigation!</h3>
             <p>Use your keyboard to navigate this stepper:</p>
-            <div style={{ marginTop: '16px', padding: '16px', background: '#f0f8ff', borderRadius: '8px' }}>
+            <div
+              style={{
+                marginTop: 'var(--dyn-spacing-md, 0.75rem)',
+                padding: 'var(--dyn-spacing-md, 0.75rem)',
+                background: '#f0f8ff',
+                borderRadius: '8px',
+              }}
+            >
               <strong>💡 Tip:</strong> Use Tab to focus step indicators, then Enter or Space to activate!
             </div>
-          </div>
+          </DynStep>
         )
       },
       {
@@ -492,13 +674,20 @@ export const AccessibilityDemo: Story = {
         title: 'Screen Reader Support',
         icon: '🔊',
         content: (
-          <div style={{ padding: '20px' }}>
+          <DynStep padding="lg" spacing="md">
             <h3>🔊 Screen Reader Optimized</h3>
             <p>This stepper is optimized for screen readers with proper ARIA attributes.</p>
-            <div style={{ marginTop: '16px', padding: '16px', background: '#f0fff0', borderRadius: '8px' }}>
+            <div
+              style={{
+                marginTop: 'var(--dyn-spacing-md, 0.75rem)',
+                padding: 'var(--dyn-spacing-md, 0.75rem)',
+                background: '#f0fff0',
+                borderRadius: '8px',
+              }}
+            >
               Screen readers will announce: "Step 3 of 3, Screen Reader Support, current step."
             </div>
-          </div>
+          </DynStep>
         )
       }
     ],
