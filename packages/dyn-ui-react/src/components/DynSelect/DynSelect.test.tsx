@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { DynSelect } from './DynSelect';
 import styles from './DynSelect.module.css';
@@ -114,18 +114,125 @@ describe('DynSelect', () => {
     expect(handleChange).not.toHaveBeenCalled();
   });
 
-  it('handles keyboard navigation', () => {
-    render(<DynSelectAny name="test" label="Test" options={sampleOptions} />);
+  it('tracks the active option for keyboard navigation', () => {
+    const handleChange = vi.fn();
+    render(
+      <label>
+        Test
+        <DynSelectAny name="test" options={sampleOptions} onChange={handleChange} />
+      </label>
+    );
 
-    const select = screen.getByRole('combobox');
+    const combobox = screen.getByRole('combobox');
+    fireEvent.focus(combobox);
 
-    // Enter should open dropdown
-    fireEvent.keyDown(select, { key: 'Enter' });
-    expect(screen.getByText('Option 1')).toBeInTheDocument();
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'ArrowDown' });
+    });
+    const option1 = screen.getByRole('option', { name: 'Option 1' });
+    expect(option1).toHaveClass(styles.optionActive);
+    const activeId = combobox.getAttribute('aria-activedescendant');
+    expect(activeId).toBe(option1.getAttribute('id'));
 
-    // Escape should close dropdown
-    fireEvent.keyDown(select, { key: 'Escape' });
-    expect(screen.queryByText('Option 1')).not.toBeInTheDocument();
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'ArrowDown' });
+    });
+    const option2 = screen.getByRole('option', { name: 'Option 2' });
+    expect(option2).toHaveClass(styles.optionActive);
+    expect(option1).not.toHaveClass(styles.optionActive);
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'End' });
+    });
+    expect(option2).toHaveClass(styles.optionActive);
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'Home' });
+    });
+    expect(option1).toHaveClass(styles.optionActive);
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'Enter' });
+    });
+    expect(handleChange).toHaveBeenCalledWith('option1');
+    expect(combobox).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('handles page navigation and skips disabled options', () => {
+    render(
+      <label>
+        Test
+        <DynSelectAny name="test" options={sampleOptions} />
+      </label>
+    );
+
+    const combobox = screen.getByRole('combobox');
+    fireEvent.focus(combobox);
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'ArrowDown' });
+    });
+    const option1 = screen.getByRole('option', { name: 'Option 1' });
+    const option2 = screen.getByRole('option', { name: 'Option 2' });
+    const option3 = screen.getByRole('option', { name: 'Option 3' });
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'PageDown' });
+    });
+    expect(option2).toHaveClass(styles.optionActive);
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'ArrowDown' });
+    });
+    expect(option3).not.toHaveClass(styles.optionActive);
+    expect(option1).toHaveClass(styles.optionActive);
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'PageUp' });
+    });
+    expect(option2).toHaveClass(styles.optionActive);
+  });
+
+  it('supports character search to jump to options', () => {
+    const alphaOptions = [
+      { value: 'alpha', label: 'Alpha' },
+      { value: 'bravo', label: 'Bravo' },
+      { value: 'charlie', label: 'Charlie' },
+    ];
+
+    render(
+      <label>
+        Test
+        <DynSelectAny name="test" options={alphaOptions} />
+      </label>
+    );
+
+    const combobox = screen.getByRole('combobox');
+    fireEvent.focus(combobox);
+
+    vi.useFakeTimers();
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'ArrowDown' });
+    });
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'c' });
+    });
+
+    const charlie = screen.getByRole('option', { name: 'Charlie' });
+    expect(charlie).toHaveClass(styles.optionActive);
+
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'b' });
+    });
+    const bravo = screen.getByRole('option', { name: 'Bravo' });
+    expect(bravo).toHaveClass(styles.optionActive);
+
+    vi.useRealTimers();
   });
 
   it('displays selected value', () => {

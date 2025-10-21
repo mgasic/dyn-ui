@@ -81,6 +81,14 @@ export const DynGauge = forwardRef<HTMLDivElement, DynGaugeProps>((props, ref) =
     ...rest
   } = props;
 
+  const restEntries = Object.entries(rest as Record<string, unknown>);
+  const ariaPropsFromRest = Object.fromEntries(
+    restEntries.filter(([key]) => key.startsWith('aria-'))
+  ) as Record<string, unknown>;
+  const nonAriaRestProps = Object.fromEntries(
+    restEntries.filter(([key]) => !key.startsWith('aria-'))
+  ) as typeof rest;
+
   const instanceId = useId();
   const componentId = id ?? instanceId;
   const titleId = title || label ? `${componentId}-title` : undefined;
@@ -376,7 +384,8 @@ export const DynGauge = forwardRef<HTMLDivElement, DynGaugeProps>((props, ref) =
       data-size={size}
       data-type={type}
       className={rootClassName}
-      {...rest}
+      {...ariaPropsFromRest}
+      {...nonAriaRestProps}
     >
       <figure className={styles.figure}>
         {(resolvedTitle || subtitle) && (

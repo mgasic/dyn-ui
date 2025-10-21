@@ -1,2 +1,2 @@
 export { DynGauge } from './DynGauge';
-export type { DynGaugeProps } from './DynGauge.types';
+export type { DynGaugeAccessibilityProps, DynGaugeProps } from './DynGauge.types';
