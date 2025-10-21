@@ -9,7 +9,8 @@ import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import { DynMenuItem as DynMenuItemElement } from '../DynMenuItem';
 import styles from './DynMenu.module.css';
-import type { DynMenuProps, MenuItem } from './DynMenu.types';
+import type { DynMenuProps, DynMenuItem } from './DynMenu.types';
+import { DynMenuTrigger } from '../DynMenuTrigger';
 
 const getStyleClass = (n: string) => (styles as Record<string, string>)[n] || '';
 
@@ -510,11 +511,12 @@ export const DynMenu: React.FC<DynMenuProps> = ({
         };
         return (
           <div key={buttonId} className={cn(getStyleClass('menubar__item'), 'dyn-menu-item-container')}>
-            <DynMenuItemElement
+            <DynMenuTrigger
               ref={(el) => {
-                itemRefs.current[idx] = el;
+                itemRefs.current[idx] = el as HTMLButtonElement | null;
               }}
               id={buttonId}
+              role="menuitem"
               className={cn(
                 getStyleClass('menubar__button'),
                 isOpen && getStyleClass('menubar__button--open'),
@@ -525,14 +527,11 @@ export const DynMenu: React.FC<DynMenuProps> = ({
               aria-expanded={childItems.length ? isOpen : undefined}
               aria-controls={childItems.length ? menuId : undefined}
               disabled={item.disabled}
-              active={isOpen}
-              loading={item.loading}
-              ariaLabel={item.ariaLabel}
-              aria-labelledby={item.ariaLabelledBy}
-              aria-describedby={item.ariaDescribedBy}
-              label={item.label}
+              isOpen={isOpen}
               onClick={() => handleItemClick(idx)}
-            />
+            >
+              {item.label}
+            </DynMenuTrigger>
             {childItems.length > 0 && isOpen && (
               <div
                 id={menuId}
