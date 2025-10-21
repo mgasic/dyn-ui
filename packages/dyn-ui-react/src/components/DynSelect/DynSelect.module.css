@@ -212,13 +212,12 @@
   color: var(--dyn-color-primary-dark, #1565c0);
 }
 
-.optionActive {
-  outline: 2px solid var(--dyn-color-primary, #0066cc);
-  outline-offset: -2px;
+.optionActive:not(.optionDisabled):not(.optionSelected) {
+  background-color: var(--dyn-color-surface-hover, #f3f4f6);
 }
 
-.optionActive:not(.optionSelected) {
-  background-color: var(--dyn-color-surface-hover, #f3f4f6);
+.optionActive.optionSelected {
+  box-shadow: inset 0 0 0 2px var(--dyn-color-primary-alpha, rgba(0, 102, 204, 0.2));
 }
 
 .optionDisabled {

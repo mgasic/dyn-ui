@@ -17,6 +17,7 @@ import {
   // Form Components - SCOPE 6
   DynInput,
   DynSelect,
+  DynSelectOption,
   DynCheckbox,
   DynDatePicker,
   DynFieldContainer,
@@ -36,10 +37,13 @@ import {
 
   // Navigation Components
   DynMenu,
+  DynMenuItem,
   DynBreadcrumb,
   DynTabs,
   DynStepper,
   DynToolbar,
+  DynModal,
+  DynModalPlacement,
 
   // Theme system
   ThemeProvider,
@@ -81,6 +85,7 @@ describe('Component Exports', () => {
   it('exports all form components - SCOPE 6', () => {
     expect(isComponentExport(DynInput)).toBe(true);
     expect(isComponentExport(DynSelect)).toBe(true);
+    expect(isComponentExport(DynSelectOption)).toBe(true);
     expect(isComponentExport(DynCheckbox)).toBe(true);
     expect(isComponentExport(DynDatePicker)).toBe(true);
     expect(isComponentExport(DynFieldContainer)).toBe(true);
@@ -102,10 +107,13 @@ describe('Component Exports', () => {
 
   it('exports all navigation components', () => {
     expect(isComponentExport(DynMenu)).toBe(true);
+    expect(isComponentExport(DynMenuItem)).toBe(true);
     expect(isComponentExport(DynBreadcrumb)).toBe(true);
     expect(isComponentExport(DynTabs)).toBe(true);
     expect(isComponentExport(DynStepper)).toBe(true);
     expect(isComponentExport(DynToolbar)).toBe(true);
+    expect(isComponentExport(DynModal)).toBe(true);
+    expect(isComponentExport(DynModalPlacement)).toBe(true);
   });
 
   it('exports theme system', () => {
