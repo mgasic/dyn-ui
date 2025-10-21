@@ -67,11 +67,11 @@
   cursor: not-allowed;
 }
 
-.dyn-label--disabled .dyn-label--required .dyn-label-required-asterisk {
+.dyn-label--disabled .dyn-label-required-asterisk {
   color: var(--color-neutral-dark-70, #666);
 }
 
-.dyn-label--disabled .dyn-label--optional .dyn-label-optional-text {
+.dyn-label--disabled .dyn-label-optional-text {
   color: var(--color-neutral-dark-50, #888);
 }
 
