@@ -1,6 +1,6 @@
 ﻿// Standardized exports for ALL DYN-UI components
 // Ovaj fajl pokriva sve komponente - ne menjaj ručno!
-// Generated on: 2025-10-21 17:02:45
+// Generated on: 2025-10-21 06:43:00
 export { DynAvatar } from './DynAvatar';
 export { DynBadge } from './DynBadge';
 export { DynBox } from './DynBox';
