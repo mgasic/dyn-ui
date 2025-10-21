@@ -96,35 +96,31 @@ const renderBreadcrumbItems = (breadcrumbs: DynPageBreadcrumb[]) => (
   </nav>
 );
 
+const resolveActionVariant = (type: DynPageAction['type']): DynButtonVariant => {
+  switch (type) {
+    case 'primary':
+      return 'primary';
+    case 'secondary':
+      return 'secondary';
+    default:
+      return 'secondary';
+  }
+};
+
 const renderActionButtons = (actions: DynPageAction[], size: LayoutSize | undefined) => {
   if (actions.length === 0) return null;
 
   return (
     <div className={styles.actions}>
       {actions.map((action) => {
-        let variant: DynButtonVariant = 'secondary';
-        let danger = false;
-
-        switch (action.type) {
-          case 'primary':
-            variant = 'primary';
-            break;
-          case 'secondary':
-            variant = 'secondary';
-            break;
-          case 'danger':
-            variant = 'primary';
-            danger = true;
-            break;
-          default:
-            variant = 'secondary';
-        }
+        const variant = resolveActionVariant(action.type);
+        const isDanger = action.type === 'danger';
 
         return (
           <DynButton
             key={action.key}
             variant={variant}
-            danger={danger}
+            danger={isDanger}
             size={size === 'large' ? 'large' : 'medium'}
             disabled={action.disabled}
             loading={action.loading}
