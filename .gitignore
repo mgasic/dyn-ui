@@ -3,6 +3,16 @@ node_modules
 
 # Build outputs
 dist
+reports/coverage/
+reports/storybook/
+reports/playwright/
+reports/api/
+reports/bundle/
+
+# Test runner artefacts
+playwright-report
+test-results
+
 
 # Turbo cache
 .turbo

@@ -122,9 +122,18 @@ export interface DynInputProps
 
   /** Custom error message */
   errorMessage?: string;
-  
+
+  /** Custom warning message */
+  warningMessage?: string;
+
   /** Success message when valid */
   successMessage?: string;
+
+  /** Custom loading message */
+  loadingMessage?: string;
+
+  /** Visual validation state override */
+  state?: 'default' | 'error' | 'warning' | 'success' | 'loading';
 
   /** Validation rules */
   validation?: DynInputValidationRule | DynInputValidationRule[];
@@ -149,6 +158,12 @@ export interface DynInputProps
 
   /** Whether to show spin buttons for numeric inputs */
   showSpinButtons?: boolean;
+
+  /** Optional prefix element rendered inside the input */
+  prefix?: ReactNode;
+
+  /** Optional suffix element rendered inside the input */
+  suffix?: ReactNode;
 
   /** Input mask configuration */
   mask?: string | DynInputMask;

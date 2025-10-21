@@ -11,7 +11,8 @@ const meta: Meta<typeof DynFieldContainer> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Container component that provides consistent layout and validation display for form fields.',
+        component:
+          'Polymorphic form container that provides consistent spacing, labeling, and validation messaging. Supports responsive spacing tokens and automatically wires aria-describedby relationships for native inputs.',
       },
     },
   },
@@ -98,6 +99,100 @@ export const WithDynCheckbox: Story = {
         />
       </DynFieldContainer>
     </div>
+  ),
+};
+
+export const FormGroupLayout: Story = {
+  render: () => (
+    <form
+      aria-labelledby="contact-form-heading"
+      style={{
+        display: 'grid',
+        gap: '1.5rem',
+        padding: '2rem',
+        borderRadius: '16px',
+        background: 'var(--dyn-color-surface-muted, #f8fafc)',
+        width: 'min(100%, 420px)',
+        boxShadow: '0 16px 32px rgba(15, 23, 42, 0.08)',
+      }}
+    >
+      <h2
+        id="contact-form-heading"
+        style={{ margin: 0, fontSize: '1.125rem', color: 'var(--dyn-color-text-primary, #0f172a)' }}
+      >
+        Contact preferences
+      </h2>
+
+      <DynFieldContainer
+        as="section"
+        label="Full name"
+        htmlFor="full-name"
+        helpText="Use your legal name"
+        p="md"
+        gap="sm"
+        mb="0"
+        style={{ borderRadius: '12px', border: '1px solid rgba(148, 163, 184, 0.3)', background: '#ffffff' }}
+      >
+        <input
+          id="full-name"
+          type="text"
+          placeholder="Jane Doe"
+          style={{
+            padding: '0.75rem',
+            borderRadius: '8px',
+            border: '1px solid rgba(148, 163, 184, 0.6)',
+            fontSize: '1rem',
+          }}
+        />
+      </DynFieldContainer>
+
+      <DynFieldContainer
+        as="section"
+        label="How should we contact you?"
+        htmlFor="preferred-email"
+        optional
+        p="md"
+        gap="sm"
+        mb="0"
+        style={{ borderRadius: '12px', border: '1px solid rgba(148, 163, 184, 0.3)', background: '#ffffff' }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <label style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.95rem' }}>
+            <input id="preferred-email" type="checkbox" /> Email notifications
+          </label>
+          <label style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.95rem' }}>
+            <input id="preferred-sms" type="checkbox" /> SMS alerts
+          </label>
+          <label style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.95rem' }}>
+            <input id="preferred-phone" type="checkbox" /> Phone call follow-ups
+          </label>
+        </div>
+      </DynFieldContainer>
+
+      <DynFieldContainer
+        as="section"
+        label="Additional context"
+        htmlFor="context"
+        helpText="Let us know how we can best assist you"
+        p="md"
+        gap="sm"
+        mb="0"
+        style={{ borderRadius: '12px', border: '1px solid rgba(148, 163, 184, 0.3)', background: '#ffffff' }}
+      >
+        <textarea
+          id="context"
+          rows={3}
+          placeholder="Share project details or preferred meeting times"
+          style={{
+            padding: '0.75rem',
+            borderRadius: '8px',
+            border: '1px solid rgba(148, 163, 184, 0.6)',
+            fontSize: '1rem',
+            resize: 'vertical',
+          }}
+        />
+      </DynFieldContainer>
+    </form>
   ),
 };
 
