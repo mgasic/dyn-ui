@@ -206,36 +206,35 @@ const DynPageComponent = <E extends ElementType = 'main'>(
     return renderBreadcrumbItems(breadcrumbs);
   }, [breadcrumbs]);
 
-  const memoizedRenderActions = useCallback(() => {
-    return renderActionButtons(actions, size);
-  }, [actions, size]);
+    return (
+      <div className={styles.actions}>
+        {actions.map((action) => {
+          const variant: DynButtonVariant =
+            action.type === 'primary'
+              ? 'primary'
+              : action.type === 'secondary'
+                ? 'secondary'
+                : 'primary';
+          const isDanger = action.type === 'danger';
 
-  const headerContent = slots?.header
-    ? slots.header({
-        title,
-        subtitle,
-        breadcrumbs,
-        actions,
-        titleId,
-        renderBreadcrumbs: memoizedRenderBreadcrumbs,
-        renderActions: memoizedRenderActions,
-      })
-    : (
-        <>
-          {memoizedRenderBreadcrumbs()}
-          <div className={styles.titleSection}>
-            <div className={styles.titleContent}>
-              {title && (
-                <h1 id={titleId} className={styles.title}>
-                  {title}
-                </h1>
-              )}
-              {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-            </div>
-            {memoizedRenderActions()}
-          </div>
-        </>
-      );
+          return (
+            <DynButton
+              key={action.key}
+              variant={variant}
+              danger={isDanger}
+              size={size === 'large' ? 'large' : 'medium'}
+              disabled={action.disabled}
+              loading={action.loading}
+              onClick={action.onClick}
+              startIcon={action.icon}
+            >
+              {action.title}
+            </DynButton>
+          );
+        })}
+      </div>
+    );
+  };
 
   if (loading) {
     return (
