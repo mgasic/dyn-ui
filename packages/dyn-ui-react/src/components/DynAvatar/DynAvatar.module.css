@@ -5,13 +5,27 @@
   justify-content: center;
   border-radius: var(--dyn-border-radius-full, var(--radius-full, 9999px));
   overflow: hidden;
-  background-color: var(--dyn-color-neutral-100, var(--color-surface, #f8fafc));
-  color: var(--dyn-color-text-primary, var(--color-text-primary, #111827));
+  --dyn-avatar-solid-bg: var(--dyn-color-neutral-800, #1f2937);
+  --dyn-avatar-solid-color: var(--dyn-color-text-primary-dark, #f1f5f9);
+  --dyn-avatar-solid-border: var(--dyn-color-neutral-800, #1f2937);
+  --dyn-avatar-subtle-bg: var(--dyn-color-neutral-100, var(--color-surface, #f8fafc));
+  --dyn-avatar-subtle-color: var(--dyn-color-text-primary, var(--color-text-primary, #111827));
+  --dyn-avatar-subtle-border: var(--dyn-color-border, var(--color-border, #d0d5dd));
+  --dyn-avatar-outline-bg: var(--dyn-color-background, #ffffff);
+  --dyn-avatar-outline-color: var(--dyn-color-text-primary, var(--color-text-primary, #111827));
+  --dyn-avatar-outline-border: var(--dyn-color-border, var(--color-border, #d0d5dd));
+  --dyn-avatar-bg: var(--dyn-avatar-subtle-bg);
+  --dyn-avatar-color: var(--dyn-avatar-subtle-color);
+  --dyn-avatar-border-color: var(--dyn-avatar-subtle-border);
+  --dyn-avatar-fallback-bg: var(--dyn-avatar-subtle-bg);
+  --dyn-avatar-fallback-color: var(--dyn-avatar-subtle-color);
+  background-color: var(--dyn-avatar-bg);
+  color: var(--dyn-avatar-color);
   font-family: var(--dyn-font-family-primary, inherit);
   font-weight: var(--dyn-font-weight-semibold, var(--font-weight-semibold, 600));
   user-select: none;
   transition: var(--dyn-transition-fast, 150ms ease);
-  border: var(--dyn-border-width, 1px) solid var(--dyn-color-border, var(--color-border, #d0d5dd));
+  border: var(--dyn-border-width, 1px) solid var(--dyn-avatar-border-color);
 }
 
 /* Size variants using design tokens - aligned with design system */
@@ -56,6 +70,116 @@
 
 .avatar--rounded {
   border-radius: var(--dyn-border-radius-lg, var(--radius-lg, 0.75rem));
+}
+
+/* Variant styles */
+.avatar--variant-solid {
+  --dyn-avatar-bg: var(--dyn-avatar-solid-bg);
+  --dyn-avatar-color: var(--dyn-avatar-solid-color);
+  --dyn-avatar-border-color: var(--dyn-avatar-solid-border);
+  --dyn-avatar-fallback-bg: var(--dyn-avatar-solid-bg);
+  --dyn-avatar-fallback-color: var(--dyn-avatar-solid-color);
+}
+
+.avatar--variant-subtle {
+  --dyn-avatar-bg: var(--dyn-avatar-subtle-bg);
+  --dyn-avatar-color: var(--dyn-avatar-subtle-color);
+  --dyn-avatar-border-color: var(--dyn-avatar-subtle-border);
+  --dyn-avatar-fallback-bg: var(--dyn-avatar-subtle-bg);
+  --dyn-avatar-fallback-color: var(--dyn-avatar-subtle-color);
+}
+
+.avatar--variant-outline {
+  --dyn-avatar-bg: var(--dyn-avatar-outline-bg);
+  --dyn-avatar-color: var(--dyn-avatar-outline-color);
+  --dyn-avatar-border-color: var(--dyn-avatar-outline-border);
+  --dyn-avatar-fallback-bg: var(--dyn-avatar-outline-bg);
+  --dyn-avatar-fallback-color: var(--dyn-avatar-outline-color);
+}
+
+/* Semantic color tokens */
+.avatar--color-neutral {
+  --dyn-avatar-solid-bg: var(--dyn-color-neutral-800, #1f2937);
+  --dyn-avatar-solid-color: var(--dyn-color-text-primary-dark, #f1f5f9);
+  --dyn-avatar-solid-border: var(--dyn-color-neutral-800, #1f2937);
+  --dyn-avatar-subtle-bg: var(--dyn-color-neutral-100, var(--color-surface, #f8fafc));
+  --dyn-avatar-subtle-color: var(--dyn-color-text-primary, var(--color-text-primary, #111827));
+  --dyn-avatar-subtle-border: var(--dyn-color-border, var(--color-border, #d0d5dd));
+  --dyn-avatar-outline-bg: var(--dyn-color-background, #ffffff);
+  --dyn-avatar-outline-color: var(--dyn-color-text-primary, var(--color-text-primary, #111827));
+  --dyn-avatar-outline-border: var(--dyn-color-border, var(--color-border, #d0d5dd));
+}
+
+.avatar--color-primary {
+  --dyn-avatar-solid-bg: var(--dyn-color-primary, #2563eb);
+  --dyn-avatar-solid-color: var(--dyn-color-primary-contrast, #ffffff);
+  --dyn-avatar-solid-border: var(--dyn-color-primary, #2563eb);
+  --dyn-avatar-subtle-bg: var(--dyn-color-primary-alpha-10, rgba(37, 99, 235, 0.12));
+  --dyn-avatar-subtle-color: var(--dyn-color-primary, #2563eb);
+  --dyn-avatar-subtle-border: var(--dyn-color-primary-alpha-strong, rgba(37, 99, 235, 0.24));
+  --dyn-avatar-outline-bg: var(--dyn-color-background, #ffffff);
+  --dyn-avatar-outline-color: var(--dyn-color-primary, #2563eb);
+  --dyn-avatar-outline-border: var(--dyn-color-primary, #2563eb);
+}
+
+.avatar--color-secondary {
+  --dyn-avatar-solid-bg: var(--dyn-color-secondary, #6b7280);
+  --dyn-avatar-solid-color: var(--dyn-color-text-primary-dark, #f1f5f9);
+  --dyn-avatar-solid-border: var(--dyn-color-secondary, #6b7280);
+  --dyn-avatar-subtle-bg: rgba(107, 114, 128, 0.16);
+  --dyn-avatar-subtle-color: var(--dyn-color-secondary, #6b7280);
+  --dyn-avatar-subtle-border: rgba(107, 114, 128, 0.28);
+  --dyn-avatar-outline-bg: var(--dyn-color-background, #ffffff);
+  --dyn-avatar-outline-color: var(--dyn-color-secondary, #6b7280);
+  --dyn-avatar-outline-border: var(--dyn-color-secondary, #6b7280);
+}
+
+.avatar--color-success {
+  --dyn-avatar-solid-bg: var(--dyn-color-success, #10b981);
+  --dyn-avatar-solid-color: var(--dyn-color-text-primary-dark, #f1f5f9);
+  --dyn-avatar-solid-border: var(--dyn-color-success, #10b981);
+  --dyn-avatar-subtle-bg: rgba(16, 185, 129, 0.16);
+  --dyn-avatar-subtle-color: var(--dyn-color-success, #10b981);
+  --dyn-avatar-subtle-border: rgba(16, 185, 129, 0.28);
+  --dyn-avatar-outline-bg: var(--dyn-color-background, #ffffff);
+  --dyn-avatar-outline-color: var(--dyn-color-success, #10b981);
+  --dyn-avatar-outline-border: var(--dyn-color-success, #10b981);
+}
+
+.avatar--color-warning {
+  --dyn-avatar-solid-bg: var(--dyn-color-warning, #f59e0b);
+  --dyn-avatar-solid-color: var(--dyn-color-foreground, #0f172a);
+  --dyn-avatar-solid-border: var(--dyn-color-warning, #f59e0b);
+  --dyn-avatar-subtle-bg: rgba(245, 158, 11, 0.18);
+  --dyn-avatar-subtle-color: var(--dyn-color-warning, #f59e0b);
+  --dyn-avatar-subtle-border: rgba(245, 158, 11, 0.32);
+  --dyn-avatar-outline-bg: var(--dyn-color-background, #ffffff);
+  --dyn-avatar-outline-color: var(--dyn-color-warning, #f59e0b);
+  --dyn-avatar-outline-border: var(--dyn-color-warning, #f59e0b);
+}
+
+.avatar--color-danger {
+  --dyn-avatar-solid-bg: var(--dyn-color-danger, #dc2626);
+  --dyn-avatar-solid-color: var(--dyn-color-danger-contrast, #ffffff);
+  --dyn-avatar-solid-border: var(--dyn-color-danger, #dc2626);
+  --dyn-avatar-subtle-bg: rgba(220, 38, 38, 0.16);
+  --dyn-avatar-subtle-color: var(--dyn-color-danger, #dc2626);
+  --dyn-avatar-subtle-border: rgba(220, 38, 38, 0.3);
+  --dyn-avatar-outline-bg: var(--dyn-color-background, #ffffff);
+  --dyn-avatar-outline-color: var(--dyn-color-danger, #dc2626);
+  --dyn-avatar-outline-border: var(--dyn-color-danger, #dc2626);
+}
+
+.avatar--color-info {
+  --dyn-avatar-solid-bg: var(--dyn-color-info, #0ea5e9);
+  --dyn-avatar-solid-color: var(--dyn-color-text-primary-dark, #f1f5f9);
+  --dyn-avatar-solid-border: var(--dyn-color-info, #0ea5e9);
+  --dyn-avatar-subtle-bg: rgba(14, 165, 233, 0.18);
+  --dyn-avatar-subtle-color: var(--dyn-color-info, #0ea5e9);
+  --dyn-avatar-subtle-border: rgba(14, 165, 233, 0.3);
+  --dyn-avatar-outline-bg: var(--dyn-color-background, #ffffff);
+  --dyn-avatar-outline-color: var(--dyn-color-info, #0ea5e9);
+  --dyn-avatar-outline-border: var(--dyn-color-info, #0ea5e9);
 }
 
 /* Interactive states */
@@ -135,8 +259,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--dyn-color-primary-alpha-10, var(--color-primary, rgba(37, 99, 235, 0.1)));
-  color: var(--dyn-color-primary, var(--color-primary, #2563eb));
+  background-color: var(--dyn-avatar-fallback-bg);
+  color: var(--dyn-avatar-fallback-color);
 }
 
 .avatar__initials {
@@ -195,16 +319,23 @@
 
 /* Dark theme support */
 @media (prefers-color-scheme: dark) {
-  .avatar {
-    background-color: var(--dyn-color-neutral-800, #1f2937);
-    border-color: var(--dyn-color-neutral-700, #374151);
+  .avatar--color-neutral {
+    --dyn-avatar-solid-bg: var(--dyn-color-neutral-700, #374151);
+    --dyn-avatar-solid-color: var(--dyn-color-text-primary-dark, #f1f5f9);
+    --dyn-avatar-solid-border: var(--dyn-color-neutral-600, #4b5563);
+    --dyn-avatar-subtle-bg: var(--dyn-color-neutral-800, #1f2937);
+    --dyn-avatar-subtle-color: var(--dyn-color-text-primary-dark, #f1f5f9);
+    --dyn-avatar-subtle-border: var(--dyn-color-neutral-700, #374151);
+    --dyn-avatar-outline-bg: var(--dyn-color-neutral-800, #1f2937);
+    --dyn-avatar-outline-color: var(--dyn-color-text-primary-dark, #f1f5f9);
+    --dyn-avatar-outline-border: var(--dyn-color-neutral-700, #374151);
   }
-  
+
   .avatar__fallback {
-    background-color: var(--dyn-color-neutral-700, #374151);
-    color: var(--dyn-color-text-primary, #f1f5f9);
+    background-color: var(--dyn-avatar-fallback-bg);
+    color: var(--dyn-avatar-fallback-color);
   }
-  
+
   .avatar--error .avatar__fallback {
     background-color: var(--dyn-color-neutral-800, #1f2937);
     color: var(--dyn-color-text-disabled, #9ca3af);

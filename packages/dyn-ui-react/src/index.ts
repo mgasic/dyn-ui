@@ -3,6 +3,12 @@
 
 // Components and related types/constants
 export * from './components';
+export {
+  AVATAR_SIZES,
+  DYN_AVATAR_VARIANTS,
+  DYN_AVATAR_COLORS,
+  AVATAR_COLOR_TOKENS,
+} from './components/DynAvatar';
 
 // Theme system
 export { ThemeProvider, useTheme } from './theme/ThemeProvider';

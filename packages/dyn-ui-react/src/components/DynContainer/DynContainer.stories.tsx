@@ -26,6 +26,10 @@ const meta: Meta<typeof DynContainer> = {
   },
   tags: ['autodocs'],
   argTypes: {
+    as: {
+      control: 'text',
+      description: 'HTML element to render (e.g., div, section, main).',
+    },
     title: {
       control: 'text',
       description: 'Optional container title',
@@ -195,6 +199,24 @@ export const NoPadding: Story = {
         <p>This container has no internal padding. Content spans the full width.</p>
         <p>You can add custom padding to the content if needed.</p>
       </div>
+    ),
+  },
+};
+
+export const SemanticMain: Story = {
+  args: {
+    as: 'main',
+    title: 'Main Content Area',
+    subtitle: 'Rendered using a semantic <main> element',
+    spacing: 'lg',
+    children: (
+      <>
+        <p>
+          DynContainer can render as semantic HTML elements to better match the structure of your page.
+          This example renders using a <code>&lt;main&gt;</code> tag.
+        </p>
+        <DynButton label="Learn more" kind="secondary" />
+      </>
     ),
   },
 };
