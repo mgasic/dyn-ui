@@ -1,0 +1,74 @@
+.dynModalPlacement {
+  position: fixed;
+  inset: 0;
+  z-index: var(--dyn-modal-z-index, 1300);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--dyn-modal-placement-padding, var(--dyn-space-8, 2rem));
+  gap: var(--dyn-modal-placement-gap, var(--dyn-space-6, 1.5rem));
+  pointer-events: none;
+  box-sizing: border-box;
+  background: transparent;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.dynModalPlacement > * {
+  pointer-events: auto;
+}
+
+.strategyFixed {
+  position: fixed;
+}
+
+.strategyAbsolute {
+  position: absolute;
+}
+
+.strategyRelative {
+  position: relative;
+}
+
+.placementTop {
+  justify-content: flex-start;
+}
+
+.placementCenter {
+  justify-content: center;
+}
+
+.placementBottom {
+  justify-content: flex-end;
+}
+
+.placementFullscreen {
+  justify-content: stretch;
+  align-items: stretch;
+  padding: 0;
+}
+
+.alignStart {
+  align-items: flex-start;
+}
+
+.alignCenter {
+  align-items: center;
+}
+
+.alignEnd {
+  align-items: flex-end;
+}
+
+.alignStretch {
+  align-items: stretch;
+}
+
+.allowOverflow {
+  overflow: visible;
+}
+
+.fullHeight {
+  min-height: 100vh;
+}
