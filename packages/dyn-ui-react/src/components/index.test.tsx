@@ -32,6 +32,7 @@ import {
   // Data Display Components
   DynChart,
   DynGauge,
+  DynListItem,
   DynListView,
   DynTable,
   DynTreeView,
@@ -103,6 +104,7 @@ describe('Component Exports', () => {
   it('exports all data display components', () => {
     expect(isComponentExport(DynChart)).toBe(true);
     expect(isComponentExport(DynGauge)).toBe(true);
+    expect(isComponentExport(DynListItem)).toBe(true);
     expect(isComponentExport(DynListView)).toBe(true);
     expect(isComponentExport(DynTable)).toBe(true);
     expect(isComponentExport(DynTreeView)).toBe(true);
