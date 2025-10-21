@@ -93,15 +93,41 @@ describe('DynStepper', () => {
   it('shows first step as active by default', () => {
     render(<DynStepper {...defaultProps} />);
 
-    const firstStep = screen.getByLabelText(/step 1.*step 1/i);
+    const firstStep = screen.getByLabelText('Step 1');
     expect(firstStep).toHaveAttribute('aria-current', 'step');
     expect(screen.getByText('Step 1 Content')).toBeInTheDocument();
+  });
+
+  it('sets the aria-label to the step title without duplication', () => {
+    render(<DynStepper {...defaultProps} />);
+
+    const firstStep = screen.getByLabelText('Step 1');
+    expect(firstStep).toHaveAccessibleName('Step 1');
+  });
+
+  it('falls back to generated labels when title information is missing', () => {
+    const stepsWithoutTitles: StepItem[] = [
+      {
+        id: 'shipping',
+        label: 'Shipping',
+        content: <div>Shipping Content</div>
+      },
+      {
+        id: 'billing',
+        content: <div>Billing Content</div>
+      }
+    ];
+
+    render(<DynStepper steps={stepsWithoutTitles} />);
+
+    expect(screen.getByLabelText('Shipping')).toHaveAccessibleName('Shipping');
+    expect(screen.getByLabelText('Step 2')).toHaveAccessibleName('Step 2');
   });
 
   it('respects defaultActiveStep prop', () => {
     render(<DynStepper steps={mockSteps} defaultActiveStep={1} />);
 
-    const secondStep = screen.getByLabelText(/step 2.*step 2/i);
+    const secondStep = screen.getByLabelText('Step 2');
     expect(secondStep).toHaveAttribute('aria-current', 'step');
     expect(screen.getByText('Step 2 Content')).toBeInTheDocument();
   });
@@ -117,7 +143,7 @@ describe('DynStepper', () => {
       />
     );
 
-    const secondStep = screen.getByLabelText(/step 2.*step 2/i);
+    const secondStep = screen.getByLabelText('Step 2');
     await user.click(secondStep);
 
     expect(onStepChange).toHaveBeenCalledWith(1, mockSteps[1]);
@@ -134,7 +160,7 @@ describe('DynStepper', () => {
       />
     );
 
-    const secondStep = screen.getByLabelText(/step 2.*step 2/i);
+    const secondStep = screen.getByLabelText('Step 2');
     await user.click(secondStep);
 
     expect(onStepClick).toHaveBeenCalledWith(1, mockSteps[1]);
@@ -151,7 +177,7 @@ describe('DynStepper', () => {
       />
     );
 
-    const disabledStep = screen.getByLabelText(/step 3.*step 3/i);
+    const disabledStep = screen.getByLabelText('Step 3');
     expect(disabledStep).toBeDisabled();
 
     await user.click(disabledStep);
@@ -170,7 +196,7 @@ describe('DynStepper', () => {
     );
 
     // Should not be able to click step 4 when step 1 is not completed
-    const fourthStep = screen.getByLabelText(/step 4.*step 4/i);
+    const fourthStep = screen.getByLabelText('Step 4');
     await user.click(fourthStep);
 
     expect(onStepChange).not.toHaveBeenCalledWith(3, mockSteps[3]);
@@ -523,7 +549,7 @@ describe('DynStepper', () => {
       />
     );
 
-    const secondStep = screen.getByLabelText(/step 2.*step 2/i);
+    const secondStep = screen.getByLabelText('Step 2');
     await user.click(secondStep);
 
     expect(onStepChange).not.toHaveBeenCalledWith(1, mockSteps[1]);

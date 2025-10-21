@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import { DynTreeViewProps, DynTreeNode } from './DynTreeView.types';
 import styles from './DynTreeView.module.css';
@@ -29,6 +29,9 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
   const [internalCheckedKeys, setInternalCheckedKeys] = useState<string[]>(checkedKeys);
   const [internalSelectedKeys, setInternalSelectedKeys] = useState<string[]>(selectedKeys);
   const [searchValue, setSearchValue] = useState<string>('');
+  const [focusedKey, setFocusedKey] = useState<string | null>(null);
+  const nodeRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const treeRef = useRef<HTMLDivElement | null>(null);
 
   // Helper function to get all keys from tree data
   function getAllKeys(nodes: DynTreeNode[]): string[] {
@@ -155,17 +158,88 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
     [onSearch, filteredTreeData]
   );
 
-  // Render tree node
+  const visibleNodes = useMemo(() => {
+    const nodes: Array<{
+      node: DynTreeNode;
+      level: number;
+      parentKey?: string;
+      setSize: number;
+      position: number;
+    }> = [];
+
+    function traverse(currentNodes: DynTreeNode[], level: number, parentKey?: string) {
+      currentNodes.forEach((item, index) => {
+        const hasChildren = item.children && item.children.length > 0;
+        nodes.push({
+          node: item,
+          level,
+          parentKey,
+          setSize: currentNodes.length,
+          position: index + 1,
+        });
+
+        if (hasChildren && internalExpandedKeys.includes(item.key)) {
+          traverse(item.children!, level + 1, item.key);
+        }
+      });
+    }
+
+    traverse(filteredTreeData, 1);
+    return nodes;
+  }, [filteredTreeData, internalExpandedKeys]);
+
+  const firstFocusableKey = useMemo(() => {
+    const focusable = visibleNodes.find(meta => !meta.node.disabled);
+    return focusable ? focusable.node.key : null;
+  }, [visibleNodes]);
+
+  useEffect(() => {
+    if (!visibleNodes.length) {
+      setFocusedKey(null);
+      return;
+    }
+
+    if (focusedKey && !visibleNodes.some(meta => meta.node.key === focusedKey && !meta.node.disabled)) {
+      setFocusedKey(firstFocusableKey);
+      return;
+    }
+
+    if (!focusedKey) {
+      setFocusedKey(firstFocusableKey);
+    }
+  }, [visibleNodes, focusedKey, firstFocusableKey]);
+
+  useEffect(() => {
+    if (focusedKey) {
+      const treeElement = treeRef.current;
+      const ref = nodeRefs.current[focusedKey];
+      if (treeElement && ref && treeElement.contains(document.activeElement)) {
+        ref.focus();
+      }
+    }
+  }, [focusedKey, visibleNodes]);
+
   const renderTreeNode = useCallback(
-    (node: DynTreeNode, level: number = 0): React.ReactNode => {
+    (
+      node: DynTreeNode,
+      level: number,
+      setSize: number,
+      position: number,
+      parentKey?: string
+    ): React.ReactNode => {
       const hasChildren = node.children && node.children.length > 0;
       const isExpanded = internalExpandedKeys.includes(node.key);
       const isSelected = internalSelectedKeys.includes(node.key);
       const isChecked = internalCheckedKeys.includes(node.key);
+      const nodeId = `dyn-tree-item-${node.key}`;
 
       return (
         <div key={node.key} className={styles['dyn-tree-view__node']}>
           <div
+            ref={element => {
+              nodeRefs.current[node.key] = element;
+            }}
+            id={nodeId}
             className={classNames(
               styles['dyn-tree-view__node-content'],
               {
@@ -173,10 +247,16 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
                 [styles['dyn-tree-view__node-content--disabled']]: node.disabled,
               }
             )}
-            style={{ paddingLeft: level * 24 }}
+            style={{ paddingLeft: (level - 1) * 24 }}
             role="treeitem"
             aria-selected={isSelected}
             aria-disabled={node.disabled ? true : undefined}
+            aria-expanded={hasChildren ? isExpanded : undefined}
+            aria-level={level}
+            aria-setsize={setSize}
+            aria-posinset={position}
+            tabIndex={focusedKey === node.key ? 0 : -1}
+            data-parent-key={parentKey}
           >
             {/* Expand/Collapse icon */}
             {hasChildren ? (
@@ -230,7 +310,9 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
           {/* Children */}
           {hasChildren && isExpanded && (
             <div className={styles['dyn-tree-view__node-children']}>
-              {node.children!.map(child => renderTreeNode(child, level + 1))}
+              {node.children!.map((child, index) =>
+                renderTreeNode(child, level + 1, node.children!.length, index + 1, node.key)
+              )}
             </div>
           )}
         </div>
@@ -247,6 +329,7 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
       selectable,
       showIcon,
       showLine,
+      focusedKey,
     ]
   );
 
@@ -272,8 +355,197 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
     className
   );
 
+  const handleTreeFocus = useCallback(
+    (event: React.FocusEvent<HTMLDivElement>) => {
+      if (event.target === event.currentTarget) {
+        if (!focusedKey) {
+          const first = visibleNodes.find(meta => !meta.node.disabled);
+          if (first) {
+            setFocusedKey(first.node.key);
+            return;
+          }
+        }
+
+        if (focusedKey) {
+          const ref = nodeRefs.current[focusedKey];
+          ref?.focus();
+        }
+      }
+    },
+    [focusedKey, visibleNodes]
+  );
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (!visibleNodes.length) {
+        return;
+      }
+
+      const currentIndex = focusedKey
+        ? visibleNodes.findIndex(meta => meta.node.key === focusedKey)
+        : -1;
+      const currentMeta = currentIndex >= 0 ? visibleNodes[currentIndex] : undefined;
+
+      const moveFocus = (direction: 1 | -1) => {
+        if (currentIndex === -1) {
+          if (direction === 1) {
+            const next = visibleNodes.find(meta => !meta.node.disabled);
+            if (next) {
+              setFocusedKey(next.node.key);
+            }
+          }
+          return;
+        }
+
+        let index = currentIndex + direction;
+        while (index >= 0 && index < visibleNodes.length) {
+          const candidate = visibleNodes[index];
+          if (!candidate.node.disabled) {
+            setFocusedKey(candidate.node.key);
+            break;
+          }
+          index += direction;
+        }
+      };
+
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          moveFocus(1);
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          moveFocus(-1);
+          break;
+        case 'Home':
+          event.preventDefault();
+          {
+            const first = visibleNodes.find(meta => !meta.node.disabled);
+            if (first) {
+              setFocusedKey(first.node.key);
+            }
+          }
+          break;
+        case 'End':
+          event.preventDefault();
+          {
+            for (let i = visibleNodes.length - 1; i >= 0; i -= 1) {
+              const candidate = visibleNodes[i];
+              if (!candidate.node.disabled) {
+                setFocusedKey(candidate.node.key);
+                break;
+              }
+            }
+          }
+          break;
+        case 'ArrowRight':
+          if (!currentMeta) {
+            return;
+          }
+          {
+            const { node, level } = currentMeta;
+            const hasChildren = node.children && node.children.length > 0;
+            const isExpanded = internalExpandedKeys.includes(node.key);
+            if (hasChildren && !isExpanded) {
+              event.preventDefault();
+              handleExpand(node.key, true);
+            } else if (hasChildren && isExpanded) {
+              event.preventDefault();
+              const child = visibleNodes
+                .slice(currentIndex + 1)
+                .find(meta => meta.parentKey === node.key && meta.level === level + 1 && !meta.node.disabled);
+              if (child) {
+                setFocusedKey(child.node.key);
+              }
+            }
+          }
+          break;
+        case 'ArrowLeft':
+          if (!currentMeta) {
+            return;
+          }
+          {
+            const { node, parentKey } = currentMeta;
+            const hasChildren = node.children && node.children.length > 0;
+            const isExpanded = internalExpandedKeys.includes(node.key);
+            if (hasChildren && isExpanded) {
+              event.preventDefault();
+              handleExpand(node.key, false);
+            } else if (parentKey) {
+              event.preventDefault();
+              const parentMeta = visibleNodes.find(meta => meta.node.key === parentKey);
+              if (parentMeta && !parentMeta.node.disabled) {
+                setFocusedKey(parentMeta.node.key);
+              }
+            }
+          }
+          break;
+        case 'Enter':
+          if (!currentMeta || currentMeta.node.disabled) {
+            return;
+          }
+          {
+            const { node } = currentMeta;
+            const hasChildren = node.children && node.children.length > 0;
+            const isExpanded = internalExpandedKeys.includes(node.key);
+            const isSelected = internalSelectedKeys.includes(node.key);
+            event.preventDefault();
+
+            if (selectable) {
+              handleSelect(node, !isSelected);
+            }
+
+            if (hasChildren) {
+              handleExpand(node.key, !isExpanded);
+            }
+          }
+          break;
+        case ' ': // Space
+          if (!currentMeta || currentMeta.node.disabled) {
+            return;
+          }
+          event.preventDefault();
+          {
+            const { node } = currentMeta;
+            const isChecked = internalCheckedKeys.includes(node.key);
+            const isSelected = internalSelectedKeys.includes(node.key);
+
+            if (checkable) {
+              handleCheck(node, !isChecked);
+            } else if (selectable) {
+              handleSelect(node, !isSelected);
+            }
+          }
+          break;
+        default:
+          break;
+      }
+    },
+    [
+      visibleNodes,
+      focusedKey,
+      internalExpandedKeys,
+      internalSelectedKeys,
+      internalCheckedKeys,
+      handleExpand,
+      handleSelect,
+      handleCheck,
+      selectable,
+      checkable,
+    ]
+  );
+
   return (
-  <div className={treeViewClasses} style={{ height }} role="tree">
+    <div
+      ref={treeRef}
+      className={treeViewClasses}
+      style={{ height }}
+      role="tree"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      onFocus={handleTreeFocus}
+      aria-multiselectable={multiple || undefined}
+    >
       {/* Search */}
       {(showSearch ?? searchable) && (
         <div className={styles['dyn-tree-view__search']}>
@@ -290,7 +562,9 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
       {/* Tree content */}
       <div className={styles['dyn-tree-view__content']}>
         {filteredTreeData.length > 0 ? (
-          filteredTreeData.map(node => renderTreeNode(node))
+          filteredTreeData.map((node, index) =>
+            renderTreeNode(node, 1, filteredTreeData.length, index + 1)
+          )
         ) : (
           <div className={styles['dyn-tree-view__empty']}>
             <span>

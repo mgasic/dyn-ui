@@ -1,158 +1,155 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { useState } from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect } from 'vitest';
-import type { DynDatePickerProps } from '../../types/field.types';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from 'vitest';
 import { DynDatePicker } from './DynDatePicker';
 
-const formatAriaLabel = (locale: string, date: Date) =>
-  new Intl.DateTimeFormat(locale, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date);
-
-const ControlledDatePicker = ({
-  initialValue,
-  ...props
-}: { initialValue?: Date } & Partial<DynDatePickerProps>) => {
-  const [value, setValue] = React.useState<Date | null>(initialValue ?? null);
-  return (
-    <DynDatePicker
-      name="controlled-date"
-      label="Controlled Date"
-      value={value}
-      onChange={setValue}
-      {...props}
-    />
-  );
-};
+const createUser = () => userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
 describe('DynDatePicker', () => {
-  it('renders with label and opens the calendar', async () => {
-    render(<DynDatePicker name="test" label="Test Date Picker" />);
-
-    expect(screen.getByLabelText('Test Date Picker')).toBeInTheDocument();
-
-    const calendarButton = screen.getByLabelText('Abrir calendário');
-    await userEvent.click(calendarButton);
-
-    expect(screen.getByText('Hoje')).toBeInTheDocument();
-    expect(screen.getByText('Limpar')).toBeInTheDocument();
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
   });
 
-  it('selects a date from the calendar grid and closes the dropdown', async () => {
-    render(
-      <ControlledDatePicker
-        initialValue={new Date('2024-05-15')}
-        locale="en-US"
-        format="MM/dd/yyyy"
-      />
-    );
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
-    await userEvent.click(screen.getByLabelText('Abrir calendário'));
+  it('updates value and closes when selecting a day', async () => {
+    const user = createUser();
 
-    const targetLabel = formatAriaLabel('en-US', new Date('2024-05-20'));
-    await userEvent.click(screen.getByRole('gridcell', { name: targetLabel }));
+    const ControlledDatePicker = () => {
+      const [selected, setSelected] = useState<Date | null>(null);
+      return (
+        <DynDatePicker
+          name="event"
+          label="Event date"
+          locale="en-US"
+          format="MM/dd/yyyy"
+          value={selected}
+          onChange={setSelected}
+        />
+      );
+    };
+
+    render(<ControlledDatePicker />);
+
+    await user.click(screen.getByLabelText('Abrir calendário'));
+
+    const targetDay = await screen.findByRole('gridcell', {
+      name: 'Thursday, January 18, 2024',
+    });
+
+    await user.click(targetDay);
+
+    const input = screen.getByLabelText('Event date');
+    expect(input).toHaveValue('01/18/2024');
 
     await waitFor(() => {
       expect(screen.queryByRole('grid')).not.toBeInTheDocument();
     });
-
-    expect(screen.getByRole('textbox')).toHaveValue('05/20/2024');
+    expect(input).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('supports roving focus and directional navigation', async () => {
+  it('supports roving focus with arrow, home and end keys', async () => {
+    const user = createUser();
+
+    render(<DynDatePicker name="date" label="Choose date" locale="en-US" />);
+
+    const input = screen.getByLabelText('Choose date');
+    await user.click(input);
+    await user.keyboard('{ArrowDown}');
+
+    let activeElement = document.activeElement as HTMLButtonElement;
+    expect(activeElement).toHaveAttribute('data-date', '2024-01-15');
+
+    await user.keyboard('{ArrowRight}');
+    activeElement = document.activeElement as HTMLButtonElement;
+    expect(activeElement).toHaveAttribute('data-date', '2024-01-16');
+
+    await user.keyboard('{ArrowUp}');
+    activeElement = document.activeElement as HTMLButtonElement;
+    expect(activeElement).toHaveAttribute('data-date', '2024-01-09');
+
+    await user.keyboard('{End}');
+    activeElement = document.activeElement as HTMLButtonElement;
+    expect(activeElement).toHaveAttribute('data-date', '2024-01-13');
+
+    await user.keyboard('{Home}');
+    activeElement = document.activeElement as HTMLButtonElement;
+    expect(activeElement).toHaveAttribute('data-date', '2024-01-07');
+  });
+
+  it('clamps navigation within the configured date range', async () => {
+    const user = createUser();
+
     render(
-      <ControlledDatePicker
-        initialValue={new Date('2024-05-15')}
+      <DynDatePicker
+        name="range"
+        label="Range"
         locale="en-US"
-        format="MM/dd/yyyy"
+        minDate={new Date(2024, 0, 10)}
+        maxDate={new Date(2024, 0, 20)}
       />
     );
 
-    await userEvent.click(screen.getByLabelText('Abrir calendário'));
+    const input = screen.getByLabelText('Range');
+    await user.click(input);
+    await user.keyboard('{ArrowDown}');
 
-    const focusedLabel = formatAriaLabel('en-US', new Date('2024-05-15'));
-    const focusedCell = await screen.findByRole('gridcell', { name: focusedLabel });
-    expect(focusedCell).toHaveFocus();
+    let activeElement = document.activeElement as HTMLButtonElement;
+    expect(activeElement).toHaveAttribute('data-date', '2024-01-15');
 
-    fireEvent.keyDown(focusedCell, { key: 'ArrowRight' });
-    await waitFor(() => {
-      expect(document.activeElement).toHaveAttribute('data-date', '2024-05-16');
+    await user.keyboard('{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}');
+    activeElement = document.activeElement as HTMLButtonElement;
+    expect(activeElement).toHaveAttribute('data-date', '2024-01-10');
+
+    const disabledDay = screen.getByRole('gridcell', {
+      name: 'Tuesday, January 9, 2024',
     });
-
-    const nextFocused = document.activeElement as HTMLElement;
-    fireEvent.keyDown(nextFocused, { key: 'Home' });
-    await waitFor(() => {
-      expect(document.activeElement).toHaveAttribute('data-date', '2024-05-12');
-    });
-
-    fireEvent.keyDown(document.activeElement as HTMLElement, { key: 'End' });
-    await waitFor(() => {
-      expect(document.activeElement).toHaveAttribute('data-date', '2024-05-18');
-    });
+    expect(disabledDay).toHaveAttribute('aria-disabled', 'true');
   });
 
-  it('closes the calendar with Escape when focused inside the grid', async () => {
-    render(<ControlledDatePicker initialValue={new Date('2024-05-15')} locale="en-US" />);
+  it('localizes calendar labels and accessible text', async () => {
+    const user = createUser();
 
-    await userEvent.click(screen.getByLabelText('Abrir calendário'));
-    const focusedLabel = formatAriaLabel('en-US', new Date('2024-05-15'));
-    const focusedCell = await screen.findByRole('gridcell', { name: focusedLabel });
+    render(<DynDatePicker name="fr" label="Date" locale="fr-FR" />);
 
-    fireEvent.keyDown(focusedCell, { key: 'Escape' });
+    await user.click(screen.getByLabelText('Abrir calendário'));
+
+    expect(screen.getByText(/^janvier 2024$/i)).toBeInTheDocument();
+    expect(screen.getByText(/lun\./i)).toBeInTheDocument();
+
+    const focusedDay = await screen.findByRole('gridcell', {
+      name: /lundi 15 janvier 2024/i,
+    });
+    expect(focusedDay).toHaveAttribute('aria-label', expect.stringMatching(/lundi 15 janvier 2024/i));
+  });
+
+  it('closes the calendar with Escape and toggles expanded state', async () => {
+    const user = createUser();
+
+    render(<DynDatePicker name="escape" label="Escape" locale="en-US" />);
+
+    const input = screen.getByLabelText('Escape');
+    await user.click(input);
+    await user.keyboard('{Enter}');
+
+    expect(await screen.findByRole('grid')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
 
     await waitFor(() => {
       expect(screen.queryByRole('grid')).not.toBeInTheDocument();
     });
-
-    expect(screen.getByRole('textbox')).toHaveFocus();
-  });
-
-  it('disables days outside the provided range', async () => {
-    render(
-      <ControlledDatePicker
-        initialValue={new Date('2024-05-15')}
-        locale="en-US"
-        minDate={new Date('2024-05-10')}
-        maxDate={new Date('2024-05-20')}
-      />
-    );
-
-    await userEvent.click(screen.getByLabelText('Abrir calendário'));
-
-    const beforeRange = formatAriaLabel('en-US', new Date('2024-05-05'));
-    const afterRange = formatAriaLabel('en-US', new Date('2024-05-25'));
-
-    expect(screen.getByRole('gridcell', { name: beforeRange })).toBeDisabled();
-    expect(screen.getByRole('gridcell', { name: afterRange })).toBeDisabled();
-  });
-
-  it('orders weekday headers based on locale', async () => {
-    const { rerender } = render(
-      <DynDatePicker name="locale-us" label="US" locale="en-US" />
-    );
-
-    await userEvent.click(screen.getByLabelText('Abrir calendário'));
-    const usWeekdays = screen.getAllByTestId('dyn-datepicker-weekday');
-    expect(usWeekdays[0]).toHaveTextContent(/sun/i);
-
-    rerender(<DynDatePicker name="locale-gb" label="GB" locale="en-GB" />);
-    await userEvent.click(screen.getByLabelText('Abrir calendário'));
-    const gbWeekdays = screen.getAllByTestId('dyn-datepicker-weekday');
-    expect(gbWeekdays[0]).toHaveTextContent(/mon/i);
-  });
-
-  it('announces the active date for assistive technologies', async () => {
-    render(
-      <ControlledDatePicker initialValue={new Date('2024-05-15')} locale="en-US" />
-    );
-
-    await userEvent.click(screen.getByLabelText('Abrir calendário'));
-
-    const announcement = formatAriaLabel('en-US', new Date('2024-05-15'));
-    expect(screen.getByText(announcement)).toBeInTheDocument();
+    expect(input).toHaveAttribute('aria-expanded', 'false');
   });
 });

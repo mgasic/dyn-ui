@@ -169,6 +169,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--dyn-spacing-sm, 8px);
 }
 
 .monthButton {
@@ -177,14 +178,13 @@
   justify-content: center;
   width: 32px;
   height: 32px;
+  font-size: var(--dyn-font-size-lg, 18px);
   border: 1px solid var(--dyn-color-border, #d1d5db);
   border-radius: var(--dyn-border-radius-sm, 4px);
   background-color: var(--dyn-color-surface, #fff);
   color: var(--dyn-color-text-primary, #333);
   cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .monthButton:hover:not(:disabled) {
@@ -194,28 +194,24 @@
 
 .monthButton:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.monthButton:focus {
-  outline: 2px solid var(--dyn-color-primary, #0066cc);
-  outline-offset: 2px;
+  color: var(--dyn-color-text-disabled, #9ca3af);
+  border-color: var(--dyn-color-border-disabled, #e5e7eb);
 }
 
 .monthLabel {
-  font-weight: var(--dyn-font-weight-medium, 600);
+  flex: 1;
+  text-align: center;
+  font-size: var(--dyn-font-size-md, 16px);
+  font-weight: var(--dyn-font-weight-medium, 500);
   text-transform: capitalize;
-  color: var(--dyn-color-text-primary, #333);
 }
 
-.weekHeader {
+.weekdayRow {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: var(--dyn-spacing-xs, 4px);
-  font-size: var(--dyn-font-size-xs, 12px);
-  text-transform: uppercase;
+  font-size: var(--dyn-font-size-sm, 14px);
   color: var(--dyn-color-text-secondary, #666);
-  padding: 0 var(--dyn-spacing-2xs, 2px);
 }
 
 .weekday {
@@ -225,56 +221,65 @@
 
 .calendarGrid {
   display: grid;
+  grid-template-rows: repeat(6, auto);
+  gap: var(--dyn-spacing-xs, 4px);
+}
+
+.weekRow {
+  display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: var(--dyn-spacing-xs, 4px);
 }
 
-.dayButton {
-  position: relative;
+.day {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  padding: var(--dyn-spacing-xs, 4px);
+  min-height: 36px;
   border: 1px solid transparent;
   border-radius: var(--dyn-border-radius-sm, 4px);
   background-color: transparent;
   font-size: var(--dyn-font-size-sm, 14px);
   color: var(--dyn-color-text-primary, #333);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.dayButton:hover:not(:disabled) {
+.day:hover:not(:disabled) {
   background-color: var(--dyn-color-surface-hover, #f3f4f6);
 }
 
-.dayButton:focus {
+.day:focus-visible {
   outline: 2px solid var(--dyn-color-primary, #0066cc);
   outline-offset: 2px;
-}
-
-.dayToday {
-  border-color: var(--dyn-color-primary, #0066cc);
-}
-
-.daySelected {
-  background-color: var(--dyn-color-primary, #0066cc);
-  color: var(--dyn-color-on-primary, #fff);
 }
 
 .dayOutside {
   color: var(--dyn-color-text-disabled, #9ca3af);
 }
 
-.dayDisabled {
+.dayDisabled,
+.dayDisabled:hover,
+.dayDisabled:focus-visible {
   color: var(--dyn-color-text-disabled, #9ca3af);
-  background-color: var(--dyn-color-surface-disabled, #f3f4f6);
   cursor: not-allowed;
+  background-color: transparent;
+  outline: none;
 }
 
-.dayDisabled:focus {
-  outline: none;
+.daySelected {
+  background-color: var(--dyn-color-primary, #0066cc);
+  color: var(--dyn-color-surface, #fff);
+}
+
+.dayToday {
+  border-color: var(--dyn-color-primary, #0066cc);
+}
+
+.dayActive:not(.daySelected) {
+  border-color: var(--dyn-color-primary, #0066cc);
+  background-color: var(--dyn-color-primary-alpha, rgba(0, 102, 204, 0.1));
 }
 
 .srOnly {
