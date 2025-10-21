@@ -3,12 +3,7 @@ import type { ElementType, FocusEvent, KeyboardEvent, MouseEvent } from 'react';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import { DynIcon } from '../DynIcon';
-import { useI18n } from '../../i18n';
-import type {
-  DynButtonDefaultProps,
-  DynButtonProps,
-  DynButtonRef,
-} from './DynButton.types';
+import type { DynButtonProps, DynButtonRef } from './DynButton.types';
 import { DYN_BUTTON_DEFAULT_PROPS } from './DynButton.types';
 import styles from './DynButton.module.css';
 
@@ -78,111 +73,75 @@ const DynButtonInner = <E extends ElementType = 'button'>(
 
   const Component = (as || 'button') as ElementType;
   const internalId = id || generateId('button');
-  const { t } = useI18n();
+  const isNativeButton = typeof Component === 'string' && Component === 'button';
 
-    // Memoized computations
-    const fallbackButtonLabel = useMemo(
-      () => t({ id: 'button.fallback', defaultMessage: 'Button' }),
-      [t]
-    );
-    const defaultLoadingMessage = useMemo(
-      () => t({ id: DYN_BUTTON_DEFAULT_PROPS.loadingText, defaultMessage: DYN_BUTTON_DEFAULT_PROPS.loadingText }),
-      [t]
-    );
-    const labelText = useMemo(() => {
-      if (typeof label !== 'string') return '';
-      const trimmed = label.trim();
-      if (!trimmed) return '';
-      return t({ id: trimmed, defaultMessage: trimmed }).trim();
-    }, [label, t]);
-    const hasLabel = labelText.length > 0;
-    const childrenCount = React.Children.count(children);
-    const hasChildrenContent = childrenCount > 0;
-    const isIconOnly = Boolean(icon) && !hasLabel && !hasChildrenContent;
-    const isDisabled = disabled || loading;
+  const [internalLoading, setInternalLoading] = useState(false);
+  const loadingIsControlled = loadingProp !== undefined;
+  const loading = loadingIsControlled ? Boolean(loadingProp) : internalLoading;
+  const isDisabled = disabled || loading;
 
-    // Generate appropriate ARIA label for accessibility
-    const iconAriaLabel = useMemo(() => generateIconAriaLabel(icon), [icon]);
-    const translatedAriaLabel = useMemo(() => {
-      if (typeof ariaLabel !== 'string') return undefined;
-      const trimmed = ariaLabel.trim();
-      if (!trimmed) return undefined;
-      return t({ id: trimmed, defaultMessage: trimmed });
-    }, [ariaLabel, t]);
-    const computedAriaLabel = useMemo(
-      () =>
-        normalizeAriaLabel(
-          translatedAriaLabel ??
-            (isIconOnly ? (labelText || iconAriaLabel || fallbackButtonLabel) : undefined)
-        ),
-      [translatedAriaLabel, isIconOnly, labelText, iconAriaLabel, fallbackButtonLabel]
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const trimmedLabel = useMemo(() => (typeof label === 'string' ? label.trim() : ''), [label]);
+  const hasLabel = trimmedLabel.length > 0;
+  const childrenCount = React.Children.count(children);
+  const hasChildrenContent = childrenCount > 0;
+  const hasStartIcon = Boolean(startIcon);
+  const hasEndIcon = Boolean(endIcon);
+  const isIconOnly = (hasStartIcon || hasEndIcon) && !hasLabel && !hasChildrenContent;
+
+  const iconAriaLabel = useMemo(() => {
+    return normalizeAriaLabel(
+      generateIconAriaLabel(startIcon) ?? generateIconAriaLabel(endIcon) ?? undefined
     );
   }, [startIcon, endIcon]);
 
-    // Normalize loading text
-    const normalizedLoadingText = useMemo(() => {
-      if (typeof loadingText !== 'string') return defaultLoadingMessage;
-      const trimmed = loadingText.trim();
-      if (!trimmed) return defaultLoadingMessage;
-      return t({ id: trimmed, defaultMessage: trimmed });
-    }, [defaultLoadingMessage, loadingText, t]);
+  const computedAriaLabel = useMemo(
+    () =>
+      normalizeAriaLabel(
+        ariaLabel ?? (isIconOnly ? trimmedLabel || iconAriaLabel || 'Button' : undefined)
+      ),
+    [ariaLabel, iconAriaLabel, isIconOnly, trimmedLabel]
+  );
 
-    // Icon size mapping
-    const iconSizeToken = useMemo(() => {
-      switch (size) {
-        case 'small': return 'small';
-        case 'large': return 'large';
-        default: return 'medium';
-      }
-    }, [size]);
+  const normalizedLoadingText = useMemo(() => {
+    if (typeof loadingText !== 'string') return DYN_BUTTON_DEFAULT_PROPS.loadingText;
+    const trimmed = loadingText.trim();
+    return trimmed || DYN_BUTTON_DEFAULT_PROPS.loadingText;
+  }, [loadingText]);
 
-    // Render icon element
-    const iconElement = useMemo(() => {
-      if (!icon) return null;
-      if (typeof icon === 'string') {
-        return <DynIcon icon={icon} aria-hidden="true" className={getStyleClass('icon')} size={iconSizeToken} />;
-      }
-      return <span className={getStyleClass('icon')} aria-hidden="true">{icon}</span>;
-    }, [icon, iconSizeToken]);
+  const iconSizeToken = useMemo(() => {
+    switch (size) {
+      case 'small':
+        return 'small';
+      case 'large':
+        return 'large';
+      default:
+        return 'medium';
+    }
+  }, [size]);
 
-    // Render children content
-    const childrenContent = useMemo(() => {
-      if (!hasChildrenContent) return null;
-      if (typeof children === 'string') {
-        const trimmedChildren = children.trim();
-        if (!trimmedChildren) return null;
-        const translatedChild = t({ id: trimmedChildren, defaultMessage: trimmedChildren });
-        return <span className={getStyleClass('label')}>{translatedChild}</span>;
-      }
-      return children;
-    }, [children, hasChildrenContent, t]);
-
-    // Render label element (primary text)
-    const labelElement = hasLabel ? (
-      <span className={getStyleClass('label')}>{labelText}</span>
-    ) : null;
-
-    // Generate CSS classes safely (DynAvatar pattern)
-    const kindClass = getStyleClass(`kind${kind.charAt(0).toUpperCase() + kind.slice(1)}`);
-    const sizeClass = getStyleClass(`size${size.charAt(0).toUpperCase() + size.slice(1)}`);
-    const dangerClass = getStyleClass('danger');
-    const loadingClass = getStyleClass('loading');
-    const iconOnlyClass = getStyleClass('iconOnly');
-    const fullWidthClass = getStyleClass('fullWidth');
-    const hideOnMobileClass = getStyleClass('hideOnMobile');
-    const iconOnlyOnMobileClass = getStyleClass('iconOnlyOnMobile');
-
-    const buttonClassName = cn(
-      getStyleClass('root'),
-      kindClass,
-      sizeClass,
-      {
-        [dangerClass]: danger && dangerClass,
-        [loadingClass]: loading && loadingClass,
-        [iconOnlyClass]: isIconOnly && iconOnlyClass,
-        [fullWidthClass]: fullWidth && fullWidthClass,
-        [hideOnMobileClass]: hideOnMobile && hideOnMobileClass,
-        [iconOnlyOnMobileClass]: iconOnlyOnMobile && iconOnlyOnMobileClass,
+  const renderIcon = useMemo(
+    () =>
+      (icon: string | React.ReactNode | undefined, slot: 'iconStart' | 'iconEnd') => {
+        if (!icon) return null;
+        const slotClass = getStyleClass(slot);
+        const iconClass = cn(getStyleClass('icon'), slotClass);
+        if (typeof icon === 'string') {
+          return (
+            <DynIcon icon={icon} aria-hidden="true" className={iconClass} size={iconSizeToken} />
+          );
+        }
+        return (
+          <span className={iconClass} aria-hidden="true">
+            {icon}
+          </span>
+        );
       },
     [iconSizeToken]
   );
@@ -290,27 +249,59 @@ const DynButtonInner = <E extends ElementType = 'button'>(
     ref: forwardedRef,
     id: internalId,
     className: buttonClassName,
-    'data-testid': dataTestId ?? 'dyn-button',
-    'data-state': state,
-    'data-variant': variant,
-    'data-size': size,
-    'data-danger': danger ? 'true' : undefined,
-    'data-disabled': isDisabled ? 'true' : undefined,
-    'aria-label': computedAriaLabel,
-    'aria-describedby': ariaDescribedBy,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-expanded': ariaExpanded,
-    'aria-controls': ariaControls,
-    'aria-pressed': typeof ariaPressed === 'boolean' ? ariaPressed : undefined,
-    'aria-busy': loading || undefined,
-    'aria-disabled': isDisabled || undefined,
-    role: resolvedRole,
-    tabIndex: resolvedTabIndex,
     onClick: handleClick,
     onBlur: handleBlur,
     onKeyDown: handleKeyDown,
     ...rest,
   } as ElementProps<E>;
+
+  componentProps['data-testid'] = dataTestId ?? 'dyn-button';
+  componentProps['data-state'] = state;
+  componentProps['data-variant'] = variant;
+  componentProps['data-size'] = size;
+
+  if (danger) {
+    componentProps['data-danger'] = 'true';
+  }
+
+  if (isDisabled) {
+    componentProps['data-disabled'] = 'true';
+  }
+
+  if (computedAriaLabel) {
+    componentProps['aria-label'] = computedAriaLabel;
+  }
+
+  if (ariaDescribedBy !== undefined) {
+    componentProps['aria-describedby'] = ariaDescribedBy;
+  }
+
+  if (ariaLabelledBy !== undefined) {
+    componentProps['aria-labelledby'] = ariaLabelledBy;
+  }
+
+  if (typeof ariaExpanded === 'boolean') {
+    componentProps['aria-expanded'] = ariaExpanded;
+  }
+
+  if (ariaControls !== undefined) {
+    componentProps['aria-controls'] = ariaControls;
+  }
+
+  if (typeof ariaPressed === 'boolean') {
+    componentProps['aria-pressed'] = ariaPressed;
+  }
+
+  componentProps['aria-busy'] = loading;
+  componentProps['aria-disabled'] = isDisabled;
+
+  if (resolvedRole) {
+    componentProps.role = resolvedRole;
+  }
+
+  if (typeof resolvedTabIndex === 'number') {
+    componentProps.tabIndex = resolvedTabIndex;
+  }
 
   if (isNativeButton) {
     (componentProps as React.ButtonHTMLAttributes<HTMLButtonElement>).type = typeProp;
