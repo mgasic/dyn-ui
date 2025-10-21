@@ -3,7 +3,13 @@
  * Part of DYN UI Layout Components Group - SCOPE 7
  */
 
-import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
+import type {
+  CSSProperties,
+  ComponentPropsWithoutRef,
+  ElementType,
+  HTMLAttributes,
+  ReactNode,
+} from 'react';
 import type { BaseComponentProps } from './theme';
 
 // Common layout types
@@ -88,6 +94,9 @@ export interface DynGridColumn {
   hidden?: boolean;
 }
 
+type PolymorphicComponentProps<E extends ElementType, P> = P &
+  Omit<ComponentPropsWithoutRef<E>, keyof P>;
+
 // DynPage Props
 export interface DynPageBreadcrumb {
   title: string;
@@ -105,18 +114,41 @@ export interface DynPageAction {
   loading?: boolean;
 }
 
-export interface DynPageProps {
-  title: string;
+export interface DynPageHeaderSlotProps {
+  title?: string;
+  subtitle?: string;
+  breadcrumbs: DynPageBreadcrumb[];
+  actions: DynPageAction[];
+  /**
+   * Identifier used to bind the document landmark with the heading. Consumers
+   * should assign this value to the element that labels the page when
+   * providing a custom header implementation.
+   */
+  titleId: string;
+  renderBreadcrumbs: () => ReactNode;
+  renderActions: () => ReactNode;
+}
+
+export interface DynPageSlots {
+  header?: (props: DynPageHeaderSlotProps) => ReactNode;
+}
+
+export interface DynPageOwnProps {
+  title?: string;
   subtitle?: string;
   breadcrumbs?: DynPageBreadcrumb[];
   actions?: DynPageAction[];
-  children: ReactNode;
   loading?: boolean;
   error?: string | ReactNode;
   size?: LayoutSize;
   padding?: LayoutSpacing;
+  headerPadding?: LayoutSpacing;
   background?: 'none' | 'surface' | 'page';
-  className?: string;
-  id?: string;
-  'data-testid'?: string;
+  style?: CSSProperties;
+  slots?: DynPageSlots;
 }
+
+export type DynPageProps<E extends ElementType = 'main'> =
+  PolymorphicComponentProps<E, BaseComponentProps & DynPageOwnProps> & {
+    as?: E;
+  };

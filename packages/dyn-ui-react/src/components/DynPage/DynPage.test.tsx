@@ -143,16 +143,18 @@ describe('DynPage', () => {
     expect(el?.className).toMatch(/large/i);
   });
 
-  it('applies padding classes', () => {
-    const { container } = render(
+  it('maps padding prop to spacing tokens', () => {
+    render(
       <DynPage title="Test" padding="lg">
         <div>Content</div>
       </DynPage>
     );
-    
-    // CSS module friendly assertion
-    const el = container.firstElementChild as HTMLElement | null;
-    expect(el?.className).toMatch(/padding.*lg/i);
+
+    const root = screen.getByRole('main');
+    expect(root.className).toMatch(/padding.*lg/i);
+    expect(root.style.getPropertyValue('--dyn-page-content-padding')).toContain(
+      '--dyn-spacing-2xl'
+    );
   });
 
   it('applies background classes', () => {
@@ -173,10 +175,68 @@ describe('DynPage', () => {
         <div>Page content</div>
       </DynPage>
     );
-    
-    expect(screen.getByRole('banner')).toBeInTheDocument(); // header
-    expect(screen.getByRole('main')).toBeInTheDocument(); // main content
-    expect(screen.getByRole('navigation')).toBeInTheDocument(); // breadcrumbs
+
+    const main = screen.getByRole('main');
+    const header = screen.getByRole('banner');
+
+    expect(main.tagName.toLowerCase()).toBe('main');
+    expect(header).toBeInTheDocument();
+    expect(screen.getByRole('navigation')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+    expect(main).toHaveAttribute('aria-labelledby');
+  });
+
+  it('falls back to role="main" when rendered with alternative element', () => {
+    const { container } = render(
+      <DynPage as="div" title="Alt Semantic">
+        <div>Alt Content</div>
+      </DynPage>
+    );
+
+    const root = container.firstElementChild as HTMLElement | null;
+    expect(root?.tagName.toLowerCase()).toBe('div');
+    expect(root).toHaveAttribute('role', 'main');
+  });
+
+  it('links aria-labelledby to generated heading id by default', () => {
+    render(
+      <DynPage title="Accessible Title">
+        <div>Accessible Content</div>
+      </DynPage>
+    );
+
+    const main = screen.getByRole('main');
+    const heading = screen.getByRole('heading', { level: 1 });
+
+    expect(heading.id).not.toBe('');
+    expect(main).toHaveAttribute('aria-labelledby', heading.id);
+  });
+
+  it('supports custom PageHeader slot while preserving accessibility bindings', () => {
+    render(
+      <DynPage
+        title="Ignored"
+        breadcrumbs={mockBreadcrumbs}
+        actions={mockActions}
+        slots={{
+          header: ({ titleId, renderBreadcrumbs, renderActions }) => (
+            <>
+              <div data-testid="slot-breadcrumbs">{renderBreadcrumbs()}</div>
+              <h1 id={titleId}>Slot Title</h1>
+              <div data-testid="slot-actions">{renderActions()}</div>
+            </>
+          ),
+        }}
+      >
+        <div>Content</div>
+      </DynPage>
+    );
+
+    const main = screen.getByRole('main');
+    const heading = screen.getByRole('heading', { level: 1, name: 'Slot Title' });
+
+    expect(screen.getByTestId('slot-breadcrumbs')).toBeInTheDocument();
+    expect(screen.getByTestId('slot-actions')).toBeInTheDocument();
+    expect(main).toHaveAttribute('aria-labelledby', heading.id);
   });
 });
