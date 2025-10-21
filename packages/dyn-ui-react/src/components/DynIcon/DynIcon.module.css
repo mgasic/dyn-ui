@@ -1,10 +1,15 @@
 .dynIcon {
+  --dyn-icon-size: var(--dyn-size-control-md, 1.125rem);
+  --dyn-icon-color: var(--dyn-color-text-secondary, currentColor);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: currentColor;
   vertical-align: middle;
+  width: var(--dyn-icon-size);
+  height: var(--dyn-icon-size);
+  font-size: var(--dyn-icon-size);
+  color: var(--dyn-icon-color);
 }
 
 .dynIcon svg {
@@ -37,23 +42,17 @@
   font-family: monospace;
 }
 
-/* Interactive icons */
-.dynIcon:hover {
-  opacity: 0.8;
-}
-
 .dyn-icon-clickable {
   cursor: pointer;
   border-radius: 4px;
   padding: 2px;
   margin: -2px;
-  transition: all 0.2s ease;
+  transition: var(--dyn-animation-transition-all, all 0.2s ease);
 }
 
 .dyn-icon-clickable:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  transform: scale(1.1);
-  opacity: 0.7;
+  background-color: var(--dyn-color-primary-alpha, rgba(37, 99, 235, 0.16));
+  transform: scale(1.04);
 }
 
 .dyn-icon-clickable:active {
@@ -61,49 +60,58 @@
 }
 
 .dyn-icon-clickable:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--dyn-color-focus-ring, #3b82f6);
   outline-offset: 2px;
 }
 
-/* Size variants */
+/* Size variants mapped to token scale */
 .dyn-icon-size-small {
-  font-size: 0.875rem;
-  width: 14px;
-  height: 14px;
+  --dyn-icon-size: var(--dyn-size-control-sm, 0.875rem);
 }
 
 .dyn-icon-size-medium {
-  font-size: 1rem;
-  width: 16px;
-  height: 16px;
+  --dyn-icon-size: var(--dyn-size-control-md, 1.125rem);
 }
 
 .dyn-icon-size-large {
-  font-size: 1.25rem;
-  width: 18px;
-  height: 18px;
+  --dyn-icon-size: var(--dyn-size-control-lg, 1.375rem);
 }
 
-/* State colors */
-.success {
-  color: #059669;
+/* Visual variants mapped to palette */
+.dyn-icon-variant-default {
+  --dyn-icon-color: var(--dyn-color-text-secondary, currentColor);
 }
 
-.warning {
-  color: #d97706;
+.dyn-icon-variant-muted {
+  --dyn-icon-color: var(--dyn-color-text-tertiary, currentColor);
 }
 
-.danger {
-  color: #dc2626;
+.dyn-icon-variant-subtle {
+  --dyn-icon-color: var(--dyn-color-text-placeholder, currentColor);
 }
 
-.info {
-  color: #0891b2;
+.dyn-icon-variant-inverse {
+  --dyn-icon-color: var(--dyn-color-text-inverse, currentColor);
+}
+
+.dyn-icon-variant-accent {
+  --dyn-icon-color: var(--dyn-color-primary, currentColor);
+}
+
+.fontIcon {
+  font-family: var(--dyn-icon-font-family, inherit);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  speak: none;
 }
 
 /* Disabled state */
 .disabled {
-  opacity: 0.5;
+  opacity: var(--dyn-opacity-disabled, 0.56);
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -127,15 +135,15 @@
   .dyn-icon-clickable {
     transition: none;
   }
-  
+
   .dyn-icon-clickable:hover {
     transform: none;
   }
-  
+
   .dyn-icon-clickable:active {
     transform: none;
   }
-  
+
   .spinning {
     animation: none;
   }
@@ -147,9 +155,23 @@
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
-  
+
   .dyn-icon-clickable {
     background: none !important;
     transform: none !important;
   }
+}
+
+:global(.dyn-icon) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+:global(.dyn-fonts-icon) {
+  font-family: var(--dyn-icon-font-family, inherit);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
 }
