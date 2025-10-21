@@ -17,6 +17,7 @@ import type { DynSelectProps, DynFieldRef, SelectOption } from '../../types/fiel
 import { DynFieldContainer } from '../DynFieldContainer';
 import { useDynFieldValidation } from '../../hooks/useDynFieldValidation';
 import { DynIcon } from '../DynIcon';
+import { DynSelectOption } from '../DynSelectOption';
 import styles from './DynSelect.module.css';
 
 const getStyleClass = (classKey: keyof typeof styles) => styles[classKey];
@@ -162,7 +163,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
 
     const handleOptionSelect = (
       option: SelectOption,
-      config: { focusCombobox?: boolean } = {}
+      _event?: React.MouseEvent<HTMLDivElement>
     ) => {
       if (option.disabled) return;
 
@@ -676,38 +677,19 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                     const isActive = index === activeOptionIndex;
 
                     return (
-                      <div
+                      <DynSelectOption
                         key={option.value}
                         id={`${listboxId}-option-${optionIndex}`}
-                        className={classNames(getStyleClass('option'), {
-                          [getStyleClass('optionSelected')]: isSelected,
-                          [getStyleClass('optionDisabled')]: option.disabled,
-                          [getStyleClass('optionActive')]: isActive
-                        })}
-                        role="option"
-                        aria-selected={isSelected}
-                        aria-disabled={option.disabled || undefined}
-                        id={getOptionId(index)}
-                        data-active={isActive ? 'true' : undefined}
-                        onMouseEnter={() => {
-                          if (!option.disabled) {
-                            setActiveOptionIndex(index);
-                          }
-                        }}
-                        onClick={() => handleOptionSelect(option)}
+                        option={option}
+                        multiple={multiple}
+                        isSelected={isSelected}
+                        isActive={isActive}
+                        onSelect={handleOptionSelect}
+                        onActivate={() => focusOption(optionIndex)}
                         ref={(element) => {
                           optionRefs.current[optionIndex] = element;
                         }}
-                      >
-                        {multiple && (
-                          <span className={classNames(getStyleClass('checkbox'), {
-                            [getStyleClass('checkboxChecked')]: isSelected
-                          })}>
-                            {isSelected && <DynIcon icon="dyn-icon-check" />}
-                          </span>
-                        )}
-                        <span className={getStyleClass('optionText')}>{option.label}</span>
-                      </div>
+                      />
                     );
                   })}
                 </div>
