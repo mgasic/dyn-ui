@@ -587,3 +587,95 @@ export const Performance: Story = {
     },
   },
 };
+
+/**
+ * Demonstrates responsive spacing tokens combined with semantic overrides.
+ */
+export const SpacingPlayground: Story = {
+  render: () => (
+    <DynBox
+      as="section"
+      border="default"
+      borderRadius="lg"
+      display="grid"
+      gap={{ base: 'md', md: 'lg' }}
+      gridTemplateColumns="repeat(auto-fit, minmax(260px, 1fr))"
+      p={{ base: 'md', lg: 'xl' }}
+      aria-labelledby="spacing-playground-heading"
+    >
+      <DynBox
+        as="section"
+        border="default"
+        borderRadius="md"
+        display="flex"
+        flexDirection="column"
+        gap={{ base: 'xs', md: 'sm' }}
+        p={{ base: 'sm', lg: 'lg' }}
+      >
+        <h3 id="spacing-playground-heading" style={{ margin: 0 }}>Responsive spacing tokens</h3>
+        <p style={{ margin: 0 }}>
+          Padding, margin, and gap props accept breakpoint-aware values that map directly to dyn-ui spacing tokens.
+        </p>
+        <DynBox
+          display="flex"
+          flexDirection="column"
+          gap={{ base: 'xs', md: 'sm' }}
+          my={{ base: 'xs', lg: 'md' }}
+        >
+          <DynBox bg="tertiary" borderRadius="sm" p={{ base: 'xs', md: 'sm' }}>
+            Base spacing (sm) grows to lg padding on large screens.
+          </DynBox>
+          <DynBox bg="tertiary" borderRadius="sm" px={{ base: 'sm', md: 'lg' }} py={{ base: 'xs', md: 'md' }}>
+            Horizontal and vertical tokens can be tuned independently.
+          </DynBox>
+        </DynBox>
+      </DynBox>
+
+      <DynBox
+        as="nav"
+        aria-label="Secondary navigation"
+        border="default"
+        borderRadius="md"
+        display="flex"
+        flexDirection="column"
+        gap={{ base: 'xs', md: 'sm' }}
+        mx={{ base: '0', lg: 'auto' }}
+        px={{ base: 'sm', md: 'lg' }}
+        py={{ base: 'xs', md: 'md' }}
+      >
+        <strong style={{ margin: 0 }}>Navigation</strong>
+        <DynBox
+          as="ul"
+          display="flex"
+          flexDirection="row"
+          wrap="wrap"
+          gap={{ base: 'xs', md: 'md' }}
+          m={{ base: '0', md: 'xs' }}
+          p={{ base: '0' }}
+          style={{ listStyle: 'none', margin: 0, padding: 0 }}
+        >
+          <DynBox as="li" border="default" borderRadius="sm" p={{ base: 'xs', md: 'sm' }}>
+            Overview
+          </DynBox>
+          <DynBox as="li" border="default" borderRadius="sm" p={{ base: 'xs', md: 'sm' }}>
+            Settings
+          </DynBox>
+          <DynBox as="li" border="default" borderRadius="sm" p={{ base: 'xs', md: 'sm' }}>
+            Billing
+          </DynBox>
+        </DynBox>
+        <span style={{ fontSize: '0.875rem' }}>
+          The <code>nav</code> and <code>ul</code> elements inherit semantic overrides without losing spacing tokens.
+        </span>
+      </DynBox>
+    </DynBox>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Showcases responsive `p`, `m`, and `gap` props alongside semantic overrides (`section`, `nav`, `ul`) that consume dyn-ui spacing tokens.',
+      },
+    },
+  },
+};

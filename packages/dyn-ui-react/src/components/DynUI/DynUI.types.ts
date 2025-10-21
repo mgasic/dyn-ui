@@ -1,11 +1,15 @@
 import type { ElementType } from 'react';
-import type { DynBoxProps, DynBoxRef, SpacingSize } from '../DynBox';
+import type {
+  DynBoxBreakpoint,
+  DynBoxProps,
+  DynBoxRef,
+  ResponsiveSpacingValue as DynBoxResponsiveSpacingValue,
+  SpacingSize,
+} from '../DynBox';
 
-export type DynUIBreakpoint = 'base' | 'sm' | 'md' | 'lg' | 'xl';
+export type DynUIBreakpoint = DynBoxBreakpoint;
 
-export type ResponsiveSpacingValue =
-  | SpacingSize
-  | Partial<Record<DynUIBreakpoint, SpacingSize>>;
+export type ResponsiveSpacingValue = DynBoxResponsiveSpacingValue;
 
 export interface DynUISpacingProps {
   padding?: ResponsiveSpacingValue;

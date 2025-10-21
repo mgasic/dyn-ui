@@ -19,8 +19,21 @@ export type BoxDisplay =
 
 export type BoxPosition = 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
 export type SpacingSize = '0' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'auto';
+export type DynBoxBreakpoint = 'base' | 'sm' | 'md' | 'lg' | 'xl';
+export type ResponsiveSpacingValue =
+  | SpacingSize
+  | Partial<Record<DynBoxBreakpoint, SpacingSize>>;
 
-export type BackgroundVariant = 'surface' | 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'none' | string;
+export type BackgroundVariant =
+  | 'surface'
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'none'
+  | string;
 export type BorderRadius = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | string;
 export type BorderVariant = 'none' | 'default' | 'subtle' | 'strong' | string;
 export type Shadow = 'none' | 'sm' | 'md' | 'lg' | string;
@@ -59,22 +72,22 @@ export interface DynBoxOwnProps
   position?: BoxPosition;
 
   // Primary spacing API
-  padding?: SpacingSize;
-  p?: SpacingSize; // alias for padding
-  px?: SpacingSize;
-  py?: SpacingSize;
-  pt?: SpacingSize;
-  pr?: SpacingSize;
-  pb?: SpacingSize;
-  pl?: SpacingSize;
+  padding?: ResponsiveSpacingValue;
+  p?: ResponsiveSpacingValue; // alias for padding
+  px?: ResponsiveSpacingValue;
+  py?: ResponsiveSpacingValue;
+  pt?: ResponsiveSpacingValue;
+  pr?: ResponsiveSpacingValue;
+  pb?: ResponsiveSpacingValue;
+  pl?: ResponsiveSpacingValue;
 
-  m?: SpacingSize;
-  mx?: SpacingSize;
-  my?: SpacingSize;
-  mt?: SpacingSize;
-  mr?: SpacingSize;
-  mb?: SpacingSize;
-  ml?: SpacingSize;
+  m?: ResponsiveSpacingValue;
+  mx?: ResponsiveSpacingValue;
+  my?: ResponsiveSpacingValue;
+  mt?: ResponsiveSpacingValue;
+  mr?: ResponsiveSpacingValue;
+  mb?: ResponsiveSpacingValue;
+  ml?: ResponsiveSpacingValue;
 
   width?: string | number;
   height?: string | number;
@@ -116,9 +129,9 @@ export interface DynBoxOwnProps
   justify?: JustifyContent;
   align?: AlignItems;
   alignContent?: AlignContent;
-  gap?: SpacingSize;
-  rowGap?: SpacingSize;
-  columnGap?: SpacingSize;
+  gap?: ResponsiveSpacingValue;
+  rowGap?: ResponsiveSpacingValue;
+  columnGap?: ResponsiveSpacingValue;
 
   gridTemplateColumns?: string;
   gridTemplateRows?: string;
