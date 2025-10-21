@@ -227,6 +227,15 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
 
       ref.focus();
     }
+
+    const isTreeRoot = activeElement === treeElement;
+    const isTreeItem = activeElement.getAttribute('role') === 'treeitem';
+
+    if (!isTreeRoot && !isTreeItem) {
+      return;
+    }
+
+    ref.focus();
   }, [focusedKey, visibleNodes]);
 
   const renderTreeNode = useCallback(
