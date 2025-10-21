@@ -22,8 +22,7 @@ const meta: Meta<typeof DynSelect> = {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'Advanced select component with search, multiple selection, virtual scrolling support, and full keyboard navigation via aria-activedescendant tracking.',
+        component: 'Advanced select component with search, multiple selection, virtual scrolling support, and full keyboard navigation via active option tracking.',
       },
     },
   },
@@ -72,6 +71,15 @@ export const Default: Story = {
         story:
           'Use Arrow keys, Home/End, PageUp/PageDown, or type a character to move the active option. Press Enter or Space to confirm the highlighted choice.',
       },
+    },
+  },
+};
+
+Default.parameters = {
+  docs: {
+    description: {
+      story:
+        'Use Arrow keys, Home/End, Page Up/Down, and type-to-search to change the active option. The highlighted option follows aria-activedescendant and Enter or Space will confirm the selection.',
     },
   },
 };
