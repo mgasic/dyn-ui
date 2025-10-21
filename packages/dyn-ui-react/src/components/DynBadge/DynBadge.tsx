@@ -148,15 +148,14 @@ const DynBadgeComponent = (
     return undefined;
   }, [children, displayCount, hasChildren, hasCount]);
 
-  const resolvedState: DynBadgeState =
-    visualStateProp ?? (isBadgeState(color) ? (color as DynBadgeState) : undefined) ?? 'neutral';
+  const resolvedState = visualStateProp ?? (isBadgeState(color) ? (color as DynBadgeState) : undefined);
 
   const semanticColorClass =
     color && Object.prototype.hasOwnProperty.call(colorClassNameMap, color)
       ? colorClassNameMap[color as keyof typeof colorClassNameMap]
       : undefined;
 
-  const resolvedStateClass = stateClassNameMap[resolvedState];
+  const resolvedStateClass = resolvedState ? stateClassNameMap[resolvedState] : undefined;
 
   const badgeClasses = cn(
     getStyleClass('badge'),
@@ -164,7 +163,7 @@ const DynBadgeComponent = (
     variantClassNameMap[variant],
     semanticColorClass,
     resolvedStateClass,
-    legacyStateColorClassNameMap[resolvedState],
+    resolvedState ? legacyStateColorClassNameMap[resolvedState] : undefined,
     position && getStyleClass('badge--positioned'),
     position ? positionClassNameMap[position] : undefined,
     isInteractive && getStyleClass('badge--clickable'),
