@@ -28,6 +28,7 @@ export { DynStepper } from './DynStepper';
 export { DynTable } from './DynTable';
 export { DynTabs } from './DynTabs';
 export { DynToolbar } from './DynToolbar';
+export { DynTreeNode } from './DynTreeNode';
 export { DynTreeView } from './DynTreeView';
 export { ThemeSwitcher } from './ThemeSwitcher';
 
@@ -68,6 +69,7 @@ export type * from './DynStepper';
 export type * from './DynTable';
 export type * from './DynTabs';
 export type * from './DynToolbar';
+export type * from './DynTreeNode';
 export type * from './DynTreeView';
 export type * from './ThemeSwitcher';
 
