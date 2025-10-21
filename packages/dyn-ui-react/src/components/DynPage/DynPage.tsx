@@ -113,7 +113,12 @@ const renderActionButtons = (actions: DynPageAction[], size: LayoutSize | undefi
   return (
     <div className={styles.actions}>
       {actions.map((action) => {
-        const variant = resolveActionVariant(action.type);
+        const variant: DynButtonVariant =
+          action.type === 'primary'
+            ? 'primary'
+            : action.type === 'secondary'
+              ? 'secondary'
+              : 'primary';
         const isDanger = action.type === 'danger';
 
         return (
@@ -223,7 +228,7 @@ const DynPageComponent = <E extends ElementType = 'main'>(
     return renderBreadcrumbItems(breadcrumbs);
   }, [breadcrumbs]);
 
-  const renderActions = useCallback(
+  const computedActions = useMemo(
     () => renderActionButtons(actions, size),
     [actions, size]
   );
@@ -237,28 +242,31 @@ const DynPageComponent = <E extends ElementType = 'main'>(
         actions,
         titleId,
         renderBreadcrumbs: memoizedRenderBreadcrumbs,
-        renderActions,
+        renderActions: () => computedActions,
       });
     }
 
-    const actionsElement = renderActions();
-    const hasTitle = Boolean(title);
-    const hasSubtitle = Boolean(subtitle);
+    const breadcrumbsElement = memoizedRenderBreadcrumbs();
+    const hasTitleContent = Boolean(title || subtitle || computedActions);
+
+    if (!breadcrumbsElement && !hasTitleContent) {
+      return null;
+    }
 
     return (
       <>
-        {memoizedRenderBreadcrumbs()}
-        {(hasTitle || hasSubtitle || actionsElement) && (
+        {breadcrumbsElement}
+        {hasTitleContent && (
           <div className={styles.titleSection}>
             <div className={styles.titleContent}>
-              {hasTitle ? (
+              {title ? (
                 <h1 id={titleId} className={styles.title}>
                   {title}
                 </h1>
               ) : null}
-              {hasSubtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
+              {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
             </div>
-            {actionsElement}
+            {computedActions}
           </div>
         )}
       </>
@@ -266,8 +274,8 @@ const DynPageComponent = <E extends ElementType = 'main'>(
   }, [
     actions,
     breadcrumbs,
+    computedActions,
     memoizedRenderBreadcrumbs,
-    renderActions,
     slots,
     subtitle,
     title,
