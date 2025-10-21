@@ -20,6 +20,18 @@ export interface MenuItem {
 
   /** Disable interactions with the menu entry. */
   disabled?: boolean;
+
+  /** Render the menu entry in a loading state. */
+  loading?: boolean;
+
+  /** Accessible label for icon-only menu entries. */
+  ariaLabel?: string;
+
+  /** Provide external labelling for the menu entry. */
+  ariaLabelledBy?: string;
+
+  /** Provide additional description for assistive technologies. */
+  ariaDescribedBy?: string;
 }
 
 // Alias for backward compatibility

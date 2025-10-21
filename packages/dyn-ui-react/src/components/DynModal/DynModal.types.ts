@@ -1,51 +1,82 @@
-import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
+import type React from 'react';
 import type {
-  DynModalPlacementConfig,
-  DynModalHorizontalAlignment,
-  DynModalPlacementStrategy,
-  DynModalVerticalPlacement
-} from '../DynModalPlacement/DynModalPlacement.types';
+  ComponentPropsWithoutRef,
+  ComponentRef,
+  ElementType,
+  ReactNode,
+} from 'react';
+import type { AccessibilityProps, BaseComponentProps } from '../../types';
 
-export interface DynModalProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
-  /** Controls whether the modal is visible. */
-  isOpen: boolean;
-  /** Callback invoked when the modal requests to close (escape, backdrop click, etc.). */
-  onClose?: () => void;
-  /** Preferred vertical placement, forwarded to {@link DynModalPlacement}. */
-  placement?: DynModalVerticalPlacement;
-  /** Preferred horizontal alignment, forwarded to {@link DynModalPlacement}. */
-  alignment?: DynModalHorizontalAlignment;
-  /** Placement strategy (`fixed` by default). */
-  strategy?: DynModalPlacementStrategy;
-  /** Additional props forwarded to {@link DynModalPlacement}. */
-  placementProps?: Omit<DynModalPlacementConfig, 'placement' | 'alignment' | 'strategy'>;
-  /** Whether clicking on the backdrop should trigger `onClose`. */
-  closeOnBackdropClick?: boolean;
-  /** Whether pressing Escape should trigger `onClose`. */
-  closeOnEsc?: boolean;
-  /** Locks the document scroll when the modal is open (default: `true`). */
-  lockScroll?: boolean;
-  /** Optional class applied to the outer placement wrapper. */
-  wrapperClassName?: string;
-  /** Optional class applied to the backdrop element. */
-  backdropClassName?: string;
-  /** Inline style applied to the backdrop element. */
-  backdropStyle?: CSSProperties;
-  /** Optional class applied to the modal content container. */
-  className?: string;
-  /** Inline style applied to the modal content container. */
-  style?: CSSProperties;
-  /** Maximum width of the modal content (defaults to `min(90vw, 640px)`). */
-  maxWidth?: number | string;
-  /** Minimum width of the modal content. */
-  minWidth?: number | string;
+type PolymorphicProps<E extends ElementType, P> = P &
+  Omit<ComponentPropsWithoutRef<E>, keyof P> & { as?: E };
+
+export interface DynModalOwnProps extends BaseComponentProps, AccessibilityProps {
   /**
-   * When provided, focus is returned to the element after the modal is closed.
-   * Defaults to the element that had focus when the modal opened.
+   * Controls whether the modal is visible.
    */
-  returnFocusElement?: HTMLElement | null;
-  /** Modal content. */
+  open: boolean;
+  /**
+   * Callback fired when the modal requests to be closed via ESC key or overlay click.
+   */
+  onClose?: () => void;
+  /**
+   * Disables dismissal interactions while keeping the modal rendered.
+   */
+  disabled?: boolean;
+  /**
+   * Accessible label for the modal when no visible heading is present.
+   */
+  'aria-label'?: string;
+  /**
+   * ID of the element that labels the modal.
+   */
+  'aria-labelledby'?: string;
+  /**
+   * ID of the element that describes the modal contents.
+   */
+  'aria-describedby'?: string;
+  /**
+   * Additional class applied to the overlay element.
+   */
+  overlayClassName?: string;
+  /**
+   * When false, prevents overlay clicks from closing the modal.
+   */
+  closeOnOverlayClick?: boolean;
+  /**
+   * When false, prevents the ESC key from closing the modal.
+   */
+  closeOnEscape?: boolean;
+  /**
+   * Content rendered inside the modal.
+   */
   children?: ReactNode;
+  /**
+   * Optional role override. Defaults to `dialog`.
+   */
+  role?: React.AriaRole;
 }
 
-export type DynModalRef = HTMLDivElement;
+export type DynModalProps<E extends ElementType = 'div'> = PolymorphicProps<
+  E,
+  DynModalOwnProps
+>;
+
+export type DynModalRef<E extends ElementType = 'div'> = ComponentRef<E>;
+
+export interface DynModalDefaultProps {
+  closeOnOverlayClick: boolean;
+  closeOnEscape: boolean;
+  disabled: boolean;
+  role: React.AriaRole;
+  'data-testid': string;
+}
+
+export const DYN_MODAL_DEFAULT_PROPS: DynModalDefaultProps = {
+  closeOnOverlayClick: true,
+  closeOnEscape: true,
+  disabled: false,
+  role: 'dialog',
+  'data-testid': 'dyn-modal',
+};
+
