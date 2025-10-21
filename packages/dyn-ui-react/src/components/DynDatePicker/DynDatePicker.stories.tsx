@@ -175,3 +175,114 @@ export const InteractiveExample: Story = {
     );
   },
 };
+
+export const KeyboardNavigationDemo: Story = {
+  render: () => {
+    const [value, setValue] = React.useState<Date | null>(new Date());
+
+    return (
+      <DynDatePicker
+        name="keyboard-demo"
+        label="Keyboard navigation demo"
+        locale="en-US"
+        format="MM/dd/yyyy"
+        value={value}
+        onChange={setValue}
+        help="Press Enter or ArrowDown to open, use Arrow keys/Home/End to move focus, and Enter to select."
+      />
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Demonstrates the roving focus calendar. Use the keyboard to open the picker, move between days, and press Escape to close.',
+      },
+    },
+  },
+};
+
+export const OpenCloseBehavior: Story = {
+  render: () => {
+    const [value, setValue] = React.useState<Date | null>(null);
+    const [status, setStatus] = React.useState('Calendar ready');
+
+    const handleChange: DynDatePickerProps['onChange'] = next => {
+      setValue(next ?? null);
+      if (next) {
+        setStatus(`Selected ${next.toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        })}`);
+      } else {
+        setStatus('Cleared selection');
+      }
+    };
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '320px' }}>
+        <DynDatePicker
+          name="open-close"
+          label="Open & close behavior"
+          locale="en-US"
+          format="MM/dd/yyyy"
+          help="Press Enter or ArrowDown to open. Use Escape to close the calendar and return focus to the field."
+          value={value}
+          onChange={handleChange}
+        />
+        <p style={{ margin: 0 }}>Status: {status}</p>
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Highlights the default open/close interactions. Selecting a day closes the dropdown and updates the status text.',
+      },
+    },
+  },
+};
+
+export const LocalizedWeekStarts: Story = {
+  render: () => (
+    <div
+      style={{
+        display: 'grid',
+        gap: '1.5rem',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+      }}
+    >
+      <DynDatePicker
+        name="locale-us"
+        label="United States"
+        locale="en-US"
+        format="MM/dd/yyyy"
+        help="Calendar starts on Sunday."
+      />
+      <DynDatePicker
+        name="locale-gb"
+        label="United Kingdom"
+        locale="en-GB"
+        format="dd/MM/yyyy"
+        help="Calendar starts on Monday."
+      />
+      <DynDatePicker
+        name="locale-de"
+        label="Germany"
+        locale="de-DE"
+        format="dd.MM.yyyy"
+        help="Localized weekday abbreviations and formatting."
+      />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Compares how the calendar grid reflects locale-specific weekday ordering and formatting.',
+      },
+    },
+  },
+};
