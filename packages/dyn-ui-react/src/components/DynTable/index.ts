@@ -1,2 +1,12 @@
 export { DynTable } from './DynTable';
-export type { DynTableProps } from './DynTable.types';
+export type {
+  DynTableProps,
+  DynTableColumn,
+  TableAction,
+  TableVariant,
+  TableColor,
+  DynTableSlots,
+  DynTableHeaderSlotContext,
+  DynTableBodySlotContext,
+  DynTableFooterSlotContext
+} from './DynTable.types';

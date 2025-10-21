@@ -5,14 +5,13 @@ import type {
   ElementType,
   ReactNode
 } from 'react';
-import type { AccessibilityProps, BaseComponentProps } from '../../types/theme';
-import type {
-  ComponentPropsWithoutRef,
-  ComponentRef,
-  ElementType,
-  ReactNode,
-} from 'react';
 import type { AccessibilityProps, BaseComponentProps } from '../../types';
+import type {
+  DynModalHorizontalAlignment,
+  DynModalPlacementConfig,
+  DynModalPlacementStrategy,
+  DynModalVerticalPlacement
+} from '../DynModalPlacement/DynModalPlacement.types';
 
 type PolymorphicComponentProps<E extends ElementType, P> = P &
   Omit<ComponentPropsWithoutRef<E>, keyof P>;
@@ -47,7 +46,7 @@ export interface DynModalBaseProps extends BaseComponentProps, AccessibilityProp
   backdropStyle?: CSSProperties;
   /** Inline style applied to the modal content container. */
   style?: CSSProperties;
-  /** Maximum width of the modal content (defaults to `min(90vw, 640px)`). */
+  /** Maximum width of the modal content. */
   maxWidth?: number | string;
   /** Minimum width of the modal content. */
   minWidth?: number | string;
@@ -72,3 +71,4 @@ export type DynModalProps<E extends ElementType = 'div'> = PolymorphicComponentP
 };
 
 export type DynModalRef<E extends ElementType = 'div'> = ComponentRef<E>;
+

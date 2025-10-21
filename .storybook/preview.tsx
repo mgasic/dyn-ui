@@ -43,12 +43,14 @@ const preview: Preview = {
 
       return (
         <ThemeProvider initialTheme={theme}>
-          <div style={{
-            minHeight: '100vh',
-            backgroundColor: 'var(--dyn-color-background)',
-            color: 'var(--dyn-color-foreground)',
-            padding: '1rem'
-          }}>
+          <div
+            style={{
+              minHeight: '100vh',
+              backgroundColor: 'var(--dyn-color-background)',
+              color: 'var(--dyn-color-foreground)',
+              padding: '1rem',
+            }}
+          >
             <Story />
           </div>
         </ThemeProvider>

@@ -10,6 +10,9 @@
   --dyn-input-disabled-color: var(--dyn-color-text-disabled, var(--color-text-disabled, #9ca3af));
   --dyn-input-readonly-bg: var(--dyn-color-surface-readonly, var(--color-surface-readonly, #f9fafb));
   --dyn-input-error: var(--dyn-color-danger, var(--color-danger, #d32f2f));
+  --dyn-input-warning: var(--dyn-color-warning, var(--color-warning, #f59e0b));
+  --dyn-input-success: var(--dyn-color-success, var(--color-success, #22c55e));
+  --dyn-input-loading: var(--dyn-color-info, var(--color-info, #0ea5e9));
 
   position: relative;
   display: flex;
@@ -65,6 +68,31 @@
   box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.25);
 }
 
+.dyn-input--warning {
+  border-color: var(--dyn-input-warning);
+}
+
+.dyn-input--warning:focus-visible {
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+}
+
+.dyn-input--success {
+  border-color: var(--dyn-input-success);
+}
+
+.dyn-input--success:focus-visible {
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+}
+
+.dyn-input--loading {
+  border-color: var(--dyn-input-loading);
+  cursor: progress;
+}
+
+.dyn-input--loading:focus-visible {
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25);
+}
+
 .dyn-input--disabled,
 .dyn-input:disabled {
   background-color: var(--dyn-input-disabled-bg);
@@ -95,11 +123,13 @@
   height: 3rem;
 }
 
-.dyn-input--with-icon {
+.dyn-input--with-icon,
+.dyn-input--with-prefix {
   padding-left: var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem));
 }
 
-.dyn-input--cleanable {
+.dyn-input--cleanable,
+.dyn-input--with-suffix {
   padding-right: var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem));
 }
 
@@ -113,16 +143,96 @@
   pointer-events: none;
 }
 
+.dyn-input-currency-symbol--suffix {
+  left: auto;
+  right: var(--dyn-spacing-md, var(--spacing-md, 1rem));
+}
+
 .dyn-input-icon-container {
-  position: absolute;
-  left: var(--dyn-spacing-md, var(--spacing-md, 1rem));
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--dyn-color-text-secondary, var(--color-text-secondary, #6b7280));
-  pointer-events: none;
+  position: relative;
+  color: inherit;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.dyn-input-prefix {
+  position: absolute;
+  left: var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem));
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dyn-spacing-xs, var(--spacing-xs, 0.5rem));
+  color: var(--dyn-color-text-secondary, var(--color-text-secondary, #6b7280));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dyn-input-prefix > * {
+  pointer-events: auto;
+}
+
+.dyn-input-prefix-content {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dyn-input-suffix {
+  position: absolute;
+  right: var(--dyn-spacing-md, var(--spacing-md, 1rem));
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dyn-spacing-xs, var(--spacing-xs, 0.5rem));
+  color: var(--dyn-color-text-secondary, var(--color-text-secondary, #6b7280));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dyn-input-suffix > * {
+  pointer-events: auto;
+}
+
+.dyn-input.dyn-input--cleanable + .dyn-input-suffix,
+.dyn-input.dyn-input--with-suffix + .dyn-input-suffix {
+  right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)));
+}
+
+.dyn-input.dyn-input--cleanable ~ .dyn-input-currency-symbol--suffix,
+.dyn-input.dyn-input--with-suffix ~ .dyn-input-currency-symbol--suffix {
+  right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)));
+}
+
+.dyn-input-container--with-spin-buttons .dyn-input-suffix,
+.dyn-input-container--with-spin-buttons .dyn-input-currency-symbol--suffix {
+  right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)) + 0.5rem);
+}
+
+.dyn-input-loading-indicator {
+  position: absolute;
+  right: var(--dyn-spacing-md, var(--spacing-md, 1rem));
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 2px solid var(--dyn-input-loading);
+  border-top-color: transparent;
+  animation: dyn-input-spin 0.8s linear infinite;
+}
+
+.dyn-input-loading-indicator + .dyn-input-clean-button {
+  right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)));
+}
+
+.dyn-input-loading-indicator ~ .dyn-input-suffix {
+  right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)) + 0.75rem);
+}
+
+.dyn-input-loading-indicator ~ .dyn-input-currency-symbol--suffix {
+  right: calc(var(--dyn-spacing-xl, var(--spacing-xl, 2.5rem)) + 0.75rem);
 }
 
 .dyn-input-clean-button {
@@ -196,6 +306,15 @@
 .dyn-input-spin-button--decrement {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+@keyframes dyn-input-spin {
+  from {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
 }
 
 .dyn-input-spin-button:focus-visible {

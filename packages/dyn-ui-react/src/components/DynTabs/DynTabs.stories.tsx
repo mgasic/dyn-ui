@@ -38,10 +38,10 @@ const tabItems = [
   { id: 'contact', label: 'Kontakt', content: <ContactPage /> }
 ];
 
-<DynTabs 
+<DynTabs
   items={tabItems}
   variant="underlined"
-  onChange={(tabId) => console.log('Aktivan:', tabId)}
+  onChange={(tabId, event) => console.log('Aktivan:', tabId, event.trigger)}
 />
 \`\`\`
         `
@@ -83,6 +83,14 @@ const tabItems = [
     animated: {
       control: 'boolean',
       description: 'Omogući animacije prilikom prelaska između tab-ova'
+    },
+    disabled: {
+      control: 'boolean',
+      description: 'Onemogući sve tabove i interakcije'
+    },
+    lazyMount: {
+      control: 'boolean',
+      description: 'Montira tab panele tek kada se prvi put aktiviraju'
     }
   }
 };
@@ -213,6 +221,28 @@ export const Positions: Story = {
   )
 };
 
+// Orientation showcase
+export const Orientation: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: '2rem' }}>
+      <div>
+        <h4>Horizontalna orijentacija</h4>
+        <DynTabs items={defaultItems.slice(0, 3)} orientation="horizontal" />
+      </div>
+      <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', minHeight: '240px' }}>
+        <div style={{ flex: '1 1 0' }}>
+          <h4>Vertikalna orijentacija (levo)</h4>
+          <DynTabs items={defaultItems.slice(0, 3)} orientation="vertical" position="left" />
+        </div>
+        <div style={{ flex: '1 1 0' }}>
+          <h4>Vertikalna orijentacija (desno)</h4>
+          <DynTabs items={defaultItems.slice(0, 3)} orientation="vertical" position="right" />
+        </div>
+      </div>
+    </div>
+  )
+};
+
 // Interactive features following DynAvatar pattern
 export const InteractiveTabs: Story = {
   render: () => {
@@ -244,14 +274,14 @@ export const InteractiveTabs: Story = {
       setTabCounter(prev => prev + 1);
     };
 
-    return (
-      <DynTabs
-        items={items}
-        activeTab={activeTab}
-        onChange={setActiveTab}
-        onTabClose={handleTabClose}
-        onTabAdd={handleTabAdd}
-        closable
+      return (
+        <DynTabs
+          items={items}
+          activeTab={activeTab}
+          onChange={(tabId) => setActiveTab(tabId)}
+          onTabClose={handleTabClose}
+          onTabAdd={handleTabAdd}
+          closable
         addable
         animated
       />
