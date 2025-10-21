@@ -7,6 +7,7 @@ import type {
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import { DynIcon } from '../DynIcon';
+import { useI18n } from '../../i18n';
 import type {
   DynButtonDefaultProps,
   DynButtonProps,
@@ -83,10 +84,24 @@ export const DynButton = forwardRef<DynButtonRef, DynButtonProps>(
   // Generate an ID per render when not provided so tests that expect
   // different IDs on rerender pass (generateId increments a module counter).
   const internalId = id || generateId('button');
+  const { t } = useI18n();
 
     // Memoized computations
-    const trimmedLabel = useMemo(() => (typeof label === 'string' ? label.trim() : ''), [label]);
-    const hasLabel = trimmedLabel.length > 0;
+    const fallbackButtonLabel = useMemo(
+      () => t({ id: 'button.fallback', defaultMessage: 'Button' }),
+      [t]
+    );
+    const defaultLoadingMessage = useMemo(
+      () => t({ id: DYN_BUTTON_DEFAULT_PROPS.loadingText, defaultMessage: DYN_BUTTON_DEFAULT_PROPS.loadingText }),
+      [t]
+    );
+    const labelText = useMemo(() => {
+      if (typeof label !== 'string') return '';
+      const trimmed = label.trim();
+      if (!trimmed) return '';
+      return t({ id: trimmed, defaultMessage: trimmed }).trim();
+    }, [label, t]);
+    const hasLabel = labelText.length > 0;
     const childrenCount = React.Children.count(children);
     const hasChildrenContent = childrenCount > 0;
     const isIconOnly = Boolean(icon) && !hasLabel && !hasChildrenContent;
@@ -94,19 +109,28 @@ export const DynButton = forwardRef<DynButtonRef, DynButtonProps>(
 
     // Generate appropriate ARIA label for accessibility
     const iconAriaLabel = useMemo(() => generateIconAriaLabel(icon), [icon]);
+    const translatedAriaLabel = useMemo(() => {
+      if (typeof ariaLabel !== 'string') return undefined;
+      const trimmed = ariaLabel.trim();
+      if (!trimmed) return undefined;
+      return t({ id: trimmed, defaultMessage: trimmed });
+    }, [ariaLabel, t]);
     const computedAriaLabel = useMemo(
-      () => normalizeAriaLabel(
-        ariaLabel ?? (isIconOnly ? (trimmedLabel || iconAriaLabel || 'Button') : undefined)
-      ),
-      [ariaLabel, isIconOnly, trimmedLabel, iconAriaLabel]
+      () =>
+        normalizeAriaLabel(
+          translatedAriaLabel ??
+            (isIconOnly ? (labelText || iconAriaLabel || fallbackButtonLabel) : undefined)
+        ),
+      [translatedAriaLabel, isIconOnly, labelText, iconAriaLabel, fallbackButtonLabel]
     );
 
     // Normalize loading text
     const normalizedLoadingText = useMemo(() => {
-      if (typeof loadingText !== 'string') return DYN_BUTTON_DEFAULT_PROPS.loadingText;
+      if (typeof loadingText !== 'string') return defaultLoadingMessage;
       const trimmed = loadingText.trim();
-      return trimmed || DYN_BUTTON_DEFAULT_PROPS.loadingText;
-    }, [loadingText]);
+      if (!trimmed) return defaultLoadingMessage;
+      return t({ id: trimmed, defaultMessage: trimmed });
+    }, [defaultLoadingMessage, loadingText, t]);
 
     // Icon size mapping
     const iconSizeToken = useMemo(() => {
@@ -132,14 +156,15 @@ export const DynButton = forwardRef<DynButtonRef, DynButtonProps>(
       if (typeof children === 'string') {
         const trimmedChildren = children.trim();
         if (!trimmedChildren) return null;
-        return <span className={getStyleClass('label')}>{trimmedChildren}</span>;
+        const translatedChild = t({ id: trimmedChildren, defaultMessage: trimmedChildren });
+        return <span className={getStyleClass('label')}>{translatedChild}</span>;
       }
       return children;
-    }, [children, hasChildrenContent]);
+    }, [children, hasChildrenContent, t]);
 
     // Render label element (primary text)
     const labelElement = hasLabel ? (
-      <span className={getStyleClass('label')}>{trimmedLabel}</span>
+      <span className={getStyleClass('label')}>{labelText}</span>
     ) : null;
 
     // Generate CSS classes safely (DynAvatar pattern)

@@ -26,6 +26,7 @@ import { DynFieldContainer } from '../DynFieldContainer';
 import { useDynFieldValidation } from '../../hooks/useDynFieldValidation';
 import { useDynMask } from '../../hooks/useDynMask';
 import { DynIcon } from '../DynIcon';
+import { useI18n } from '../../i18n';
 // NOTE: DynInput implements its own formatting helpers; do not import formatCurrencyValue
 // from utils to avoid name collision with local implementations.
 
@@ -102,6 +103,25 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
     const resolvedCurrencyConfig = useMemo(
       () => resolveCurrencyConfig(currencyConfig, type),
       [currencyConfig, type]
+    );
+    const { t } = useI18n();
+    const translatedPlaceholder = useMemo(() => {
+      if (typeof placeholder !== 'string') return undefined;
+      const trimmed = placeholder.trim();
+      if (!trimmed) return undefined;
+      return t({ id: trimmed, defaultMessage: trimmed });
+    }, [placeholder, t]);
+    const clearButtonLabel = useMemo(
+      () => t({ id: 'input.clear', defaultMessage: 'Clear field' }),
+      [t]
+    );
+    const increaseButtonLabel = useMemo(
+      () => t({ id: 'input.increment', defaultMessage: 'Increase value' }),
+      [t]
+    );
+    const decreaseButtonLabel = useMemo(
+      () => t({ id: 'input.decrement', defaultMessage: 'Decrease value' }),
+      [t]
     );
 
     const [inputValue, setInputValue] = useState<string>(() =>
@@ -604,7 +624,7 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
             name={name}
             type={type === 'number' || isCurrencyType ? 'text' : type}
             className={inputClasses}
-            placeholder={placeholder}
+            placeholder={translatedPlaceholder ?? placeholder}
             value={displayValue}
             disabled={disabled}
             readOnly={isReadOnly}
@@ -655,7 +675,7 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
               className={getStyleClass('dyn-input-clean-button')}
               onClick={handleClean}
               tabIndex={-1}
-              aria-label="Limpar campo"
+              aria-label={clearButtonLabel}
             >
               <DynIcon icon="dyn-icon-close" />
             </button>
@@ -674,7 +694,7 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
                 )}
                 onClick={() => handleStepChange(1)}
                 tabIndex={-1}
-                aria-label="Increase value"
+                aria-label={increaseButtonLabel}
                 disabled={disabled || isReadOnly}
               >
                 ▲
@@ -687,7 +707,7 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
                 )}
                 onClick={() => handleStepChange(-1)}
                 tabIndex={-1}
-                aria-label="Decrease value"
+                aria-label={decreaseButtonLabel}
                 disabled={disabled || isReadOnly}
               >
                 ▼

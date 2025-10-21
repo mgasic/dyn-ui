@@ -9,6 +9,7 @@ import {
   type DynFieldContainerRef,
 } from './DynFieldContainer.types';
 import styles from './DynFieldContainer.module.css';
+import { useI18n } from '../../i18n';
 
 type NativeFieldElement = ReactElement<
   {
@@ -55,6 +56,7 @@ export const DynFieldContainer = forwardRef(
       className,
       htmlFor,
       id,
+      role,
       gap: gapProp = DYN_FIELD_CONTAINER_DEFAULT_PROPS.gap,
       rowGap,
       columnGap,
@@ -79,14 +81,25 @@ export const DynFieldContainer = forwardRef(
       ...rest
     } = props;
 
+    const { t } = useI18n();
+    const translate = (value?: string) => {
+      if (typeof value !== 'string') return value;
+      const trimmed = value.trim();
+      if (!trimmed) return value;
+      return t({ id: trimmed, defaultMessage: trimmed });
+    };
+
     const generatedId = useId();
     const baseId = htmlFor ?? generatedId;
     const dataTestId = dataTestIdProp ?? DYN_FIELD_CONTAINER_DEFAULT_PROPS['data-testid'];
     const Component = (as ?? DYN_FIELD_CONTAINER_DEFAULT_PROPS.as) as ElementType;
 
+    const translatedLabel = translate(label) as string | undefined;
+    const translatedHelpText = translate(helpText) as string | undefined;
+
     const resolvedValidationState = validationState ?? (errorText ? 'error' : 'default');
-    const resolvedValidationMessage =
-      validationMessage ?? (resolvedValidationState === 'error' ? errorText : undefined);
+    const rawValidationMessage = validationMessage ?? (resolvedValidationState === 'error' ? errorText : undefined);
+    const translatedValidationMessage = translate(rawValidationMessage) as string | undefined;
 
     const containerClasses = cn(
       styles.container,
@@ -99,13 +112,44 @@ export const DynFieldContainer = forwardRef(
       className
     );
 
-    const errorId = htmlFor ? `${htmlFor}-error` : undefined;
-    const helpId = htmlFor ? `${htmlFor}-help` : undefined;
-    const labelId = label && htmlFor ? `${htmlFor}-label` : undefined;
-    const validationId = validationMessageId ?? (resolvedValidationState === 'error' ? errorId : undefined);
+    const fieldId = htmlFor ?? baseId;
+    const errorId = translatedValidationMessage || validationMessageId ? `${fieldId}-error` : undefined;
+    const helpId = translatedHelpText ? `${fieldId}-help` : undefined;
+    const labelId = translatedLabel ? `${fieldId}-label` : undefined;
+    const validationId =
+      validationMessageId ?? (translatedValidationMessage && resolvedValidationState === 'error' ? errorId : undefined);
+
+    const containerDescribedBy = mergeAriaIds(
+      ariaDescribedByProp,
+      validationId,
+      translatedHelpText ? helpId : undefined,
+    );
+    const containerLabelledBy = mergeAriaIds(ariaLabelledByProp, labelId);
+    const shouldLabelContainer = Boolean(containerLabelledBy && (role || ariaLabelledByProp));
 
     const validationRole = resolvedValidationState === 'error' ? 'alert' : 'status';
     const validationAriaLive = resolvedValidationState === 'error' ? 'assertive' : 'polite';
+
+    const requiredLabel = t({ id: 'field.required', defaultMessage: 'required' });
+    const optionalLabel = t({ id: 'field.optional', defaultMessage: '(optional)' });
+    const optionalAria = t({ id: 'field.optional.aria', defaultMessage: 'optional' });
+
+    const enhancedChildren = Children.map(children, (child) => {
+      if (!isNativeFieldElement(child)) return child;
+
+      const mergedDescribedBy = mergeAriaIds(
+        child.props['aria-describedby'],
+        translatedHelpText ? helpId : undefined,
+        translatedValidationMessage ? validationId : undefined,
+      );
+      const mergedLabelledBy = mergeAriaIds(child.props['aria-labelledby'], labelId);
+
+      return cloneElement(child, {
+        id: child.props.id ?? fieldId,
+        'aria-describedby': mergedDescribedBy,
+        'aria-labelledby': mergedLabelledBy,
+      });
+    });
 
     return (
       <DynBox
@@ -116,7 +160,8 @@ export const DynFieldContainer = forwardRef(
         className={containerClasses}
         data-testid={dataTestId}
         aria-describedby={containerDescribedBy}
-        aria-labelledby={containerLabelledBy}
+        aria-labelledby={shouldLabelContainer ? containerLabelledBy : undefined}
+        role={role}
         display="flex"
         direction="column"
         gap={gapProp}
@@ -138,31 +183,27 @@ export const DynFieldContainer = forwardRef(
         mb={marginBottomProp}
         ml={ml}
       >
-        {label && (
-          <label
-            className={styles.label}
-            htmlFor={htmlFor}
-            id={labelId}
-          >
-            {label}
+        {translatedLabel && (
+          <label className={styles.label} htmlFor={fieldId} id={labelId}>
+            {translatedLabel}
             {required && (
-              <span className={styles.required} aria-label="obrigatório">
+              <span className={styles.required} aria-label={requiredLabel}>
                 *
               </span>
             )}
             {optional && (
-              <span className={styles.optional} aria-label="opcional">
-                (opcional)
+              <span className={styles.optional} aria-label={optionalAria}>
+                {optionalLabel}
               </span>
             )}
           </label>
         )}
 
-        {children}
+        {enhancedChildren}
 
-        {showValidation && (helpText || resolvedValidationMessage) && (
+        {showValidation && (translatedHelpText || translatedValidationMessage) && (
           <div className={styles.feedback}>
-            {resolvedValidationMessage ? (
+            {translatedValidationMessage ? (
               <div
                 className={cn(
                   styles.validation,
@@ -175,22 +216,22 @@ export const DynFieldContainer = forwardRef(
                 role={validationRole}
                 aria-live={validationAriaLive}
               >
-                {resolvedValidationMessage}
+                {translatedValidationMessage}
               </div>
-            ) : helpText ? (
+            ) : translatedHelpText ? (
               <div className={styles.help} id={helpId}>
-                {helpText}
+                {translatedHelpText}
               </div>
             ) : null}
 
-            {helpText && resolvedValidationMessage && (
+            {translatedHelpText && translatedValidationMessage && (
               <div className={styles.help} id={helpId}>
-                {helpText}
+                {translatedHelpText}
               </div>
             )}
           </div>
         )}
-      </div>
+      </DynBox>
     );
   }
 );

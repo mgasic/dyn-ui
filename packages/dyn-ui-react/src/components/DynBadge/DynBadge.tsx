@@ -15,6 +15,7 @@ import type {
 } from './DynBadge.types';
 import { DYN_BADGE_STATES } from './DynBadge.types';
 import styles from './DynBadge.module.css';
+import { useI18n } from '../../i18n';
 
 const sizeClassNameMap = {
   small: styles['badge--small'],
@@ -112,7 +113,8 @@ const DynBadgeComponent = (
   const { style: inlineStyle, ...restProps } = rest;
 
   const [internalId] = useState(() => id || generateId('badge'));
-  
+  const { t, formatNumber } = useI18n();
+
   const numericCount = typeof count === 'number' ? count : typeof value === 'number' ? value : undefined;
   const hasCount = typeof numericCount === 'number';
   const hasChildren = children !== undefined && children !== null;
@@ -130,14 +132,20 @@ const DynBadgeComponent = (
     }
 
     if (typeof maxCount === 'number' && numericCount! > maxCount) {
-      return `${maxCount}+`;
+      return `${formatNumber(maxCount)}+`;
     }
 
-    return String(numericCount);
-  }, [hasCount, maxCount, numericCount]);
+    return formatNumber(numericCount!);
+  }, [formatNumber, hasCount, maxCount, numericCount]);
 
   const displayContent = useMemo(() => {
     if (hasChildren) {
+      if (typeof children === 'string') {
+        const trimmed = children.trim();
+        if (!trimmed) return '';
+        const translated = t({ id: trimmed, defaultMessage: trimmed });
+        return translated;
+      }
       return children;
     }
 
@@ -146,7 +154,7 @@ const DynBadgeComponent = (
     }
 
     return undefined;
-  }, [children, displayCount, hasChildren, hasCount]);
+  }, [children, displayCount, hasChildren, hasCount, t]);
 
   const resolvedState = visualStateProp ?? (isBadgeState(color) ? (color as DynBadgeState) : undefined);
 
@@ -173,7 +181,22 @@ const DynBadgeComponent = (
     className
   );
 
-  const ariaLabelValue = ariaLabel ?? (hasCount ? `${countDescription || 'Count'}: ${displayCount}` : undefined);
+  const countLabel = useMemo(() => {
+    if (typeof countDescription === 'string' && countDescription.trim()) {
+      const trimmed = countDescription.trim();
+      return t({ id: trimmed, defaultMessage: trimmed });
+    }
+    return t({ id: 'badge.count', defaultMessage: 'Notifications' });
+  }, [countDescription, t]);
+
+  const translatedAriaLabel = useMemo(() => {
+    if (typeof ariaLabel !== 'string') return undefined;
+    const trimmed = ariaLabel.trim();
+    if (!trimmed) return undefined;
+    return t({ id: trimmed, defaultMessage: trimmed });
+  }, [ariaLabel, t]);
+
+  const ariaLabelValue = translatedAriaLabel ?? (hasCount ? `${countLabel}: ${displayCount}` : undefined);
   const ariaLiveValue = ariaLive ?? (hasCount ? 'polite' : undefined);
   const roleValue = roleProp ?? (isInteractive ? 'button' : undefined);
   const tabIndexValue = tabIndexProp ?? (isInteractive ? 0 : undefined);
@@ -255,7 +278,7 @@ const DynBadgeComponent = (
 
       {hasCount && Number(numericCount) > 0 && (
         <span className="dyn-sr-only">
-          {countDescription || 'Notifications'}: {displayCount}
+          {countLabel}: {displayCount}
         </span>
       )}
     </span>

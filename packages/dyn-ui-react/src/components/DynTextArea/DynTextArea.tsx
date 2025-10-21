@@ -3,6 +3,7 @@ import {
   useEffect,
   useId,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -14,6 +15,7 @@ import { cn } from '../../utils/classNames';
 import type { DynTextAreaProps, DynTextAreaRef } from './DynTextArea.types';
 import { DYN_TEXT_AREA_DEFAULT_PROPS } from './DynTextArea.types';
 import styles from './DynTextArea.module.css';
+import { useI18n } from '../../i18n';
 
 const DynTextAreaComponent = (
   {
@@ -47,6 +49,15 @@ const DynTextAreaComponent = (
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fallbackId = useId();
   const fieldId = id ?? name ?? `${fallbackId}-textarea`;
+
+  const { t } = useI18n();
+
+  const translatedPlaceholder = useMemo(() => {
+    if (typeof placeholder !== 'string') return undefined;
+    const trimmed = placeholder.trim();
+    if (!trimmed) return undefined;
+    return t({ id: trimmed, defaultMessage: trimmed });
+  }, [placeholder, t]);
 
   const { error, validate, clearError } = useDynFieldValidation({
     value,
@@ -151,7 +162,7 @@ const DynTextAreaComponent = (
         id={fieldId}
         name={name}
         className={textareaClasses}
-        placeholder={placeholder}
+        placeholder={translatedPlaceholder ?? placeholder}
         value={value}
         disabled={disabled}
         readOnly={readonly}

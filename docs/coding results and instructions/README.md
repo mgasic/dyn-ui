@@ -8,8 +8,12 @@ postojeći `design-tokens` (isti koji koristi *DynButton*). Ako `design-tokens` 
   - `packages/dyn-ui-react/src/theme/bridge/themeLoader.design-tokens.ts` — dinamičko učitavanje tema iz `design-tokens/themes/*`
   - `packages/dyn-ui-react/src/theme/bridge/normalize.ts` — usklađivanje naziva grupa (`space→spacing`, `radii→radius`, …)
   - `packages/dyn-ui-react/src/theme/applyCssVars.ts` — generiše CSS varijable; prefiks preuzima iz `design-tokens/config` (ako postoji)
-  - `packages/dyn-ui-react/src/theme/ThemeProvider.tsx` — koristi **bridge loader** i pravi varijable u runtime-u
+  - `packages/dyn-ui-react/src/theme/ThemeProvider.tsx` — koristi **bridge loader**, primenjuje CSS varijable u runtime-u i podržava `light`/`dark`/`high-contrast`
   - `packages/dyn-ui-react/src/system/sx.ts` — `sx` API (propovi su **ključevi tokena** → `var(--...)`)
+
+- **I18n i formatiranje:**
+  - `packages/dyn-ui-react/src/i18n/I18nProvider.tsx` — globalni provider sa pluralizacijom, Intl formatiranjem i RTL mirroring-om
+  - `packages/dyn-ui-react/src/i18n/I18nProvider.test.tsx` — validira plural rules i ažuriranje `dir/lang` atributa
 
 - **Komponente i primeri:**
   - `ThemeSwitcher` (runtime promena teme, oslanja se na tokene)

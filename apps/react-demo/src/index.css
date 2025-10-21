@@ -15,7 +15,23 @@ body {
   min-height: 100vh;
 }
 
-/* Demo-specific enhancements */
+.demo-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--spacing-3xl, 3rem) var(--spacing-xl, 1.5rem)
+    var(--spacing-5xl, 5rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3xl, 3rem);
+}
+
+.demo-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg, 1rem);
+  text-align: center;
+}
+
 .demo-container h1 {
   text-align: center;
   font-weight: var(--font-weight-bold, 700);
@@ -31,6 +47,78 @@ body {
 .demo-info {
   background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(16, 185, 129, 0.1)) !important;
   border-left-color: var(--color-success) !important;
+}
+
+.demo-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xl, 1.5rem);
+  margin: 0 auto;
+  max-width: min(100%, 520px);
+}
+
+.demo-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 0.5rem);
+  font-size: var(--font-size-sm, 0.875rem);
+  text-align: left;
+}
+
+.demo-controls select {
+  padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 0.75rem);
+  border-radius: var(--radius-md, 0.5rem);
+  border: 1px solid var(--color-border-subtle, rgba(15, 23, 42, 0.12));
+  background-color: var(--color-surface, #ffffff);
+  color: inherit;
+}
+
+.theme-switcher {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm, 0.5rem);
+}
+
+.demo-meta {
+  margin-top: var(--spacing-lg, 1rem);
+  color: var(--color-text-muted, rgba(15, 23, 42, 0.65));
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+.demo-section {
+  background-color: var(--color-surface, #ffffff);
+  border-radius: var(--radius-xl, 1rem);
+  border: 1px solid var(--color-border-subtle, rgba(15, 23, 42, 0.12));
+  padding: var(--spacing-2xl, 2.5rem) var(--spacing-3xl, 3rem);
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12);
+}
+
+.demo-section h2 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-xl, 1.5rem);
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: var(--font-weight-semibold, 600);
+}
+
+.demo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg, 1rem);
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .demo-container {
+    padding: var(--spacing-2xl, 2rem) var(--spacing-lg, 1rem);
+    gap: var(--spacing-2xl, 2rem);
+  }
+
+  .demo-section {
+    padding: var(--spacing-xl, 1.5rem);
+  }
 }
 
 /* Smooth transitions for all interactive elements */
