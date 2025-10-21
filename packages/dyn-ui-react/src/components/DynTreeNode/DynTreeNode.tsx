@@ -1,116 +1,25 @@
 import React, { forwardRef } from 'react';
 import classNames from 'classnames';
-import type {
-  DynTreeNodeComponent,
-  DynTreeNodeProps,
-  DynTreeNodeResponsiveSpacingValue,
-  DynTreeNodeSpacingPrimitive,
-} from './DynTreeNode.types';
+import type { DynTreeNodeComponent, DynTreeNodeProps, DynTreeNodeSpacing } from './DynTreeNode.types';
+import { tokens } from '../../tokens';
 import styles from './DynTreeNode.module.css';
 
-const SPACING_PROP_NAMES = [
-  'padding',
-  'p',
-  'px',
-  'py',
-  'pt',
-  'pr',
-  'pb',
-  'pl',
-  'margin',
-  'm',
-  'mx',
-  'my',
-  'mt',
-  'mr',
-  'mb',
-  'ml',
-  'gap',
-  'rowGap',
-  'columnGap',
-] as const;
+const spacingValues = tokens.spacing as Record<string, string>;
 
-type SpacingPropName = (typeof SPACING_PROP_NAMES)[number];
-
-type SpacingSlot =
-  | 'padding'
-  | 'padding-x'
-  | 'padding-y'
-  | 'padding-top'
-  | 'padding-right'
-  | 'padding-bottom'
-  | 'padding-left'
-  | 'margin'
-  | 'margin-x'
-  | 'margin-y'
-  | 'margin-top'
-  | 'margin-right'
-  | 'margin-bottom'
-  | 'margin-left'
-  | 'gap'
-  | 'row-gap'
-  | 'column-gap';
-
-const PROP_TO_SLOT: Record<SpacingPropName, SpacingSlot> = {
-  padding: 'padding',
-  p: 'padding',
-  px: 'padding-x',
-  py: 'padding-y',
-  pt: 'padding-top',
-  pr: 'padding-right',
-  pb: 'padding-bottom',
-  pl: 'padding-left',
-  margin: 'margin',
-  m: 'margin',
-  mx: 'margin-x',
-  my: 'margin-y',
-  mt: 'margin-top',
-  mr: 'margin-right',
-  mb: 'margin-bottom',
-  ml: 'margin-left',
-  gap: 'gap',
-  rowGap: 'row-gap',
-  columnGap: 'column-gap',
+const toSpacingVar = (token: string) => {
+  if (token === '0' || token === 'none') return '0';
+  const normalized = token.toLowerCase();
+  const fallback = spacingValues[normalized] ?? spacingValues[token] ?? token;
+  return `var(--dyn-spacing-${normalized}, var(--spacing-${normalized}, ${fallback}))`;
 };
 
-const MARGIN_SLOTS = new Set<SpacingSlot>([
-  'margin',
-  'margin-x',
-  'margin-y',
-  'margin-top',
-  'margin-right',
-  'margin-bottom',
-  'margin-left',
-]);
-
-const RESPONSIVE_BREAKPOINTS = ['sm', 'md', 'lg', 'xl'] as const;
-
-type Breakpoint = (typeof RESPONSIVE_BREAKPOINTS)[number];
-
-const SPACING_TOKENS: Record<string, string> = {
-  '0': '0',
-  xs: '0.25rem',
-  sm: '0.5rem',
-  md: '1rem',
-  lg: '1.5rem',
-  xl: '2rem',
-  '2xl': '3rem',
+const hasSpacingToken = (token: string) => {
+  const normalized = token.toLowerCase();
+  return normalized in spacingValues || token in spacingValues;
 };
 
-const toDesignTokenValue = (token: string) => {
-  if (token === '0') return '0';
-  const fallback = SPACING_TOKENS[token];
-  return `var(--dyn-spacing-${token}, var(--spacing-${token}, ${fallback ?? token}))`;
-};
-
-const normalizeSpacingPrimitive = (
-  value: DynTreeNodeSpacingPrimitive | undefined,
-  { allowAuto }: { allowAuto: boolean }
-): string | undefined => {
-  if (value === undefined || value === null) {
-    return undefined;
-  }
-
+const resolveSpacing = (value?: DynTreeNodeSpacing) => {
+  if (value === undefined || value === null) return undefined;
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) return undefined;
     return value === 0 ? '0px' : `${value}px`;
@@ -118,19 +27,11 @@ const normalizeSpacingPrimitive = (
 
   const trimmed = String(value).trim();
   if (!trimmed) return undefined;
-
-  const lower = trimmed.toLowerCase();
-
-  if (lower === 'none') return '0';
-  if (lower === '0') return '0';
-  if (lower === 'auto') {
-    return allowAuto ? 'auto' : trimmed;
+  if (trimmed === 'auto') return 'auto';
+  if (trimmed === '0' || trimmed.toLowerCase() === 'none') return '0';
+  if (hasSpacingToken(trimmed)) {
+    return toSpacingVar(trimmed);
   }
-
-  if (SPACING_TOKENS[lower]) {
-    return toDesignTokenValue(lower);
-  }
-
   return trimmed;
 };
 

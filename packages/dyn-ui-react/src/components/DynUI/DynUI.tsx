@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
 import { cn } from '../../utils/classNames';
+import { tokens } from '../../tokens';
 import { DynBox } from '../DynBox';
 import type { DynBoxProps, SpacingSize } from '../DynBox';
 import type {
@@ -80,14 +81,7 @@ const MARGIN_SLOTS = new Set<string>([
   'margin-left',
 ]);
 
-const SPACING_TOKENS: Record<Exclude<SpacingSize, '0' | 'auto'>, string> = {
-  xs: '0.25rem',
-  sm: '0.5rem',
-  md: '1rem',
-  lg: '1.5rem',
-  xl: '2rem',
-  '2xl': '3rem',
-};
+const SPACING_TOKENS = tokens.spacing as Record<string, string>;
 
 const toneVars: Record<DynUITone, Record<string, string>> = {
   surface: {},
