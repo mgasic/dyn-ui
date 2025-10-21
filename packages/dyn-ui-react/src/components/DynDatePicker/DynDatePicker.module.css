@@ -158,6 +158,142 @@
   box-shadow: var(--dyn-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05));
 }
 
+.calendarSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dyn-spacing-sm, 8px);
+  margin-bottom: var(--dyn-spacing-md, 16px);
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dyn-spacing-sm, 8px);
+}
+
+.monthButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: var(--dyn-font-size-lg, 18px);
+  border: 1px solid var(--dyn-color-border, #d1d5db);
+  border-radius: var(--dyn-border-radius-sm, 4px);
+  background-color: var(--dyn-color-surface, #fff);
+  color: var(--dyn-color-text-primary, #333);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.monthButton:hover:not(:disabled) {
+  background-color: var(--dyn-color-surface-hover, #f3f4f6);
+  border-color: var(--dyn-color-primary, #0066cc);
+}
+
+.monthButton:disabled {
+  cursor: not-allowed;
+  color: var(--dyn-color-text-disabled, #9ca3af);
+  border-color: var(--dyn-color-border-disabled, #e5e7eb);
+}
+
+.monthLabel {
+  flex: 1;
+  text-align: center;
+  font-size: var(--dyn-font-size-md, 16px);
+  font-weight: var(--dyn-font-weight-medium, 500);
+  text-transform: capitalize;
+}
+
+.weekdayRow {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--dyn-spacing-xs, 4px);
+  font-size: var(--dyn-font-size-sm, 14px);
+  color: var(--dyn-color-text-secondary, #666);
+}
+
+.weekday {
+  text-align: center;
+  font-weight: var(--dyn-font-weight-medium, 500);
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-rows: repeat(6, auto);
+  gap: var(--dyn-spacing-xs, 4px);
+}
+
+.weekRow {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--dyn-spacing-xs, 4px);
+}
+
+.day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--dyn-spacing-xs, 4px);
+  min-height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--dyn-border-radius-sm, 4px);
+  background-color: transparent;
+  font-size: var(--dyn-font-size-sm, 14px);
+  color: var(--dyn-color-text-primary, #333);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.day:hover:not(:disabled) {
+  background-color: var(--dyn-color-surface-hover, #f3f4f6);
+}
+
+.day:focus-visible {
+  outline: 2px solid var(--dyn-color-primary, #0066cc);
+  outline-offset: 2px;
+}
+
+.dayOutside {
+  color: var(--dyn-color-text-disabled, #9ca3af);
+}
+
+.dayDisabled,
+.dayDisabled:hover,
+.dayDisabled:focus-visible {
+  color: var(--dyn-color-text-disabled, #9ca3af);
+  cursor: not-allowed;
+  background-color: transparent;
+  outline: none;
+}
+
+.daySelected {
+  background-color: var(--dyn-color-primary, #0066cc);
+  color: var(--dyn-color-surface, #fff);
+}
+
+.dayToday {
+  border-color: var(--dyn-color-primary, #0066cc);
+}
+
+.dayActive:not(.daySelected) {
+  border-color: var(--dyn-color-primary, #0066cc);
+  background-color: var(--dyn-color-primary-alpha, rgba(0, 102, 204, 0.1));
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .shortcuts {
   display: flex;
   gap: var(--dyn-spacing-sm, 8px);

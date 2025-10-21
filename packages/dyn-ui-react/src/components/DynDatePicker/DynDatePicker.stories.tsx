@@ -175,3 +175,49 @@ export const InteractiveExample: Story = {
     );
   },
 };
+
+export const KeyboardNavigation: Story = {
+  render: () => (
+    <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+        Use the arrow keys, Home/End, and PageUp/PageDown to move the roving focus across the
+        calendar grid. Press Enter to select and Escape to close.
+      </p>
+      <DynDatePicker name="keyboard" label="Keyboard navigation" />
+    </div>
+  ),
+};
+
+export const LocalizationExamples: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+      <DynDatePicker name="locale-pt" label="Português (Brasil)" locale="pt-BR" />
+      <DynDatePicker name="locale-en" label="English (US)" locale="en-US" format="MM/dd/yyyy" />
+      <DynDatePicker name="locale-fr" label="Français" locale="fr-FR" format="dd/MM/yyyy" />
+    </div>
+  ),
+};
+
+export const RangeValidation: Story = {
+  args: {
+    name: 'range-validation',
+    label: 'Conference window',
+    locale: 'en-US',
+    minDate: new Date('2024-05-10'),
+    maxDate: new Date('2024-05-20'),
+    help: 'Only conference dates between May 10 and May 20, 2024 are available.',
+  },
+};
+
+export const OpenAndCloseBehaviors: Story = {
+  render: () => (
+    <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <DynDatePicker name="open-close" label="Try opening with the keyboard" />
+      <ul style={{ fontSize: '0.875rem', margin: 0, paddingLeft: '1.25rem', color: '#4b5563' }}>
+        <li>Press Enter or Arrow Down while focused on the input to open the calendar.</li>
+        <li>Press Escape to close the dropdown from either the input or the calendar grid.</li>
+        <li>Choosing a day commits the selection and returns focus to the field.</li>
+      </ul>
+    </div>
+  ),
+};
