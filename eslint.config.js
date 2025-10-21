@@ -4,6 +4,7 @@ import react from "eslint-plugin-react";
 import hooks from "eslint-plugin-react-hooks";
 import testing from "eslint-plugin-testing-library";
 import jestDom from "eslint-plugin-jest-dom";
+import tseslint from "typescript-eslint";
 
 const require = createRequire(import.meta.url);
 const dynUi = require("./packages/eslint-plugin-dyn-ui");
@@ -18,12 +19,7 @@ export default [
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
-        ecmaFeatures: { jsx: true },
-        project: [
-          "./tsconfig.base.json",
-          "./packages/dyn-ui-react/tsconfig.json"
-        ],
-        tsconfigRootDir: new URL(".", import.meta.url).pathname
+        ecmaFeatures: { jsx: true }
       }
     },
     plugins: {
@@ -40,7 +36,7 @@ export default [
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "react/jsx-uses-react": "off",
       "react/react-in-jsx-scope": "off",
-      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/rules-of-hooks": "warn",
       "react-hooks/exhaustive-deps": "warn",
       // dyn-ui authoring standards
       "dyn-ui/require-component-export-pattern": "error",

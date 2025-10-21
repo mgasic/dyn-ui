@@ -33,6 +33,9 @@ export {
   processIconString,
 } from './utils/dynFormatters';
 
+// Design tokens
+export * from './tokens';
+
 // Testing utilities
 export { axe, testA11y } from './testing';
 export type { AccessibilityTestOptions, AccessibilityTestResult } from './testing';

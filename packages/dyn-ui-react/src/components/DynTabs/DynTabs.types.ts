@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ElementType, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import { BaseComponentProps, ComponentSize, AccessibilityProps } from '../../types';
 
 export type DynTabsSize = ComponentSize;
@@ -50,84 +50,96 @@ export interface DynTabItem {
   'data-testid'?: string;
 }
 
+type PolymorphicComponentProps<E extends ElementType, P> = P &
+  Omit<ComponentPropsWithoutRef<E>, keyof P | 'children'>;
+
 /**
- * Props interface for DynTabs component
- * Extends BaseComponentProps for consistency across the design system
+ * Props interface for DynTabs component following DynAvatar standards.
  */
-export interface DynTabsProps extends 
-  BaseComponentProps,
-  AccessibilityProps,
-  Omit<React.HTMLAttributes<HTMLDivElement>, keyof BaseComponentProps | keyof AccessibilityProps | 'onChange' | 'children'> {
-  
+export interface DynTabsOwnProps extends BaseComponentProps, AccessibilityProps {
+  /** Optional element type override for polymorphic rendering */
+  as?: ElementType;
+
   /** Array of tab items to display */
   items: DynTabItem[];
-  
+
   /** Currently active tab ID/value (controlled) */
   value?: string | number;
-  
+
   /** Currently active tab ID (controlled - alias for value) */
   activeTab?: string | number;
-  
+
   /** Default active tab ID (uncontrolled) */
   defaultValue?: string | number;
-  
+
   /** Default active tab ID (uncontrolled - alias for defaultValue) */
   defaultActiveTab?: string | number;
-  
+
   /** Position of tabs relative to content */
   position?: DynTabsPosition;
-  
+
   /** Orientation of tabs */
   orientation?: DynTabsOrientation;
-  
+
   /** Activation mode */
   activation?: DynTabsActivation;
-  
+
   /** Visual variant of the tabs */
   variant?: DynTabsVariant;
-  
+
   /** Size of the tab elements */
   size?: DynTabsSize;
-  
+
   /** Whether tabs should fit container width */
   fitted?: boolean;
-  
+
   /** Enable horizontal scrolling for overflow tabs */
   scrollable?: boolean;
-  
+
   /** Allow tabs to be closed */
   closable?: boolean;
-  
+
   /** Enable lazy loading of tab content */
   lazy?: boolean;
-  
+
+  /** Mount tab panels on demand the first time they are activated */
+  lazyMount?: boolean;
+
   /** Enable tab transition animations */
   animated?: boolean;
-  
+
+  /** Disables the entire tab set */
+  disabled?: boolean;
+
   /** Show add new tab button */
   addable?: boolean;
-  
+
   /** Custom className for the tab list container */
   tabListClassName?: string;
-  
+
   /** Custom className for the content container */
   contentClassName?: string;
-  
+
   /** Custom loading component for lazy tabs */
   loadingComponent?: ReactNode;
-  
+
   /** Called when active tab changes */
-  onChange?: (tabId: string) => void;
-  
+  onChange?: (tabId: string, event: TabChangeEvent) => void;
+
   /** Called when a tab is closed */
   onTabClose?: (tabId: string) => void;
-  
+
   /** Called when add tab button is clicked */
   onTabAdd?: () => void;
-  
+
   /** Called when a tab is clicked (before onChange) */
-  onTabClick?: (tabId: string, event: React.MouseEvent) => boolean | void;
+  onTabClick?: (tabId: string, event: ReactMouseEvent) => boolean | void;
 }
+
+export type DynTabsProps<E extends ElementType = 'div'> = PolymorphicComponentProps<
+  E,
+  DynTabsOwnProps & { as?: E }
+>;
 
 /**
  * Ref type for DynTabs component

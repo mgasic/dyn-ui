@@ -35,11 +35,12 @@ const DynCheckboxComponent = (
     onBlur,
     onFocus,
     id,
+    loading = DYN_CHECKBOX_DEFAULT_PROPS.loading,
     'data-testid': dataTestId = DYN_CHECKBOX_DEFAULT_PROPS['data-testid'],
   }: DynCheckboxProps,
   ref: ForwardedRef<DynCheckboxRef>
 ) => {
-  const [checked, setChecked] = useState<boolean>(checkedProp);
+  const [checked, setChecked] = useState<boolean>(Boolean(checkedProp));
   const checkboxRef = useRef<HTMLInputElement>(null);
   const fallbackId = useId();
   const fieldId = id ?? name ?? `${fallbackId}-checkbox`;
@@ -70,19 +71,26 @@ const DynCheckboxComponent = (
         setChecked(false);
         onChange?.(false);
         clearError();
+        if (checkboxRef.current) {
+          checkboxRef.current.indeterminate = false;
+        }
       },
       getValue: () => checked,
       setValue: (newValue: unknown) => {
         const booleanValue = Boolean(newValue);
         setChecked(booleanValue);
         onChange?.(booleanValue);
+        if (checkboxRef.current) {
+          checkboxRef.current.indeterminate = false;
+        }
       },
+      element: checkboxRef.current,
     }),
     [checked, clearError, onChange, validate]
   );
 
   useEffect(() => {
-    setChecked(checkedProp);
+    setChecked(Boolean(checkedProp));
   }, [checkedProp]);
 
   useEffect(() => {
@@ -91,8 +99,10 @@ const DynCheckboxComponent = (
     }
   }, [indeterminate]);
 
+  const isInteractive = !(disabled || readonly || loading);
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    if (readonly || disabled) {
+    if (!isInteractive) {
       event.preventDefault();
       return;
     }
@@ -112,7 +122,7 @@ const DynCheckboxComponent = (
     if (event.key === ' ' || event.key === 'Enter') {
       event.preventDefault();
 
-      if (disabled || readonly) {
+      if (!isInteractive) {
         return;
       }
 
@@ -139,30 +149,37 @@ const DynCheckboxComponent = (
     checked && !indeterminate && styles.boxChecked,
     indeterminate && styles.boxIndeterminate,
     resolvedError && styles.boxError,
-    disabled && styles.boxDisabled,
-    readonly && styles.boxReadonly
+    (disabled || loading) && styles.boxDisabled,
+    readonly && styles.boxReadonly,
+    loading && styles.boxLoading
   );
 
   const containerClasses = cn(
     styles.container,
-    disabled && styles.containerDisabled,
+    (disabled || loading) && styles.containerDisabled,
     readonly && styles.containerReadonly,
     className
   );
 
   const wrapperClasses = cn(
     styles.wrapper,
-    disabled && styles.wrapperDisabled,
-    readonly && styles.wrapperReadonly
+    (disabled || loading) && styles.wrapperDisabled,
+    readonly && styles.wrapperReadonly,
+    loading && styles.wrapperLoading
   );
 
-  const describedById = resolvedError
-    ? `${fieldId}-error`
-    : help
-    ? `${fieldId}-help`
-    : undefined;
+  const errorId = resolvedError ? `${fieldId}-error` : undefined;
+  const helpId = !resolvedError && help ? `${fieldId}-help` : undefined;
 
-  const visualState = indeterminate ? 'indeterminate' : checked ? 'checked' : 'unchecked';
+  const describedById = [errorId, helpId].filter(Boolean).join(' ') || undefined;
+
+  const visualState = loading
+    ? 'loading'
+    : indeterminate
+    ? 'indeterminate'
+    : checked
+    ? 'checked'
+    : 'unchecked';
 
   const fieldContainerProps: Omit<DynFieldContainerProps, 'children'> = {
     required,
@@ -189,7 +206,7 @@ const DynCheckboxComponent = (
           name={name}
           className={styles.input}
           checked={checked}
-          disabled={disabled}
+          disabled={disabled || loading}
           readOnly={readonly}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -198,6 +215,7 @@ const DynCheckboxComponent = (
           aria-invalid={Boolean(resolvedError)}
           aria-describedby={describedById}
           aria-required={required || undefined}
+          aria-busy={loading || undefined}
           data-testid={dataTestId}
         />
 
@@ -206,9 +224,12 @@ const DynCheckboxComponent = (
           aria-hidden="true"
           data-state={visualState}
           data-size={size}
+          data-loading={loading || undefined}
         >
           <span className={styles.checkmark}>
-            {indeterminate ? (
+            {loading ? (
+              <span className={styles.loadingSpinner} />
+            ) : indeterminate ? (
               <span className={styles.indeterminateMark}>-</span>
             ) : checked ? (
               <span className={styles.checkMark}>✓</span>

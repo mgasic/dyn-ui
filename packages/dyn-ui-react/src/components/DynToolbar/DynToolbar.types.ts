@@ -3,9 +3,12 @@
  * Toolbar component types for action buttons and responsive layouts
  */
 
-import type { ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 import type { DynBadgeColor, DynBadgeVariant } from '../DynBadge/DynBadge.types';
 import type { BaseComponentProps, AccessibilityProps } from '../../types';
+
+type PolymorphicComponentProps<E extends ElementType, P> = P &
+  Omit<ComponentPropsWithoutRef<E>, keyof P | 'ref'>;
 
 export type ToolbarBadge =
   | number
@@ -20,6 +23,18 @@ export type ToolbarBadge =
       showZero?: boolean;
     };
 
+export type ToolbarItemState =
+  | 'default'
+  | 'active'
+  | 'pressed'
+  | 'checked'
+  | 'on'
+  | 'off'
+  | 'mixed'
+  | 'open'
+  | 'closed'
+  | (string & {});
+
 export interface ToolbarItem {
   id: string;
   label?: string;
@@ -32,12 +47,15 @@ export interface ToolbarItem {
   component?: React.ReactNode; // for custom components
   tooltip?: string;
   badge?: ToolbarBadge;
+  state?: ToolbarItemState;
 }
 
-export interface DynToolbarProps extends BaseComponentProps, AccessibilityProps {
+export interface DynToolbarOwnProps extends BaseComponentProps, AccessibilityProps {
+  /** Optional polymorphic element type */
+  as?: ElementType;
   /** Toolbar items to display */
   items: ToolbarItem[];
-  
+
   /** Visual variant */
   variant?: 'default' | 'minimal' | 'floating';
   
@@ -55,37 +73,48 @@ export interface DynToolbarProps extends BaseComponentProps, AccessibilityProps 
   
   /** Number of items before overflow kicks in */
   overflowThreshold?: number;
-  
+
   /** Show labels on toolbar items */
   showLabels?: boolean;
-  
+
+  /** Toolbar orientation for roving focus */
+  orientation?: 'horizontal' | 'vertical';
+
   /** Additional CSS classes */
   className?: string;
-  
+
   /** CSS class for individual items */
   itemClassName?: string;
   
   /** Item click handler */
   onItemClick?: (item: ToolbarItem) => void;
-  
+
   /** Overflow menu toggle handler */
   onOverflowToggle?: (isOpen: boolean) => void;
-  
+
   /** Children elements for custom toolbar content */
   children?: React.ReactNode;
-  
+
   /** Component ID */
   id?: string;
-  
+
   /** ARIA label for toolbar */
   'aria-label'?: string;
-  
+
   /** ARIA labelledby for toolbar */
   'aria-labelledby'?: string;
-  
+
+  /** ARIA orientation override for toolbar */
+  'aria-orientation'?: 'horizontal' | 'vertical';
+
   /** Test ID */
   'data-testid'?: string;
 }
+
+export type DynToolbarProps<E extends ElementType = 'div'> = PolymorphicComponentProps<
+  E,
+  DynToolbarOwnProps & { as?: E }
+>;
 
 export interface DynToolbarRef {
   openOverflow: () => void;

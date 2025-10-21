@@ -4,6 +4,7 @@ import { testA11y } from '../../testing/accessibility';
 import { describe, expect, it, vi } from 'vitest';
 import { DynInput } from './DynInput';
 import styles from './DynInput.module.css';
+import { useState } from 'react';
 
 // Accessibility assertions use axe-core directly
 
@@ -158,6 +159,49 @@ describe('DynInput', () => {
     });
   });
 
+  describe('Controlled and uncontrolled usage', () => {
+    it('manages its own state when used uncontrolled', async () => {
+      render(<DynInput name="notes" label="Notes" />);
+
+      const input = screen.getByRole('textbox');
+      await user.type(input, 'memo');
+
+      expect(input).toHaveValue('memo');
+    });
+
+    it('supports controlled usage by respecting external value updates', async () => {
+      const Controlled = () => {
+        const [value, setValue] = useState('initial');
+
+        return (
+          <div>
+            <DynInput
+              name="controlled"
+              label="Controlled"
+              value={value}
+              onChange={(next) => setValue(String(next))}
+            />
+            <button type="button" onClick={() => setValue('reset')}>
+              Reset
+            </button>
+          </div>
+        );
+      };
+
+      render(<Controlled />);
+
+      const input = screen.getByRole('textbox');
+      expect(input).toHaveValue('initial');
+
+      await user.clear(input);
+      await user.type(input, '123');
+      expect(input).toHaveValue('123');
+
+      await user.click(screen.getByRole('button', { name: 'Reset' }));
+      expect(input).toHaveValue('reset');
+    });
+  });
+
   describe('Variants and States', () => {
     it('renders different input types', () => {
       const { rerender } = render(
@@ -177,6 +221,77 @@ describe('DynInput', () => {
       const icon = screen.getByTestId('dyn-icon');
       expect(icon).toBeInTheDocument();
       expect(icon).toHaveTextContent('search');
+    });
+
+    it('renders prefix and suffix content and links them via aria-describedby', () => {
+      render(
+        <DynInput
+          name="amount"
+          label="Amount"
+          prefix="USD"
+          suffix="per month"
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+      const prefixElement = document.getElementById(`${input.id}-prefix`);
+      const suffixElement = document.getElementById(`${input.id}-suffix`);
+
+      expect(prefixElement).toBeTruthy();
+      expect(suffixElement).toBeTruthy();
+
+      const describedBy = input.getAttribute('aria-describedby')?.split(' ') ?? [];
+      expect(describedBy).toEqual(
+        expect.arrayContaining([prefixElement!.id, suffixElement!.id])
+      );
+    });
+
+    it('applies warning state and message when warningMessage is provided', () => {
+      render(
+        <DynInput
+          name="warning"
+          label="Warning"
+          warningMessage="Check your input"
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+      expect(input).toHaveClass(classes['dyn-input--warning']!);
+      const message = screen.getByText('Check your input');
+      expect(message).toHaveAttribute('id', `${input.id}-validation`);
+    });
+
+    it('applies success state when valid prop or successMessage is provided', () => {
+      render(
+        <DynInput
+          name="success"
+          label="Success"
+          valid
+          successMessage="Tudo certo"
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+      expect(input).toHaveClass(classes['dyn-input--success']!);
+      expect(screen.getByText('Tudo certo')).toBeInTheDocument();
+    });
+
+    it('shows loading state with spinner and aria-busy attribute', () => {
+      const { container } = render(
+        <DynInput
+          name="loading"
+          label="Loading"
+          loading
+          loadingMessage="Carregando dados"
+        />
+      );
+
+      const input = screen.getByRole('textbox');
+      expect(input).toHaveAttribute('aria-busy', 'true');
+      expect(screen.getByText('Carregando dados')).toBeInTheDocument();
+      expect(
+        container.querySelector(`.${classes['dyn-input-loading-indicator']}`)
+      ).toBeTruthy();
     });
   });
 
@@ -232,7 +347,7 @@ describe('DynInput', () => {
 
       const input = screen.getByLabelText(/Username/);
       const helpId = `${input.id}-help`;
-      const errorId = `${input.id}-error`;
+      const validationId = `${input.id}-validation`;
 
       expect(input).toHaveAttribute('aria-describedby', expect.stringContaining('external-hint'));
       expect(input).toHaveAttribute('aria-describedby', expect.stringContaining(helpId));
@@ -243,7 +358,7 @@ describe('DynInput', () => {
 
       const describedBy = input.getAttribute('aria-describedby');
       expect(describedBy?.split(' ')).toEqual(
-        expect.arrayContaining(['external-hint', helpId, errorId])
+        expect.arrayContaining(['external-hint', helpId, validationId])
       );
     });
   });

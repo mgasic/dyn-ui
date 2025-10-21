@@ -1,0 +1,13 @@
+.root {
+  --dyn-new-component-gap: 0;
+  --dyn-new-component-padding: 0;
+  --dyn-new-component-margin: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--dyn-new-component-gap);
+  padding: var(--dyn-new-component-padding);
+  margin: var(--dyn-new-component-margin);
+  box-sizing: border-box;
+}

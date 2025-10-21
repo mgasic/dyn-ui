@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import DynTable from './DynTable';
@@ -67,6 +68,23 @@ describe('DynTable', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
 
+    it('applies variant and color data attributes', () => {
+      const { getByTestId } = render(
+        <DynTable
+          data={sampleData}
+          columns={sampleColumns}
+          variant="zebra"
+          color="success"
+          aria-label="Employees"
+        />
+      );
+
+      const root = getByTestId('dyn-table');
+      expect(root).toHaveAttribute('data-variant', 'zebra');
+      expect(root).toHaveAttribute('data-color', 'success');
+      expect(screen.getByRole('table', { name: 'Employees' })).toBeInTheDocument();
+    });
+
     it('renders loading state correctly', () => {
       render(<DynTable data={[]} columns={[]} loading />);
       expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -97,6 +115,46 @@ describe('DynTable', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
       expect(screen.getByText('Bob Johnson')).toBeInTheDocument();
+    });
+  });
+
+  describe('Slots', () => {
+    it('renders custom header, body, and footer content via slots', () => {
+      render(
+        <DynTable
+          data={sampleData}
+          columns={sampleColumns}
+          slots={{
+            header: ({ renderDefault }) => (
+              <>
+                {renderDefault()}
+                <tr role="row">
+                  <th scope="col" colSpan={sampleColumns.length} className="dyn-table__cell dyn-table__cell--header">
+                    Extras
+                  </th>
+                </tr>
+              </>
+            ),
+            body: ({ renderDefault }) => (
+              <>
+                {renderDefault()}
+                <tr role="row">
+                  <td colSpan={sampleColumns.length} className="dyn-table__cell">Summary row</td>
+                </tr>
+              </>
+            ),
+            footer: () => (
+              <tr role="row">
+                <td colSpan={sampleColumns.length} className="dyn-table__cell">Footer details</td>
+              </tr>
+            )
+          }}
+        />
+      );
+
+      expect(screen.getByText('Extras')).toBeInTheDocument();
+      expect(screen.getByText('Summary row')).toBeInTheDocument();
+      expect(screen.getByText('Footer details')).toBeInTheDocument();
     });
   });
 
@@ -547,13 +605,23 @@ describe('DynTable', () => {
 
     it('has proper column headers with scope', () => {
       render(<DynTable data={sampleData} columns={sampleColumns} />);
-      
+
       const headers = screen.getAllByRole('columnheader');
       headers.forEach(header => {
         if (header.textContent && header.textContent.trim() && header.textContent !== 'Actions') {
           expect(header).toHaveAttribute('scope', 'col');
         }
       });
+    });
+
+    it('associates data cells with their corresponding headers', () => {
+      render(<DynTable data={sampleData} columns={sampleColumns} />);
+
+      const nameHeader = screen.getByRole('columnheader', { name: 'Name' });
+      const nameCell = screen.getByText('John Doe').closest('td');
+
+      expect(nameHeader).toHaveAttribute('id');
+      expect(nameCell).toHaveAttribute('headers', nameHeader.getAttribute('id') ?? undefined);
     });
 
     it('has proper row selection accessibility', () => {
@@ -568,17 +636,38 @@ describe('DynTable', () => {
 
     it('passes axe accessibility tests', async () => {
       const { container } = render(
-        <DynTable 
-          data={sampleData} 
+        <DynTable
+          data={sampleData}
           columns={sampleColumns}
           selectable="multiple"
           actions={sampleActions}
           aria-label="Test table"
         />
       );
-      
+
       const results = await axe(container);
       expect(results).toHaveNoViolations();
+    });
+
+    it('supports keyboard navigation for sorting', async () => {
+      const user = userEvent.setup();
+      const onSort = vi.fn();
+
+      render(
+        <DynTable
+          data={sampleData}
+          columns={sampleColumns}
+          onSort={onSort}
+          sortable
+        />
+      );
+
+      await user.tab();
+      const activeElement = document.activeElement as HTMLElement;
+      expect(activeElement).toHaveAttribute('aria-label', 'Sort by Name');
+
+      await user.keyboard('{Enter}');
+      expect(onSort).toHaveBeenCalledWith('name', 'asc');
     });
   });
 

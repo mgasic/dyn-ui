@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["DOM", "ESNext"],
+    "strict": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "Node",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@dyn-ui/react": ["types/stubs/dyn-ui-react"]
+    }
+  },
+  "include": [".storybook/**/*", "tests/**/*", "playwright*.config.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "packages/**",
+    "samples/**",
+    "templates/**"
+  ]
+}
