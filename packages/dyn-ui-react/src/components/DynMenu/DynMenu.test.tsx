@@ -112,6 +112,20 @@ describe('DynMenu', () => {
     expect(screen.queryByRole('menuitem', { name: 'All Products' })).not.toBeInTheDocument();
   });
 
+  it('restores focus to the trigger when a submenu closes', async () => {
+    const user = userEvent.setup();
+    renderMenu();
+
+    const productsButton = screen.getByRole('menuitem', { name: 'Products' });
+    await user.click(productsButton);
+
+    expect(screen.getByRole('menuitem', { name: 'All Products' })).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByRole('menubar'), { key: 'Escape' });
+
+    await waitFor(() => expect(productsButton).toHaveFocus());
+  });
+
   it('runs an action callback when a submenu item with a function is clicked', async () => {
     const user = userEvent.setup();
     renderMenu();

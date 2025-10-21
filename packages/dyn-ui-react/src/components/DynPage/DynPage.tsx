@@ -7,7 +7,7 @@ import React from 'react';
 import { DynPageProps } from '../../types/layout.types';
 import { classNames } from '../../utils/classNames';
 import { DynButton } from '../DynButton';
-import type { DynButtonKind } from '../DynButton/DynButton.types';
+import type { DynButtonVariant } from '../DynButton/DynButton.types';
 import styles from './DynPage.module.css';
 
 export const DynPage: React.FC<DynPageProps> = ({
@@ -104,19 +104,30 @@ export const DynPage: React.FC<DynPageProps> = ({
 
     return (
       <div className={styles.actions}>
-        {actions.map((action) => (
-          <DynButton
-            key={action.key}
-            kind={(action.type ?? 'secondary') as DynButtonKind}
-            size={size === 'large' ? 'large' : 'medium'}
-            disabled={action.disabled}
-            loading={action.loading}
-            onClick={action.onClick}
-            icon={action.icon}
-          >
-            {action.title}
-          </DynButton>
-        ))}
+        {actions.map((action) => {
+          const variant: DynButtonVariant =
+            action.type === 'primary'
+              ? 'primary'
+              : action.type === 'secondary'
+                ? 'secondary'
+                : 'primary';
+          const isDanger = action.type === 'danger';
+
+          return (
+            <DynButton
+              key={action.key}
+              variant={variant}
+              danger={isDanger}
+              size={size === 'large' ? 'large' : 'medium'}
+              disabled={action.disabled}
+              loading={action.loading}
+              onClick={action.onClick}
+              startIcon={action.icon}
+            >
+              {action.title}
+            </DynButton>
+          );
+        })}
       </div>
     );
   };

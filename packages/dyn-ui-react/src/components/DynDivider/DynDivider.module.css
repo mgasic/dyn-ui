@@ -1,52 +1,73 @@
 .root {
   --dyn-divider-color: var(--dyn-color-border, rgba(15, 23, 42, 0.12));
   --dyn-divider-text-color: var(--dyn-color-text-secondary, #475569);
+  --dyn-divider-flex-direction: row;
   --dyn-divider-gap: 0;
-  --dyn-divider-thickness: 1px;
+  --dyn-divider-gap-with-label: 0.75rem;
+  --dyn-divider-line-display: block;
+  --dyn-divider-line-thickness: 1px;
   --dyn-divider-line-style: solid;
-  --dyn-divider-spacing-block: 1rem;
-  --dyn-divider-spacing-inline: 1rem;
+  --dyn-divider-spacing-block-base: 1rem;
+  --dyn-divider-spacing-inline-base: 1rem;
+  --dyn-divider-spacing-block: var(--dyn-divider-spacing-block-base);
+  --dyn-divider-spacing-inline: var(--dyn-divider-spacing-inline-base);
+  --dyn-divider-label-padding-block: 0.125rem;
+  --dyn-divider-label-padding-inline: 0.75rem;
+  --dyn-divider-inline-size: 100%;
+  --dyn-divider-min-height: auto;
 
-  display: flex;
+  display: inline-flex;
+  flex-direction: var(--dyn-divider-flex-direction);
   align-items: center;
-  width: 100%;
+  width: var(--dyn-divider-inline-size);
   min-width: 0;
+  min-height: var(--dyn-divider-min-height);
   gap: var(--dyn-divider-gap);
+  padding-block: var(--dyn-divider-spacing-block);
+  padding-inline: var(--dyn-divider-spacing-inline);
   color: var(--dyn-divider-text-color);
-  font-size: var(--dyn-font-size-xs, 0.75rem);
+  font-size: var(--dyn-divider-font-size, var(--dyn-font-size-xs, 0.75rem));
   font-weight: var(--dyn-font-weight-medium, 500);
   letter-spacing: 0.02em;
 }
 
-.directionHorizontal {
-  margin-block: var(--dyn-divider-spacing-block);
+.variantHorizontal {
+  --dyn-divider-flex-direction: row;
+  --dyn-divider-inline-size: 100%;
 }
 
-.directionVertical {
-  flex-direction: column;
+.variantVertical {
+  --dyn-divider-flex-direction: column;
+  --dyn-divider-inline-size: auto;
+  --dyn-divider-min-height: 100%;
   justify-content: center;
-  width: auto;
-  min-height: 100%;
-  align-self: stretch;
-  margin-inline: var(--dyn-divider-spacing-inline);
+}
+
+.variantText {
+  --dyn-divider-flex-direction: row;
+  --dyn-divider-line-display: none;
+  --dyn-divider-gap: 0;
+  --dyn-divider-spacing-block: 0;
+  --dyn-divider-spacing-inline: 0;
 }
 
 .withLabel {
-  --dyn-divider-gap: 0.75rem;
+  --dyn-divider-gap: var(--dyn-divider-gap-with-label);
 }
 
 .line {
   flex: 1 1 0%;
-  border-top: var(--dyn-divider-thickness) var(--dyn-divider-line-style)
+  display: var(--dyn-divider-line-display);
+  border-top: var(--dyn-divider-line-thickness) var(--dyn-divider-line-style)
     var(--dyn-divider-color);
   min-width: 0;
 }
 
-.directionVertical .line {
+.variantVertical .line {
   width: 0;
   min-height: 16px;
   border-top: none;
-  border-left: var(--dyn-divider-thickness) var(--dyn-divider-line-style)
+  border-left: var(--dyn-divider-line-thickness) var(--dyn-divider-line-style)
     var(--dyn-divider-color);
 }
 
@@ -54,16 +75,24 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 0.75rem;
+  padding-block: var(--dyn-divider-label-padding-block);
+  padding-inline: var(--dyn-divider-label-padding-inline);
   white-space: nowrap;
   border-radius: 999px;
   background: var(--dyn-color-background, #ffffff);
   color: inherit;
 }
 
-.directionVertical .label {
-  padding: 0.5rem 0;
+.variantVertical .label {
+  padding-block: 0.5rem;
+  padding-inline: 0;
   border-radius: 0;
+}
+
+.variantText .label {
+  padding: 0;
+  background: none;
+  font-weight: var(--dyn-font-weight-semibold, 600);
 }
 
 .labelLeft .line:first-of-type {
@@ -74,41 +103,52 @@
   flex: 0 1 32px;
 }
 
-.directionVertical.labelLeft {
+.variantVertical.labelLeft {
   justify-content: flex-start;
 }
 
-.directionVertical.labelRight {
+.variantVertical.labelRight {
   justify-content: flex-end;
 }
 
-.thicknessThin {
-  --dyn-divider-thickness: 1px;
+.sizeSm {
+  --dyn-divider-line-thickness: 1px;
+  --dyn-divider-gap-with-label: 0.5rem;
+  --dyn-divider-spacing-block-base: 0.5rem;
+  --dyn-divider-spacing-inline-base: 0.5rem;
+  --dyn-divider-label-padding-block: 0.125rem;
+  --dyn-divider-label-padding-inline: 0.5rem;
+  --dyn-divider-font-size: var(--dyn-font-size-xs, 0.75rem);
 }
 
-.thicknessMedium {
-  --dyn-divider-thickness: 2px;
+.sizeMd {
+  --dyn-divider-line-thickness: 2px;
+  --dyn-divider-gap-with-label: 0.75rem;
+  --dyn-divider-spacing-block-base: 1rem;
+  --dyn-divider-spacing-inline-base: 1rem;
+  --dyn-divider-label-padding-block: 0.25rem;
+  --dyn-divider-label-padding-inline: 0.75rem;
+  --dyn-divider-font-size: var(--dyn-font-size-sm, 0.875rem);
 }
 
-.thicknessThick {
-  --dyn-divider-thickness: 3px;
-}
-
-.lineStyleSolid {
-  --dyn-divider-line-style: solid;
-}
-
-.lineStyleDashed {
-  --dyn-divider-line-style: dashed;
-}
-
-.lineStyleDotted {
-  --dyn-divider-line-style: dotted;
+.sizeLg {
+  --dyn-divider-line-thickness: 3px;
+  --dyn-divider-gap-with-label: 1rem;
+  --dyn-divider-spacing-block-base: 1.5rem;
+  --dyn-divider-spacing-inline-base: 1.5rem;
+  --dyn-divider-label-padding-block: 0.375rem;
+  --dyn-divider-label-padding-inline: 1rem;
+  --dyn-divider-font-size: var(--dyn-font-size-md, 1rem);
 }
 
 .colorDefault {
   --dyn-divider-color: var(--dyn-color-border, rgba(15, 23, 42, 0.12));
   --dyn-divider-text-color: var(--dyn-color-text-secondary, #475569);
+}
+
+.colorSubtle {
+  --dyn-divider-color: var(--dyn-color-muted, rgba(15, 23, 42, 0.08));
+  --dyn-divider-text-color: var(--dyn-color-text-tertiary, #94a3b8);
 }
 
 .colorPrimary {
@@ -121,39 +161,19 @@
   --dyn-divider-text-color: var(--dyn-color-secondary, #6b7280);
 }
 
-.colorMuted {
-  --dyn-divider-color: var(--dyn-color-muted, #e2e8f0);
-  --dyn-divider-text-color: var(--dyn-color-text-secondary, #475569);
+.colorSuccess {
+  --dyn-divider-color: var(--dyn-color-success, #16a34a);
+  --dyn-divider-text-color: var(--dyn-color-success, #16a34a);
 }
 
-.spacingNone {
-  --dyn-divider-spacing-block: 0;
-  --dyn-divider-spacing-inline: 0;
+.colorWarning {
+  --dyn-divider-color: var(--dyn-color-warning, #d97706);
+  --dyn-divider-text-color: var(--dyn-color-warning, #d97706);
 }
 
-.spacingXs {
-  --dyn-divider-spacing-block: 0.25rem;
-  --dyn-divider-spacing-inline: 0.25rem;
-}
-
-.spacingSm {
-  --dyn-divider-spacing-block: 0.5rem;
-  --dyn-divider-spacing-inline: 0.5rem;
-}
-
-.spacingMd {
-  --dyn-divider-spacing-block: 1rem;
-  --dyn-divider-spacing-inline: 1rem;
-}
-
-.spacingLg {
-  --dyn-divider-spacing-block: 1.5rem;
-  --dyn-divider-spacing-inline: 1.5rem;
-}
-
-.spacingXl {
-  --dyn-divider-spacing-block: 2rem;
-  --dyn-divider-spacing-inline: 2rem;
+.colorDanger {
+  --dyn-divider-color: var(--dyn-color-danger, #dc2626);
+  --dyn-divider-text-color: var(--dyn-color-danger, #dc2626);
 }
 
 @media (prefers-reduced-motion: reduce) {
