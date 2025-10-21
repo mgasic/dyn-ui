@@ -213,7 +213,14 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
     if (focusedKey) {
       const treeElement = treeRef.current;
       const ref = nodeRefs.current[focusedKey];
-      if (treeElement && ref && treeElement.contains(document.activeElement)) {
+      const activeElement = document.activeElement as HTMLElement | null;
+      if (
+        treeElement &&
+        ref &&
+        activeElement &&
+        treeElement.contains(activeElement) &&
+        (activeElement === treeElement || activeElement.getAttribute('role') === 'treeitem')
+      ) {
         ref.focus();
       }
     }
@@ -377,6 +384,15 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        target !== event.currentTarget &&
+        target.getAttribute('role') !== 'treeitem'
+      ) {
+        return;
+      }
+
       if (!visibleNodes.length) {
         return;
       }

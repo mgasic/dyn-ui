@@ -27,6 +27,10 @@ const menuItems: MenuItem[] = [
       {
         label: 'Categories',
         action: 'open-categories'
+      },
+      {
+        label: 'Inventory',
+        loading: true
       }
     ]
   },
@@ -258,5 +262,21 @@ describe('DynMenu', () => {
     await waitFor(() =>
       expect(screen.queryByRole('menuitem', { name: 'Categories' })).not.toBeInTheDocument()
     );
+  });
+
+  it('prevents activating loading submenu items', async () => {
+    const user = userEvent.setup();
+    const onAction = vi.fn();
+    renderMenu({ onAction });
+
+    await user.click(screen.getByRole('menuitem', { name: 'Products' }));
+
+    const inventoryItem = screen.getByRole('menuitem', { name: 'Inventory' });
+    expect(inventoryItem).toHaveAttribute('data-loading', 'true');
+    expect(inventoryItem).toHaveAttribute('aria-busy', 'true');
+
+    await user.click(inventoryItem);
+    expect(onAction).not.toHaveBeenCalledWith(expect.stringContaining('Inventory'));
+    expect(onAction).not.toHaveBeenCalled();
   });
 });

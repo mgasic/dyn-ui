@@ -19,12 +19,6 @@
   gap: 0.5rem;
 }
 
-.dyn-label--disabled {
-  color: var(--color-neutral-dark-70, #666);
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 .dyn-label-text {
   display: inline-flex;
   align-items: center;
@@ -67,7 +61,13 @@
   font-weight: normal;
 }
 
-.dyn-label--disabled .dyn-label-required-asterisk {
+.dyn-label--disabled {
+  color: var(--color-neutral-dark-70, #666);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dyn-label--disabled .dyn-label--required .dyn-label-required-asterisk {
   color: var(--color-neutral-dark-70, #666);
 }
 
