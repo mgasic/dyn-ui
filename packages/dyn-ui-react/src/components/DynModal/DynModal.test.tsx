@@ -76,6 +76,35 @@ describe('DynModal', () => {
     expect(modal).toHaveAttribute('data-disabled', 'true');
   });
 
+  it('maintains focus trap when disabled', async () => {
+    const user = userEvent.setup();
+    render(
+      <div>
+        <button type="button">Outside</button>
+        <DynModal isOpen disabled>
+          <button type="button">Inside first</button>
+          <button type="button">Inside second</button>
+        </DynModal>
+      </div>
+    );
+
+    const firstButton = screen.getByRole('button', { name: /inside first/i });
+    const secondButton = screen.getByRole('button', { name: /inside second/i });
+    const outsideButton = screen.getByRole('button', { name: /outside/i });
+
+    await waitFor(() => expect(firstButton).toHaveFocus());
+
+    await user.tab();
+    expect(secondButton).toHaveFocus();
+
+    await user.tab();
+    expect(firstButton).toHaveFocus();
+    expect(outsideButton).not.toHaveFocus();
+
+    await user.tab({ shift: true });
+    expect(secondButton).toHaveFocus();
+  });
+
   it('handles escape key press when enabled', async () => {
     const onClose = vi.fn();
     const user = userEvent.setup();
