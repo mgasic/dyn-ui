@@ -1,8 +1,9 @@
 import '../../../test-setup';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { act } from 'react';
 import { DynMenu } from './DynMenu';
 import type { MenuItem } from './DynMenu.types';
 
@@ -132,5 +133,71 @@ describe('DynMenu', () => {
     rerender(<DynMenu items={menuItems} orientation="vertical" />);
     menubar = screen.getByRole('menubar');
     expect(menubar).toHaveClass('dyn-menu--vertical');
+  });
+
+  it('closes open submenus when clicking or focusing outside', async () => {
+    const user = userEvent.setup();
+    renderMenu();
+
+    await user.click(screen.getByRole('menuitem', { name: 'Products' }));
+    expect(screen.getByRole('menuitem', { name: 'Categories' })).toBeInTheDocument();
+
+    await user.click(document.body);
+    await waitFor(() =>
+      expect(screen.queryByRole('menuitem', { name: 'Categories' })).not.toBeInTheDocument()
+    );
+
+    await user.click(screen.getByRole('menuitem', { name: 'Products' }));
+    expect(screen.getByRole('menuitem', { name: 'Categories' })).toBeInTheDocument();
+
+    const outsideButton = document.createElement('button');
+    outsideButton.textContent = 'Outside';
+    document.body.appendChild(outsideButton);
+
+    await act(async () => {
+      outsideButton.focus();
+      fireEvent.focusIn(outsideButton);
+    });
+
+    await waitFor(() =>
+      expect(screen.queryByRole('menuitem', { name: 'Categories' })).not.toBeInTheDocument()
+    );
+
+    outsideButton.remove();
+  });
+
+  it('supports roving focus within open submenus', async () => {
+    const user = userEvent.setup();
+    const onAction = vi.fn();
+    renderMenu({ onAction });
+
+    await user.click(screen.getByRole('menuitem', { name: 'Products' }));
+
+    const submenu = screen.getByRole('menu', { name: 'Products' });
+
+    await waitFor(() => expect(submenu).toHaveFocus());
+
+    const getActiveText = () => {
+      const activeId = submenu.getAttribute('aria-activedescendant');
+      if (!activeId) return null;
+      return document.getElementById(activeId)?.textContent;
+    };
+
+    expect(getActiveText()).toContain('All Products');
+
+    await user.keyboard('{ArrowDown}');
+    await waitFor(() => expect(getActiveText()).toContain('Categories'));
+
+    await user.keyboard('{ArrowUp}');
+    await waitFor(() => expect(getActiveText()).toContain('All Products'));
+
+    await user.keyboard('{ArrowDown}');
+    await waitFor(() => expect(getActiveText()).toContain('Categories'));
+    await user.keyboard('{Enter}');
+
+    expect(onAction).toHaveBeenCalledWith('open-categories');
+    await waitFor(() =>
+      expect(screen.queryByRole('menuitem', { name: 'Categories' })).not.toBeInTheDocument()
+    );
   });
 });
