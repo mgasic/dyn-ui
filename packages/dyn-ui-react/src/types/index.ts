@@ -24,9 +24,15 @@ export type {
   DynAvatarSize,
   DynAvatarShape,
   DynAvatarStatus,
+  DynAvatarVariant,
+  DynAvatarColor,
 } from '../components/DynAvatar/DynAvatar.types';
 export {
   DYN_AVATAR_STATUS_LABELS,
+  AVATAR_SIZES,
+  DYN_AVATAR_VARIANTS,
+  DYN_AVATAR_COLORS,
+  AVATAR_COLOR_TOKENS,
 } from '../components/DynAvatar/DynAvatar.types';
 export type { DynIconProps, IconDictionary, ProcessedIcon } from './icon.types';
 export type { DynLabelProps } from './label.types';

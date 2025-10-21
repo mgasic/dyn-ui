@@ -25,6 +25,16 @@ const meta: Meta<typeof DynAvatar> = {
       options: ['circle', 'square', 'rounded'],
       description: 'Avatar shape variant',
     },
+    variant: {
+      control: { type: 'select' },
+      options: ['subtle', 'solid', 'outline'],
+      description: 'Visual treatment for avatar background',
+    },
+    color: {
+      control: { type: 'select' },
+      options: ['neutral', 'primary', 'secondary', 'success', 'warning', 'danger', 'info'],
+      description: 'Semantic color token applied to the avatar background',
+    },
     status: {
       control: { type: 'select' },
       options: ['online', 'offline', 'busy', 'away'],
@@ -49,6 +59,8 @@ export const Default: Story = {
     alt: 'User Avatar',
     initials: 'JD',
     size: 'md',
+    variant: 'subtle',
+    color: 'neutral',
   },
 };
 
@@ -57,6 +69,8 @@ export const WithImage: Story = {
     src: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
     alt: 'John Doe',
     size: 'md',
+    variant: 'subtle',
+    color: 'neutral',
   },
 };
 
@@ -113,6 +127,52 @@ export const AllStatuses: Story = {
     docs: {
       description: {
         story: 'All status indicators with semantic meaning.',
+      },
+    },
+  },
+};
+
+export const VariantStyles: Story = {
+  render: (args) => (
+    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+      <DynAvatar {...args} variant="subtle" alt="Subtle" initials="SU" />
+      <DynAvatar {...args} variant="solid" alt="Solid" initials="SO" />
+      <DynAvatar {...args} variant="outline" alt="Outline" initials="OU" />
+    </div>
+  ),
+  args: {
+    color: 'primary',
+    size: 'md',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'All visual treatments available for the avatar background.',
+      },
+    },
+  },
+};
+
+export const SemanticColors: Story = {
+  render: (args) => (
+    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+      <DynAvatar {...args} color="neutral" alt="Neutral" initials="NE" />
+      <DynAvatar {...args} color="primary" alt="Primary" initials="PR" />
+      <DynAvatar {...args} color="secondary" alt="Secondary" initials="SE" />
+      <DynAvatar {...args} color="success" alt="Success" initials="SU" />
+      <DynAvatar {...args} color="warning" alt="Warning" initials="WA" />
+      <DynAvatar {...args} color="danger" alt="Danger" initials="DA" />
+      <DynAvatar {...args} color="info" alt="Info" initials="IN" />
+    </div>
+  ),
+  args: {
+    variant: 'subtle',
+    size: 'md',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Semantic background colors aligned with the design token palette.',
       },
     },
   },
