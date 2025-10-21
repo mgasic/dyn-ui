@@ -3,7 +3,7 @@
  * Navigation component types for hierarchical menu system
  */
 
-import type { BaseComponentProps, AccessibilityProps } from '../../types/theme';
+import type { BaseComponentProps, AccessibilityProps } from '../../types';
 
 export interface MenuItem {
   /** Visible label for the menu entry. */
