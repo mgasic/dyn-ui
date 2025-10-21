@@ -114,18 +114,68 @@ describe('DynSelect', () => {
     expect(handleChange).not.toHaveBeenCalled();
   });
 
-  it('handles keyboard navigation', () => {
+  it('navigates options with arrow keys and selects with Enter', () => {
     render(<DynSelectAny name="test" label="Test" options={sampleOptions} />);
 
     const select = screen.getByRole('combobox');
 
-    // Enter should open dropdown
-    fireEvent.keyDown(select, { key: 'Enter' });
-    expect(screen.getByText('Option 1')).toBeInTheDocument();
+    fireEvent.keyDown(select, { key: 'ArrowDown' });
+    const option1 = screen.getByRole('option', { name: 'Option 1' });
+    expect(option1).toHaveAttribute('data-active', 'true');
+    expect(select).toHaveAttribute('aria-activedescendant', option1.id);
 
-    // Escape should close dropdown
-    fireEvent.keyDown(select, { key: 'Escape' });
-    expect(screen.queryByText('Option 1')).not.toBeInTheDocument();
+    fireEvent.keyDown(select, { key: 'ArrowDown' });
+    const option2 = screen.getByRole('option', { name: 'Option 2' });
+    expect(option2).toHaveAttribute('data-active', 'true');
+
+    // Disabled option should be skipped
+    fireEvent.keyDown(select, { key: 'ArrowDown' });
+    expect(option2).toHaveAttribute('data-active', 'true');
+
+    fireEvent.keyDown(select, { key: 'Enter' });
+    expect(select).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByText('Option 2')).toBeInTheDocument();
+  });
+
+  it('supports Home, End, PageUp, and PageDown navigation', () => {
+    const manyOptions = Array.from({ length: 15 }, (_, index) => ({
+      value: `option-${index + 1}`,
+      label: `Option ${index + 1}`,
+    }));
+
+    render(<DynSelectAny name="test" label="Test" options={manyOptions} />);
+
+    const select = screen.getByRole('combobox');
+    fireEvent.keyDown(select, { key: 'ArrowDown' });
+
+    fireEvent.keyDown(select, { key: 'End' });
+    const lastOption = screen.getByRole('option', { name: 'Option 15' });
+    expect(lastOption).toHaveAttribute('data-active', 'true');
+
+    fireEvent.keyDown(select, { key: 'PageUp' });
+    const option5 = screen.getByRole('option', { name: 'Option 5' });
+    expect(option5).toHaveAttribute('data-active', 'true');
+
+    fireEvent.keyDown(select, { key: 'Home' });
+    const firstOption = screen.getByRole('option', { name: 'Option 1' });
+    expect(firstOption).toHaveAttribute('data-active', 'true');
+  });
+
+  it('enables character search to move focus', () => {
+    const typeaheadOptions = [
+      { value: 'alpha', label: 'Alpha' },
+      { value: 'beta', label: 'Beta' },
+      { value: 'gamma', label: 'Gamma' },
+    ];
+
+    render(<DynSelectAny name="test" label="Test" options={typeaheadOptions} />);
+
+    const select = screen.getByRole('combobox');
+    fireEvent.keyDown(select, { key: 'ArrowDown' });
+
+    fireEvent.keyDown(select, { key: 'g' });
+    const gammaOption = screen.getByRole('option', { name: 'Gamma' });
+    expect(gammaOption).toHaveAttribute('data-active', 'true');
   });
 
   it('displays selected value', () => {

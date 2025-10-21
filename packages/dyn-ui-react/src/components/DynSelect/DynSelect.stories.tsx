@@ -22,7 +22,7 @@ const meta: Meta<typeof DynSelect> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Advanced select component with search, multiple selection, and virtual scrolling support.',
+        component: 'Advanced select component with search, multiple selection, virtual scrolling support, and full keyboard navigation via active option tracking.',
       },
     },
   },
@@ -64,6 +64,15 @@ export const Default: Story = {
     name: 'default-select',
     label: 'Select Option',
     options: sampleOptions,
+  },
+};
+
+Default.parameters = {
+  docs: {
+    description: {
+      story:
+        'Use Arrow keys, Home/End, Page Up/Down, and type-to-search to change the active option. The highlighted option follows aria-activedescendant and Enter or Space will confirm the selection.',
+    },
   },
 };
 

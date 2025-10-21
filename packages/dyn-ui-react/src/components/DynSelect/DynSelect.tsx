@@ -54,7 +54,13 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [focused, setFocused] = useState(false);
+    const [activeOptionIndex, setActiveOptionIndex] = useState(-1);
+    const typeaheadStateRef = useRef<{ query: string; timestamp: number }>({
+      query: '',
+      timestamp: 0
+    });
     const selectRef = useRef<HTMLDivElement>(null);
+    const comboboxRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const generatedId = useId();
     const sanitizedGeneratedId = generatedId.replace(/:/g, '');
@@ -70,7 +76,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
     });
 
     useImperativeHandle(ref, () => ({
-      focus: () => inputRef.current?.focus(),
+      focus: () => comboboxRef.current?.focus(),
       validate: () => validate(),
       clear: () => {
         setValue(multiple ? [] : '');
@@ -118,16 +124,35 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
       }
     }, [isOpen]);
 
+    const getFirstEnabledIndex = () =>
+      filteredOptions.findIndex(option => !option.disabled);
+
+    const getLastEnabledIndex = () => {
+      for (let index = filteredOptions.length - 1; index >= 0; index -= 1) {
+        if (!filteredOptions[index]?.disabled) {
+          return index;
+        }
+      }
+      return -1;
+    };
+
+    const resetTypeahead = () => {
+      typeaheadStateRef.current = { query: '', timestamp: 0 };
+    };
+
     const handleToggle = () => {
       if (!disabled && !readonly) {
         setIsOpen(prev => !prev);
         if (!isOpen) {
-          inputRef.current?.focus();
+          comboboxRef.current?.focus();
         }
       }
     };
 
-    const handleOptionSelect = (option: SelectOption) => {
+    const handleOptionSelect = (
+      option: SelectOption,
+      config: { focusCombobox?: boolean } = {}
+    ) => {
       if (option.disabled) return;
 
       if (multiple && Array.isArray(value)) {
@@ -141,6 +166,9 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
         onChange?.(option.value);
         setIsOpen(false);
         setSearchTerm('');
+        if (config.focusCombobox) {
+          comboboxRef.current?.focus();
+        }
       }
 
       clearError();
@@ -171,32 +199,311 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
       setSearchTerm(e.target.value);
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      switch (e.key) {
-        case 'Enter':
-        case ' ':
-          if (!isOpen) {
-            e.preventDefault();
-            setIsOpen(true);
+    const findNextEnabledIndex = (
+      startIndex: number,
+      direction: 1 | -1
+    ) => {
+      if (!filteredOptions.length) return -1;
+
+      if (direction > 0) {
+        for (let index = Math.max(0, startIndex); index < filteredOptions.length; index += 1) {
+          if (!filteredOptions[index]?.disabled) {
+            return index;
           }
-          break;
-        case 'Escape':
-          setIsOpen(false);
-          setSearchTerm('');
-          break;
-        case 'ArrowDown':
-          if (!isOpen) {
-            setIsOpen(true);
+        }
+      } else {
+        for (let index = Math.min(filteredOptions.length - 1, startIndex); index >= 0; index -= 1) {
+          if (!filteredOptions[index]?.disabled) {
+            return index;
           }
-          break;
-        default:
-          break;
+        }
+      }
+
+      return -1;
+    };
+
+    const moveActiveBy = (delta: number) => {
+      if (!filteredOptions.length) return;
+      const firstEnabledIndex = getFirstEnabledIndex();
+      const lastEnabledIndex = getLastEnabledIndex();
+
+      if (firstEnabledIndex === -1 || lastEnabledIndex === -1) {
+        setActiveOptionIndex(-1);
+        return;
+      }
+
+      const direction: 1 | -1 = delta >= 0 ? 1 : -1;
+      const steps = Math.abs(delta);
+
+      setActiveOptionIndex(currentIndex => {
+        let nextIndex = currentIndex;
+
+        if (nextIndex === -1) {
+          return direction > 0 ? firstEnabledIndex : lastEnabledIndex;
+        }
+
+        let candidate = nextIndex;
+        let remainingSteps = steps;
+
+        while (remainingSteps > 0) {
+          const potentialIndex = findNextEnabledIndex(candidate + direction, direction);
+          if (potentialIndex === -1) {
+            break;
+          }
+
+          candidate = potentialIndex;
+          nextIndex = candidate;
+          remainingSteps -= 1;
+        }
+
+        return nextIndex;
+      });
+    };
+
+    const handleTypeahead = (key: string) => {
+      const now = Date.now();
+      const { query, timestamp } = typeaheadStateRef.current;
+      const isStale = now - timestamp > 500;
+      const nextQuery = (isStale ? '' : query) + key.toLowerCase();
+      typeaheadStateRef.current = { query: nextQuery, timestamp: now };
+
+      if (!isOpen) {
+        setIsOpen(true);
+      }
+
+      const startIndex = activeOptionIndex >= 0 ? activeOptionIndex + 1 : 0;
+      const findMatch = (fromIndex: number) => {
+        for (let index = fromIndex; index < filteredOptions.length; index += 1) {
+          const option = filteredOptions[index];
+          if (!option.disabled && option.label.toLowerCase().startsWith(nextQuery)) {
+            return index;
+          }
+        }
+        return -1;
+      };
+
+      let matchedIndex = findMatch(startIndex);
+      if (matchedIndex === -1) {
+        matchedIndex = findMatch(0);
+      }
+
+      if (matchedIndex !== -1) {
+        setActiveOptionIndex(matchedIndex);
       }
     };
 
-    if (!visible) return null;
+    const processKeyDown = (
+      event: React.KeyboardEvent<HTMLElement>,
+      options: { allowTypeahead: boolean; allowSpaceSelect: boolean }
+    ) => {
+      const { allowTypeahead, allowSpaceSelect } = options;
+      if (disabled || readonly) return;
+
+      const closeDropdown = () => {
+        setIsOpen(false);
+        setSearchTerm('');
+        comboboxRef.current?.focus();
+        resetTypeahead();
+      };
+
+      switch (event.key) {
+        case 'ArrowDown': {
+          event.preventDefault();
+          if (!isOpen) {
+            setIsOpen(true);
+            const firstEnabledIndex = getFirstEnabledIndex();
+            if (firstEnabledIndex !== -1) {
+              setActiveOptionIndex(firstEnabledIndex);
+            }
+          } else {
+            moveActiveBy(1);
+          }
+          break;
+        }
+        case 'ArrowUp': {
+          event.preventDefault();
+          if (!isOpen) {
+            setIsOpen(true);
+            const lastEnabledIndex = getLastEnabledIndex();
+            if (lastEnabledIndex !== -1) {
+              setActiveOptionIndex(lastEnabledIndex);
+            }
+          } else {
+            moveActiveBy(-1);
+          }
+          break;
+        }
+        case 'Home': {
+          if (isOpen) {
+            event.preventDefault();
+            const firstEnabledIndex = getFirstEnabledIndex();
+            if (firstEnabledIndex !== -1) {
+              setActiveOptionIndex(firstEnabledIndex);
+            }
+          }
+          break;
+        }
+        case 'End': {
+          if (isOpen) {
+            event.preventDefault();
+            const lastEnabledIndex = getLastEnabledIndex();
+            if (lastEnabledIndex !== -1) {
+              setActiveOptionIndex(lastEnabledIndex);
+            }
+          }
+          break;
+        }
+        case 'PageDown': {
+          if (isOpen) {
+            event.preventDefault();
+            moveActiveBy(10);
+          }
+          break;
+        }
+        case 'PageUp': {
+          if (isOpen) {
+            event.preventDefault();
+            moveActiveBy(-10);
+          }
+          break;
+        }
+        case 'Enter': {
+          if (!isOpen) {
+            event.preventDefault();
+            setIsOpen(true);
+            const firstEnabledIndex = getFirstEnabledIndex();
+            if (firstEnabledIndex !== -1) {
+              setActiveOptionIndex(firstEnabledIndex);
+            }
+            break;
+          }
+
+          event.preventDefault();
+          const option = filteredOptions[activeOptionIndex];
+          if (option) {
+            handleOptionSelect(option, { focusCombobox: true });
+          }
+          break;
+        }
+        case ' ': {
+          if (!allowSpaceSelect) {
+            return;
+          }
+
+          if (!isOpen) {
+            event.preventDefault();
+            setIsOpen(true);
+            const firstEnabledIndex = getFirstEnabledIndex();
+            if (firstEnabledIndex !== -1) {
+              setActiveOptionIndex(firstEnabledIndex);
+            }
+            break;
+          }
+
+          event.preventDefault();
+          const option = filteredOptions[activeOptionIndex];
+          if (option) {
+            handleOptionSelect(option, { focusCombobox: true });
+          }
+          break;
+        }
+        case 'Escape': {
+          if (isOpen) {
+            event.preventDefault();
+            closeDropdown();
+          }
+          break;
+        }
+        default: {
+          if (
+            allowTypeahead &&
+            event.key.length === 1 &&
+            !event.altKey &&
+            !event.ctrlKey &&
+            !event.metaKey
+          ) {
+            handleTypeahead(event.key);
+          }
+          break;
+        }
+      }
+    };
+
+    const handleComboboxKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      processKeyDown(event as React.KeyboardEvent<HTMLElement>, {
+        allowTypeahead: true,
+        allowSpaceSelect: true
+      });
+    };
+
+    const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+      processKeyDown(event as unknown as React.KeyboardEvent<HTMLElement>, {
+        allowTypeahead: false,
+        allowSpaceSelect: false
+      });
+    };
 
     const resolvedError = errorMessage ?? (error || undefined);
+
+    useEffect(() => {
+      if (!isOpen) {
+        setActiveOptionIndex(-1);
+        resetTypeahead();
+        return;
+      }
+
+      const firstEnabledIndex = filteredOptions.findIndex(option => !option.disabled);
+      let lastEnabledIndex = -1;
+      for (let index = filteredOptions.length - 1; index >= 0; index -= 1) {
+        if (!filteredOptions[index]?.disabled) {
+          lastEnabledIndex = index;
+          break;
+        }
+      }
+
+      if (firstEnabledIndex === -1 || lastEnabledIndex === -1) {
+        setActiveOptionIndex(-1);
+        return;
+      }
+
+      setActiveOptionIndex(currentIndex => {
+        if (
+          currentIndex >= 0 &&
+          currentIndex < filteredOptions.length &&
+          !filteredOptions[currentIndex]?.disabled
+        ) {
+          return currentIndex;
+        }
+
+        if (!multiple && !Array.isArray(value)) {
+          const selectedIndex = filteredOptions.findIndex(
+            option => option.value === value
+          );
+          if (selectedIndex !== -1 && !filteredOptions[selectedIndex]?.disabled) {
+            return selectedIndex;
+          }
+        }
+
+        if (multiple && Array.isArray(value) && value.length > 0) {
+          const selectedIndex = filteredOptions.findIndex(option =>
+            value.includes(option.value)
+          );
+          if (selectedIndex !== -1 && !filteredOptions[selectedIndex]?.disabled) {
+            return selectedIndex;
+          }
+        }
+
+        return firstEnabledIndex;
+      });
+    }, [filteredOptions, isOpen, multiple, value]);
+
+    useEffect(() => {
+      if (!isOpen) {
+        resetTypeahead();
+      }
+    }, [isOpen]);
+
+    if (!visible) return null;
 
     const sizeClassName = (() => {
       const capitalizedSize = size.charAt(0).toUpperCase() + size.slice(1);
@@ -234,6 +541,11 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
     const showPlaceholder = !selectedOptions ||
       (multiple && Array.isArray(selectedOptions) && selectedOptions.length === 0);
 
+    const getOptionId = (index: number) => `${listboxId}-option-${index}`;
+    const activeOptionId = isOpen && activeOptionIndex >= 0
+      ? getOptionId(activeOptionIndex)
+      : undefined;
+
     return (
       <DynFieldContainer
         id={idProp}
@@ -247,9 +559,10 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
       >
         <div ref={selectRef} className={getStyleClass('container')}>
           <div
+            ref={comboboxRef}
             className={selectClasses}
             onClick={handleToggle}
-            onKeyDown={handleKeyDown}
+            onKeyDown={handleComboboxKeyDown}
             tabIndex={disabled ? -1 : 0}
             role="combobox"
             aria-expanded={isOpen}
@@ -259,6 +572,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
             aria-readonly={readonly || undefined}
             aria-labelledby={labelId}
             aria-controls={isOpen ? listboxId : undefined}
+            aria-activedescendant={activeOptionId}
             aria-describedby={
               resolvedError
                 ? `${fieldId}-error`
@@ -322,6 +636,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                     placeholder="Pesquisar..."
                     value={searchTerm}
                     onChange={handleSearchChange}
+                    onKeyDown={handleSearchKeyDown}
                     className={getStyleClass('searchInput')}
                     aria-label="Pesquisar opções"
                   />
@@ -343,21 +658,30 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                   id={listboxId}
                   aria-multiselectable={multiple || undefined}
                 >
-                  {filteredOptions.map((option) => {
+                  {filteredOptions.map((option, index) => {
                     const isSelected = multiple && Array.isArray(value)
                       ? value.includes(option.value)
                       : value === option.value;
+                    const isActive = index === activeOptionIndex;
 
                     return (
                       <div
                         key={option.value}
                         className={classNames(getStyleClass('option'), {
                           [getStyleClass('optionSelected')]: isSelected,
-                          [getStyleClass('optionDisabled')]: option.disabled
+                          [getStyleClass('optionDisabled')]: option.disabled,
+                          [getStyleClass('optionActive')]: isActive
                         })}
                         role="option"
                         aria-selected={isSelected}
                         aria-disabled={option.disabled || undefined}
+                        id={getOptionId(index)}
+                        data-active={isActive ? 'true' : undefined}
+                        onMouseEnter={() => {
+                          if (!option.disabled) {
+                            setActiveOptionIndex(index);
+                          }
+                        }}
                         onClick={() => handleOptionSelect(option)}
                       >
                         {multiple && (
