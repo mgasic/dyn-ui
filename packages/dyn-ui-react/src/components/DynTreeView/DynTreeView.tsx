@@ -249,7 +249,7 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
             )}
             style={{ paddingLeft: (level - 1) * 24 }}
             role="treeitem"
-            aria-selected={isSelected}
+            aria-selected={selectable ? isSelected : undefined}
             aria-disabled={node.disabled ? true : undefined}
             aria-expanded={hasChildren ? isExpanded : undefined}
             aria-level={level}
@@ -309,7 +309,7 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
 
           {/* Children */}
           {hasChildren && isExpanded && (
-            <div className={styles['dyn-tree-view__node-children']}>
+            <div className={styles['dyn-tree-view__node-children']} role="group">
               {node.children!.map((child, index) =>
                 renderTreeNode(child, level + 1, node.children!.length, index + 1, node.key)
               )}
@@ -535,6 +535,8 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
     ]
   );
 
+  const activeDescendantId = focusedKey ? `dyn-tree-item-${focusedKey}` : undefined;
+
   return (
     <div
       ref={treeRef}
@@ -545,6 +547,7 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
       onKeyDown={handleKeyDown}
       onFocus={handleTreeFocus}
       aria-multiselectable={multiple || undefined}
+      aria-activedescendant={activeDescendantId}
     >
       {/* Search */}
       {(showSearch ?? searchable) && (
