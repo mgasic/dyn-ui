@@ -25,14 +25,6 @@
   cursor: not-allowed;
 }
 
-.dyn-label--disabled .dyn-label-required-asterisk {
-  color: var(--color-neutral-dark-70, #666);
-}
-
-.dyn-label--disabled .dyn-label-optional-text {
-  color: var(--color-neutral-dark-50, #888);
-}
-
 .dyn-label-text {
   display: inline-flex;
   align-items: center;
@@ -73,6 +65,14 @@
   color: var(--color-neutral-dark-70, #666);
   font-style: italic;
   font-weight: normal;
+}
+
+.dyn-label--disabled .dyn-label-required-asterisk {
+  color: var(--color-neutral-dark-70, #666);
+}
+
+.dyn-label--disabled .dyn-label-optional-text {
+  color: var(--color-neutral-dark-50, #888);
 }
 
 .dyn-label-help-text {
