@@ -34,6 +34,7 @@ import {
   DynGauge,
   DynListItem,
   DynListView,
+  DynNewComponent,
   DynTable,
   DynTreeView,
 
@@ -108,6 +109,10 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynListView)).toBe(true);
     expect(isComponentExport(DynTable)).toBe(true);
     expect(isComponentExport(DynTreeView)).toBe(true);
+  });
+
+  it('exports utility layout helpers', () => {
+    expect(isComponentExport(DynNewComponent)).toBe(true);
   });
 
   it('exports all navigation components', () => {
