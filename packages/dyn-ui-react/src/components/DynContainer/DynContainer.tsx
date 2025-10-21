@@ -1,8 +1,9 @@
-import { forwardRef, useMemo } from 'react';
-import type { CSSProperties, ForwardedRef } from 'react';
+import React, { forwardRef, useMemo } from 'react';
+import type { CSSProperties } from 'react';
 import { cn } from '../../utils/classNames';
 import {
   DYN_CONTAINER_DEFAULT_PROPS,
+  type DynContainerBaseProps,
   DynContainerProps,
   DynContainerRef,
   type DynContainerMaxWidthToken,
@@ -51,7 +52,7 @@ const resolveSpacingValue = (value?: DynContainerSpaceValue): string | undefined
 };
 
 const resolveMaxWidth = (
-  value?: DynContainerProps['maxWidth']
+  value?: DynContainerBaseProps['maxWidth']
 ): string | undefined => {
   if (value === undefined) {
     return undefined;
@@ -70,8 +71,9 @@ const resolveMaxWidth = (
   return normalized;
 };
 
-const DynContainerComponent = (
+const DynContainerComponent = <E extends React.ElementType = 'div'>(
   {
+    as,
     title,
     subtitle,
     direction = DYN_CONTAINER_DEFAULT_PROPS.direction,
@@ -94,14 +96,15 @@ const DynContainerComponent = (
     style,
     'data-testid': dataTestId = DYN_CONTAINER_DEFAULT_PROPS['data-testid'],
     ...rest
-  }: DynContainerProps,
-  ref: ForwardedRef<DynContainerRef>
+  }: DynContainerProps<E>,
+  ref: React.ForwardedRef<DynContainerRef<E>>
 ) => {
   const resolvedBordered = noBorder ? false : bordered;
   const hasTitleContent = Boolean(title || subtitle);
   const resolvedMaxWidth = resolveMaxWidth(maxWidth);
   const resolvedPadding = resolveSpacingValue(padding);
   const resolvedMargin = resolveSpacingValue(margin);
+  const Component = (as ?? 'div') as React.ElementType;
 
   const containerStyle = useMemo<CSSProperties | undefined>(() => {
     const next: CSSVarProperties = { ...(style as CSSVarProperties) };
@@ -162,8 +165,8 @@ const DynContainerComponent = (
   );
 
   return (
-    <div
-      ref={ref}
+    <Component
+      ref={ref as React.Ref<any>}
       className={containerClassName}
       style={containerStyle}
       data-testid={dataTestId}
@@ -176,11 +179,15 @@ const DynContainerComponent = (
         </div>
       )}
       <div className={styles.content}>{children}</div>
-    </div>
+    </Component>
   );
 };
 
-const DynContainer = forwardRef<DynContainerRef, DynContainerProps>(DynContainerComponent);
+type DynContainerForwardRef = <E extends React.ElementType = 'div'>(
+  props: DynContainerProps<E> & { ref?: DynContainerRef<E> }
+) => React.ReactElement | null;
+
+const DynContainer = forwardRef(DynContainerComponent as unknown as DynContainerForwardRef);
 
 DynContainer.displayName = 'DynContainer';
 
