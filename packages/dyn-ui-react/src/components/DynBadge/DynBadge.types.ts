@@ -5,20 +5,22 @@ import type {
 } from 'react';
 import type { BaseComponentProps, AccessibilityProps } from '../../types';
 
-export type ComponentSize = 'small' | 'medium' | 'large';
+export const DYN_BADGE_SIZES = ['small', 'medium', 'large'] as const;
+export type DynBadgeSize = (typeof DYN_BADGE_SIZES)[number];
+
+export const DYN_BADGE_VARIANTS = ['solid', 'soft', 'outline', 'dot'] as const;
+export type DynBadgeVariant = (typeof DYN_BADGE_VARIANTS)[number];
+
+export const DYN_BADGE_STATES = ['neutral', 'info', 'success', 'warning', 'danger'] as const;
+export type DynBadgeState = (typeof DYN_BADGE_STATES)[number];
 
 export const DYN_BADGE_COLORS = [
   'primary',
   'secondary',
-  'success',
-  'warning',
-  'danger',
-  'info',
-  'neutral'
+  ...DYN_BADGE_STATES
 ] as const;
 
 export type DynBadgeSemanticColor = (typeof DYN_BADGE_COLORS)[number];
-export type DynBadgeVariant = 'solid' | 'soft' | 'outline' | 'dot';
 export type DynBadgeColor = DynBadgeSemanticColor | (string & {});
 export type DynBadgePosition = 'topRight' | 'topLeft' | 'bottomRight' | 'bottomLeft';
 
@@ -41,8 +43,11 @@ export interface DynBadgeProps
   /** Semantic color */
   color?: DynBadgeColor;
 
+  /** Visual state token */
+  state?: DynBadgeState;
+
   /** Size variant */
-  size?: ComponentSize;
+  size?: DynBadgeSize;
 
   /** Position when used as overlay */
   position?: DynBadgePosition;

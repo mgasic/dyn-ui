@@ -9,8 +9,11 @@ import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import type {
   DynBadgeProps,
-  DynBadgeRef
+  DynBadgeRef,
+  DynBadgeColor,
+  DynBadgeState
 } from './DynBadge.types';
+import { DYN_BADGE_STATES } from './DynBadge.types';
 import styles from './DynBadge.module.css';
 
 const sizeClassNameMap = {
@@ -29,12 +32,33 @@ const variantClassNameMap = {
 const colorClassNameMap = {
   primary: styles['badge--primary'],
   secondary: styles['badge--secondary'],
+  neutral: styles['badge--neutral'],
+  info: styles['badge--info'],
   success: styles['badge--success'],
   warning: styles['badge--warning'],
-  danger: styles['badge--danger'],
-  info: styles['badge--info'],
-  neutral: styles['badge--neutral']
+  danger: styles['badge--danger']
 } as const;
+
+const stateClassNameMap = {
+  neutral: styles['badge--state-neutral'],
+  info: styles['badge--state-info'],
+  success: styles['badge--state-success'],
+  warning: styles['badge--state-warning'],
+  danger: styles['badge--state-danger']
+} as const;
+
+const legacyStateColorClassNameMap = {
+  neutral: styles['badge--neutral'],
+  info: styles['badge--info'],
+  success: styles['badge--success'],
+  warning: styles['badge--warning'],
+  danger: styles['badge--danger']
+} as const;
+
+const badgeStateSet = new Set<string>(DYN_BADGE_STATES);
+
+const isBadgeState = (value: DynBadgeColor | DynBadgeState | undefined): value is DynBadgeState =>
+  typeof value === 'string' && badgeStateSet.has(value);
 
 const positionClassNameMap = {
   topRight: styles['badge--topRight'],
@@ -60,6 +84,7 @@ const DynBadgeComponent = (
     children,
     variant = 'solid',
     color = 'neutral',
+    state: visualStateProp,
     size = 'medium',
     position,
     onClick,
@@ -123,16 +148,23 @@ const DynBadgeComponent = (
     return undefined;
   }, [children, displayCount, hasChildren, hasCount]);
 
+  const resolvedState: DynBadgeState =
+    visualStateProp ?? (isBadgeState(color) ? (color as DynBadgeState) : undefined) ?? 'neutral';
+
   const semanticColorClass =
     color && Object.prototype.hasOwnProperty.call(colorClassNameMap, color)
       ? colorClassNameMap[color as keyof typeof colorClassNameMap]
       : undefined;
+
+  const resolvedStateClass = stateClassNameMap[resolvedState];
 
   const badgeClasses = cn(
     getStyleClass('badge'),
     sizeClassNameMap[size],
     variantClassNameMap[variant],
     semanticColorClass,
+    resolvedStateClass,
+    legacyStateColorClassNameMap[resolvedState],
     position && getStyleClass('badge--positioned'),
     position ? positionClassNameMap[position] : undefined,
     isInteractive && getStyleClass('badge--clickable'),
@@ -147,7 +179,7 @@ const DynBadgeComponent = (
   const roleValue = roleProp ?? (isInteractive ? 'button' : undefined);
   const tabIndexValue = tabIndexProp ?? (isInteractive ? 0 : undefined);
   const dataTestIdValue = dataTestId ?? 'dyn-badge';
-  const customColorStyle = !semanticColorClass && typeof color === 'string'
+  const customColorStyle = !semanticColorClass && typeof color === 'string' && !isBadgeState(color)
     ? ({
         '--badge-accent': color,
         '--badge-outline-color': color,

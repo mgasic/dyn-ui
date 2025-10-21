@@ -2,11 +2,13 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { DynBreadcrumb } from './DynBreadcrumb';
+import { DynBreadcrumbItem } from '../DynBreadcrumbItem';
 import type { BreadcrumbItem } from './DynBreadcrumb.types';
 
 const meta = {
   title: 'Components/DynBreadcrumb',
   component: DynBreadcrumb,
+  subcomponents: { DynBreadcrumbItem },
   parameters: {
     layout: 'centered',
     docs: {
@@ -66,6 +68,33 @@ const itemsWithIcons: BreadcrumbItem[] = [
   { id: 'docs', label: 'Documentation', href: '/docs', icon: '📚' },
   { id: 'api', label: 'API Reference', href: '/docs/api', icon: '⚙️' },
   { id: 'current', label: 'Components', current: true, icon: '🧩' },
+];
+
+const actionStateItems: BreadcrumbItem[] = [
+  { id: 'home', label: 'Home', href: '/' },
+  {
+    id: 'filters',
+    label: 'Filters',
+    as: 'div',
+    onClick: () => {},
+    'aria-label': 'Open filters panel',
+  },
+  {
+    id: 'reports',
+    label: 'Reports (loading)',
+    as: 'div',
+    onClick: () => {},
+    'aria-label': 'Loading reports',
+    'data-state': 'loading',
+  },
+  {
+    id: 'disabled',
+    label: 'Disabled link',
+    href: '/disabled',
+    disabled: true,
+    'data-state': 'disabled',
+  },
+  { id: 'current', label: 'Current page', current: true },
 ];
 
 export const Default: Story = {
@@ -136,6 +165,20 @@ export const WithIcons: Story = {
   },
 };
 
+export const ActionStates: Story = {
+  args: {
+    items: actionStateItems,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Demonstrates keyboard focus, disabled, and loading states. Use Tab and Enter/Space to navigate between interactive crumbs.',
+      },
+    },
+  },
+};
+
 export const LongPath: Story = {
   args: {
     items: longItems,
@@ -198,6 +241,31 @@ export const ResponsiveBehavior: Story = {
     docs: {
       description: {
         story: 'Automatically collapses on smaller screens and maintains comfortable touch targets.',
+      },
+    },
+  },
+};
+
+export const ItemChildrenWithSeparator: Story = {
+  render: () => (
+    <DynBreadcrumb separator="custom" customSeparator={<span aria-hidden="true">|</span>}>
+      <DynBreadcrumb.Item href="/" icon="🏠" aria-label="Go to home">
+        Home
+      </DynBreadcrumb.Item>
+      <DynBreadcrumb.Item href="/products" aria-label="Browse products">
+        Products
+      </DynBreadcrumb.Item>
+      <DynBreadcrumb.Item as="button" onClick={() => {}} disabled aria-label="Disabled action">
+        Disabled
+      </DynBreadcrumb.Item>
+      <DynBreadcrumb.Item current>Current View</DynBreadcrumb.Item>
+    </DynBreadcrumb>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'DynBreadcrumb items can be composed manually with `DynBreadcrumb.Item`, supporting custom separators, disabled states, and polymorphic rendering.',
       },
     },
   },
