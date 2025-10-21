@@ -157,6 +157,95 @@ describe('DynBreadcrumb', () => {
     expect(handleEllipsisClick).toHaveBeenCalled();
   });
 
+  it('supports keyboard activation on custom action items and restores focus', async () => {
+    const handleCustomClick = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <DynBreadcrumb
+        items={[
+          { id: '1', label: 'Home', href: '/' },
+          {
+            id: '2',
+            label: 'Apply filters',
+            as: 'div',
+            onClick: handleCustomClick,
+            'aria-label': 'Apply filters',
+          },
+          { id: '3', label: 'Smartphones', current: true },
+        ]}
+      />
+    );
+
+    const actionItem = screen.getByRole('button', { name: 'Apply filters' });
+
+    actionItem.focus();
+    await user.keyboard('{Enter}');
+    expect(handleCustomClick).toHaveBeenCalledTimes(1);
+    expect(actionItem).toHaveFocus();
+
+    await user.keyboard('[Space]');
+    expect(handleCustomClick).toHaveBeenCalledTimes(2);
+    expect(actionItem).toHaveFocus();
+  });
+
+  it('prevents interaction for disabled items', async () => {
+    const handleDisabledClick = vi.fn();
+    const handleItemClick = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <DynBreadcrumb
+        items={[
+          { id: '1', label: 'Home', href: '/' },
+          {
+            id: '2',
+            label: 'Disabled link',
+            href: '/disabled',
+            disabled: true,
+            onClick: handleDisabledClick,
+            'data-state': 'disabled',
+          },
+          { id: '3', label: 'Smartphones', current: true },
+        ]}
+        onItemClick={handleItemClick}
+      />
+    );
+
+    const disabledLink = screen.getByRole('link', { name: 'Disabled link' });
+    expect(disabledLink).toHaveAttribute('aria-disabled', 'true');
+    expect(disabledLink).toHaveAttribute('data-state', 'disabled');
+
+    await user.click(disabledLink);
+    expect(handleDisabledClick).not.toHaveBeenCalled();
+    expect(handleItemClick).not.toHaveBeenCalled();
+
+    disabledLink.focus();
+    await user.keyboard('{Enter}');
+    expect(handleDisabledClick).not.toHaveBeenCalled();
+    expect(handleItemClick).not.toHaveBeenCalled();
+  });
+
+  it('collapses expanded breadcrumbs on Escape and restores focus to ellipsis', async () => {
+    const user = userEvent.setup();
+
+    render(<DynBreadcrumb items={longItems} maxItems={4} />);
+
+    const ellipsis = screen.getByRole('button', { name: /hidden breadcrumb items/i });
+    await user.click(ellipsis);
+
+    const revealedLink = screen.getByRole('link', { name: 'Electronics' });
+    revealedLink.focus();
+
+    await user.keyboard('{Escape}');
+
+    const ellipsisAfterCollapse = await screen.findByRole('button', {
+      name: /hidden breadcrumb items/i,
+    });
+
+    expect(ellipsisAfterCollapse).toHaveFocus();
+  });
+
   it('renders item icons', () => {
     const itemsWithIcons: BreadcrumbItem[] = [
       { id: '1', label: 'Home', href: '/', icon: <span data-testid="home-icon">🏠</span> },
