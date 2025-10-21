@@ -189,3 +189,10 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+.menu__item-prefix,
+.menu__item-suffix {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dyn-spacing-xxs, 0.125rem);
+}
