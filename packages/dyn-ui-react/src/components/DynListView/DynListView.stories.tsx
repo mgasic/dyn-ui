@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import DynListView from './DynListView';
 import { DynListViewProps, DynListViewRef, ListAction } from './DynListView.types';
+import styles from './DynListView.module.css';
 
 const getDisplayLabel = (item: Record<string, any>): string => {
   return (
@@ -248,6 +249,41 @@ export const WithSelection: Story = {
         </div>
       </div>
     );
+  },
+};
+
+export const CompactList: Story = {
+  args: {
+    data: sampleData.slice(0, 4),
+    as: 'ul',
+    size: 'small',
+    bordered: true,
+    p: 'sm',
+    gap: 'xs',
+  },
+};
+
+export const ZebraVariant: Story = {
+  args: {
+    data: sampleData,
+    as: 'ul',
+    size: 'medium',
+    bordered: true,
+    className: styles.rootZebra,
+    p: 'md',
+    gap: 'sm',
+  },
+};
+
+export const InteractiveItems: Story = {
+  args: {
+    data: sampleData,
+    as: 'ol',
+    selectable: true,
+    bordered: true,
+    actions: sampleActions,
+    p: 'md',
+    gap: 'sm',
   },
 };
 
