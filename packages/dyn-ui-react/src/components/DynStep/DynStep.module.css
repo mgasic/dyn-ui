@@ -1,0 +1,12 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dyn-step-gap, var(--dyn-spacing-md, 0.75rem));
+  padding: var(--dyn-step-padding, 0);
+  width: 100%;
+  min-width: 0;
+}
+
+.root > * {
+  min-width: 0;
+}

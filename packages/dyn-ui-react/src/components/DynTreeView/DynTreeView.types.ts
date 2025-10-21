@@ -1,4 +1,5 @@
 import { BaseComponentProps } from '../../types';
+import type { DynTreeNodeProps } from '../DynTreeNode';
 
 export interface TreeNode {
   key: string;
@@ -80,7 +81,18 @@ export interface DynTreeViewProps extends BaseComponentProps {
 
   /** Fixed height for scrollable tree */
   height?: number | string;
+
+  /**
+   * When true, node rows are rendered through the DynTreeNode layout primitive to provide
+   * consistent spacing semantics. Defaults to `false` to maintain the legacy DOM shape.
+   */
+  useDynTreeNodeLayout?: boolean;
+
+  /** Additional props forwarded to DynTreeNode when `useDynTreeNodeLayout` is enabled. */
+  nodeLayoutProps?: DynTreeViewNodeLayoutProps;
 }
 
 // Legacy alias
 export type DynTreeNode = TreeNode;
+
+export type DynTreeViewNodeLayoutProps = Omit<DynTreeNodeProps<'div'>, 'children'>;

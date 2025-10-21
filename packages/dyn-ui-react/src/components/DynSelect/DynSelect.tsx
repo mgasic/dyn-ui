@@ -162,7 +162,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
 
     const handleOptionSelect = (
       option: SelectOption,
-      config: { focusCombobox?: boolean } = {}
+      _event?: React.MouseEvent<HTMLDivElement>
     ) => {
       if (option.disabled) return;
 

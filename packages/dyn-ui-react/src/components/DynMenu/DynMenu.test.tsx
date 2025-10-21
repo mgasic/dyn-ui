@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { act } from 'react';
 import { DynMenu } from './DynMenu';
+import { DynMenuTrigger } from '../DynMenuTrigger';
 import type { MenuItem } from './DynMenu.types';
 
 const menuItems: MenuItem[] = [
@@ -27,6 +28,10 @@ const menuItems: MenuItem[] = [
       {
         label: 'Categories',
         action: 'open-categories'
+      },
+      {
+        label: 'Inventory',
+        loading: true
       }
     ]
   },
@@ -41,6 +46,10 @@ const renderMenu = (override: Partial<React.ComponentProps<typeof DynMenu>> = {}
 describe('DynMenu', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('exposes DynMenuTrigger as a static export', () => {
+    expect(DynMenu.Trigger).toBe(DynMenuTrigger);
   });
 
   it('renders a menubar with all top level items', () => {
@@ -59,11 +68,13 @@ describe('DynMenu', () => {
 
     const productsButton = screen.getByRole('menuitem', { name: 'Products' });
     expect(screen.queryByRole('menuitem', { name: 'All Products' })).not.toBeInTheDocument();
+    expect(productsButton).toHaveAttribute('data-state', 'closed');
 
     await user.click(productsButton);
 
     expect(screen.getByRole('menuitem', { name: 'All Products' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Categories' })).toBeInTheDocument();
+    expect(productsButton).toHaveAttribute('data-state', 'open');
   });
 
   it('closes an open submenu when another item is activated', async () => {
@@ -75,9 +86,11 @@ describe('DynMenu', () => {
 
     await user.click(productsButton);
     expect(screen.getByRole('menuitem', { name: 'All Products' })).toBeInTheDocument();
+    expect(productsButton).toHaveAttribute('data-state', 'open');
 
     await user.click(dashboardButton);
     expect(screen.queryByRole('menuitem', { name: 'All Products' })).not.toBeInTheDocument();
+    expect(productsButton).toHaveAttribute('data-state', 'closed');
   });
 
   it('closes the submenu when clicking outside the component', async () => {
@@ -258,5 +271,18 @@ describe('DynMenu', () => {
     await waitFor(() =>
       expect(screen.queryByRole('menuitem', { name: 'Categories' })).not.toBeInTheDocument()
     );
+  });
+
+  it('renders disabled top-level items with aria-disabled when using DynMenuTrigger', () => {
+    renderMenu({
+      items: [
+        { label: 'Enabled' },
+        { label: 'Disabled', disabled: true },
+      ],
+    });
+
+    const disabledTrigger = screen.getByRole('menuitem', { name: 'Disabled' });
+    expect(disabledTrigger).toHaveAttribute('data-disabled', 'true');
+    expect(disabledTrigger).toBeDisabled();
   });
 });
