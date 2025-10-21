@@ -210,6 +210,83 @@ describe('DynToolbar', () => {
     expect(screen.getByText('Custom Content')).toBeInTheDocument();
   });
 
+  it('supports polymorphic rendering and orientation', () => {
+    render(
+      <DynToolbar
+        as="nav"
+        items={[]}
+        responsive={false}
+        overflowMenu={false}
+        orientation="vertical"
+      />
+    );
+
+    const toolbar = screen.getByRole('toolbar');
+    expect(toolbar.tagName).toBe('NAV');
+    expect(toolbar).toHaveAttribute('aria-orientation', 'vertical');
+    expect(toolbar).toHaveAttribute('data-orientation', 'vertical');
+  });
+
+  it('applies state props to toolbar items', () => {
+    const toggleItems: ToolbarItem[] = [
+      { id: 'bold', label: 'Bold', state: 'on', action: jest.fn() },
+      { id: 'italic', label: 'Italic', state: 'off', action: jest.fn() }
+    ];
+
+    render(<DynToolbar items={toggleItems} responsive={false} overflowMenu={false} />);
+
+    const boldButton = screen.getByRole('button', { name: 'Bold' });
+    const italicButton = screen.getByRole('button', { name: 'Italic' });
+
+    expect(boldButton).toHaveAttribute('data-state', 'on');
+    expect(boldButton).toHaveAttribute('aria-pressed', 'true');
+    expect(italicButton).toHaveAttribute('data-state', 'off');
+    expect(italicButton).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('manages roving focus between toolbar controls', async () => {
+    const user = userEvent.setup();
+    const focusItems: ToolbarItem[] = [
+      { id: 'bold', label: 'Bold', action: jest.fn() },
+      { id: 'italic', label: 'Italic', action: jest.fn() },
+      { id: 'underline', label: 'Underline', action: jest.fn() }
+    ];
+
+    render(
+      <DynToolbar
+        items={focusItems}
+        responsive={false}
+        overflowMenu={false}
+        showLabels
+        orientation="horizontal"
+      />
+    );
+
+    const boldButton = screen.getByRole('button', { name: 'Bold' });
+    const italicButton = screen.getByRole('button', { name: 'Italic' });
+    const underlineButton = screen.getByRole('button', { name: 'Underline' });
+
+    boldButton.focus();
+    expect(boldButton).toHaveAttribute('tabindex', '0');
+    expect(italicButton).toHaveAttribute('tabindex', '-1');
+
+    await user.keyboard('{ArrowRight}');
+    expect(italicButton).toHaveFocus();
+    expect(italicButton).toHaveAttribute('tabindex', '0');
+    expect(boldButton).toHaveAttribute('tabindex', '-1');
+
+    await user.keyboard('{End}');
+    expect(underlineButton).toHaveFocus();
+    expect(underlineButton).toHaveAttribute('tabindex', '0');
+
+    await user.keyboard('{ArrowRight}');
+    expect(boldButton).toHaveFocus();
+    expect(boldButton).toHaveAttribute('tabindex', '0');
+
+    await user.keyboard('{Home}');
+    expect(boldButton).toHaveFocus();
+  });
+
   it('handles dropdown items', async () => {
     const user = userEvent.setup();
     render(<DynToolbar items={dropdownItems} />);
@@ -432,15 +509,20 @@ describe('DynToolbar', () => {
     const user = userEvent.setup();
     render(<DynToolbar {...defaultProps} />);
 
-    const firstButton = screen.getByText('Item 1');
+    const firstButton = screen.getByRole('button', { name: 'Item 1' });
+
+    await waitFor(() => {
+      expect(firstButton).toHaveAttribute('tabindex', '0');
+    });
+
     firstButton.focus();
 
-    await user.keyboard('{Enter}');
+    await user.type(firstButton, '{enter}');
     expect(basicItems[0].action).toHaveBeenCalled();
 
     jest.clearAllMocks();
 
-    await user.keyboard(' ');
+    await user.type(firstButton, '{space}');
     expect(basicItems[0].action).toHaveBeenCalled();
   });
 

@@ -12,6 +12,9 @@ import React from 'react';
 const meta: Meta<typeof DynToolbar> = {
   title: 'Navigation/DynToolbar',
   component: DynToolbar,
+  args: {
+    orientation: 'horizontal'
+  },
   parameters: {
     layout: 'padded',
     docs: {
@@ -76,6 +79,11 @@ const toolbarItems = [
     showLabels: {
       description: 'Show text labels on toolbar items',
       control: { type: 'boolean' }
+    },
+    orientation: {
+      description: 'Orientation of the toolbar for roving focus',
+      control: { type: 'select' },
+      options: ['horizontal', 'vertical']
     },
     onItemClick: {
       description: 'Callback fired when toolbar item is clicked',
@@ -481,6 +489,84 @@ export const AccessibilityDemo: Story = {
     docs: {
       description: {
         story: 'This toolbar demonstrates accessibility features including keyboard navigation, ARIA attributes, and screen reader support. Try using Tab, Enter, and Space keys to navigate.'
+      }
+    }
+  }
+};
+
+export const KeyboardNavigation: Story = {
+  render: () => {
+    const [formats, setFormats] = useState({ bold: true, italic: false, underline: false });
+    const toggleFormat = (key: 'bold' | 'italic' | 'underline') => {
+      setFormats(prev => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    const items: ToolbarItem[] = [
+      {
+        id: 'bold',
+        label: 'Bold',
+        icon: <strong>B</strong>,
+        tooltip: 'Toggle bold text',
+        state: formats.bold ? 'on' : 'off',
+        action: () => toggleFormat('bold')
+      },
+      {
+        id: 'italic',
+        label: 'Italic',
+        icon: <em>I</em>,
+        tooltip: 'Toggle italic text',
+        state: formats.italic ? 'on' : 'off',
+        action: () => toggleFormat('italic')
+      },
+      {
+        id: 'underline',
+        label: 'Underline',
+        icon: <span style={{ textDecoration: 'underline' }}>U</span>,
+        tooltip: 'Toggle underline text',
+        state: formats.underline ? 'on' : 'off',
+        action: () => toggleFormat('underline')
+      },
+      { id: 'separator-1', type: 'separator' },
+      {
+        id: 'find',
+        type: 'search',
+        label: 'Search in document'
+      },
+      {
+        id: 'comment',
+        label: 'Comment',
+        icon: '💬',
+        tooltip: 'Add a comment',
+        badge: { count: 2 },
+        action: () => console.log('Add comment')
+      },
+      {
+        id: 'more',
+        label: 'More',
+        type: 'dropdown',
+        items: [
+          { id: 'highlight', label: 'Highlight', action: () => console.log('Highlight') },
+          { id: 'strikethrough', label: 'Strikethrough', action: () => console.log('Strikethrough') },
+          { id: 'clear-formatting', label: 'Clear formatting', action: () => console.log('Clear formatting') }
+        ]
+      }
+    ];
+
+    return (
+      <DynToolbar
+        items={items}
+        showLabels
+        responsive={false}
+        overflowMenu={false}
+        orientation="horizontal"
+      />
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Keyboard roving focus demo — use Arrow keys, Home, and End to move between controls. Toggle buttons expose data-state and aria-pressed.'
       }
     }
   }
