@@ -210,20 +210,27 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
   }, [visibleNodes, focusedKey, firstFocusableKey]);
 
   useEffect(() => {
-    if (focusedKey) {
-      const treeElement = treeRef.current;
-      const ref = nodeRefs.current[focusedKey];
-      const activeElement = document.activeElement as HTMLElement | null;
-      if (
-        treeElement &&
-        ref &&
-        activeElement &&
-        treeElement.contains(activeElement) &&
-        (activeElement === treeElement || activeElement.getAttribute('role') === 'treeitem')
-      ) {
-        ref.focus();
-      }
+    if (!focusedKey) {
+      return;
     }
+
+    const treeElement = treeRef.current;
+    const ref = nodeRefs.current[focusedKey];
+    if (!treeElement || !ref) {
+      return;
+    }
+
+    const activeElement = document.activeElement as HTMLElement | null;
+    if (
+      activeElement &&
+      treeElement.contains(activeElement) &&
+      activeElement !== treeElement &&
+      activeElement.getAttribute('role') !== 'treeitem'
+    ) {
+      return;
+    }
+
+    ref.focus();
   }, [focusedKey, visibleNodes]);
 
   const renderTreeNode = useCallback(
@@ -385,11 +392,9 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       const target = event.target as HTMLElement | null;
-      if (
-        target &&
-        target !== event.currentTarget &&
-        target.getAttribute('role') !== 'treeitem'
-      ) {
+      const isTreeRoot = target === event.currentTarget;
+      const isTreeItem = target?.getAttribute('role') === 'treeitem';
+      if (!isTreeRoot && !isTreeItem) {
         return;
       }
 
