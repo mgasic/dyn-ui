@@ -54,8 +54,13 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [focused, setFocused] = useState(false);
-    const [activeIndex, setActiveIndex] = useState<number>(-1);
+    const [activeOptionIndex, setActiveOptionIndex] = useState(-1);
+    const typeaheadStateRef = useRef<{ query: string; timestamp: number }>({
+      query: '',
+      timestamp: 0
+    });
     const selectRef = useRef<HTMLDivElement>(null);
+    const comboboxRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
     const typeaheadRef = useRef('');
@@ -82,7 +87,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
     });
 
     useImperativeHandle(ref, () => ({
-      focus: () => inputRef.current?.focus(),
+      focus: () => comboboxRef.current?.focus(),
       validate: () => validate(),
       clear: () => {
         setValue(multiple ? [] : '');
@@ -130,110 +135,35 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
       }
     }, [isOpen]);
 
-    const focusOption = (index: number) => {
-      setActiveIndex(index);
-    };
+    const getFirstEnabledIndex = () =>
+      filteredOptions.findIndex(option => !option.disabled);
 
-    const findNextEnabledIndex = (startIndex: number, direction: 1 | -1) => {
-      if (filteredOptions.length === 0) return -1;
-
-      let current = startIndex;
-      for (let i = 0; i < filteredOptions.length; i += 1) {
-        if (current === -1) {
-          current = direction === 1 ? 0 : filteredOptions.length - 1;
-        } else {
-          current = (current + direction + filteredOptions.length) % filteredOptions.length;
-        }
-
-        const option = filteredOptions[current];
-        if (!option.disabled) {
-          return current;
+    const getLastEnabledIndex = () => {
+      for (let index = filteredOptions.length - 1; index >= 0; index -= 1) {
+        if (!filteredOptions[index]?.disabled) {
+          return index;
         }
       }
       return -1;
     };
 
-    const findFirstEnabledIndex = () => findNextEnabledIndex(filteredOptions.length - 1, 1);
-    const findLastEnabledIndex = () => findNextEnabledIndex(0, -1);
-
-    useEffect(() => {
-      if (!isOpen) {
-        focusOption(-1);
-        typeaheadRef.current = '';
-        if (typeaheadTimeoutRef.current) {
-          clearTimeout(typeaheadTimeoutRef.current);
-          typeaheadTimeoutRef.current = null;
-        }
-        return;
-      }
-
-      const hasValidActive =
-        activeIndex !== -1 &&
-        activeIndex < filteredOptions.length &&
-        !filteredOptions[activeIndex]?.disabled;
-
-      if (hasValidActive) {
-        return;
-      }
-
-      let nextIndex = -1;
-
-      if (multiple && Array.isArray(value) && value.length > 0) {
-        nextIndex = filteredOptions.findIndex(
-          option => value.includes(option.value) && !option.disabled
-        );
-      } else if (!multiple && value) {
-        nextIndex = filteredOptions.findIndex(
-          option => option.value === value && !option.disabled
-        );
-      }
-
-      if (nextIndex === -1) {
-        nextIndex = findFirstEnabledIndex();
-      }
-
-      focusOption(nextIndex);
-    }, [activeIndex, filteredOptions, isOpen, multiple, value]);
-
-    useEffect(() => {
-      if (!isOpen) return;
-
-      if (filteredOptions.length === 0) {
-        focusOption(-1);
-        return;
-      }
-
-      if (activeIndex >= filteredOptions.length) {
-        focusOption(findLastEnabledIndex());
-        return;
-      }
-
-      if (activeIndex === -1 || filteredOptions[activeIndex]?.disabled) {
-        const next = findNextEnabledIndex(activeIndex, 1);
-        focusOption(next);
-      }
-    }, [activeIndex, filteredOptions, isOpen]);
-
-    useEffect(() => {
-      optionRefs.current = optionRefs.current.slice(0, filteredOptions.length);
-    }, [filteredOptions.length]);
-
-    useEffect(() => {
-      if (isOpen && activeIndex >= 0) {
-        optionRefs.current[activeIndex]?.scrollIntoView({ block: 'nearest' });
-      }
-    }, [activeIndex, isOpen]);
+    const resetTypeahead = () => {
+      typeaheadStateRef.current = { query: '', timestamp: 0 };
+    };
 
     const handleToggle = () => {
       if (!disabled && !readonly) {
         setIsOpen(prev => !prev);
         if (!isOpen) {
-          inputRef.current?.focus();
+          comboboxRef.current?.focus();
         }
       }
     };
 
-    const handleOptionSelect = (option: SelectOption) => {
+    const handleOptionSelect = (
+      option: SelectOption,
+      config: { focusCombobox?: boolean } = {}
+    ) => {
       if (option.disabled) return;
 
       if (multiple && Array.isArray(value)) {
@@ -247,6 +177,9 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
         onChange?.(option.value);
         setIsOpen(false);
         setSearchTerm('');
+        if (config.focusCombobox) {
+          comboboxRef.current?.focus();
+        }
       }
 
       clearError();
@@ -277,177 +210,311 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
       setSearchTerm(e.target.value);
     };
 
+    const findNextEnabledIndex = (
+      startIndex: number,
+      direction: 1 | -1
+    ) => {
+      if (!filteredOptions.length) return -1;
+
+      if (direction > 0) {
+        for (let index = Math.max(0, startIndex); index < filteredOptions.length; index += 1) {
+          if (!filteredOptions[index]?.disabled) {
+            return index;
+          }
+        }
+      } else {
+        for (let index = Math.min(filteredOptions.length - 1, startIndex); index >= 0; index -= 1) {
+          if (!filteredOptions[index]?.disabled) {
+            return index;
+          }
+        }
+      }
+
+      return -1;
+    };
+
+    const moveActiveBy = (delta: number) => {
+      if (!filteredOptions.length) return;
+      const firstEnabledIndex = getFirstEnabledIndex();
+      const lastEnabledIndex = getLastEnabledIndex();
+
+      if (firstEnabledIndex === -1 || lastEnabledIndex === -1) {
+        setActiveOptionIndex(-1);
+        return;
+      }
+
+      const direction: 1 | -1 = delta >= 0 ? 1 : -1;
+      const steps = Math.abs(delta);
+
+      setActiveOptionIndex(currentIndex => {
+        let nextIndex = currentIndex;
+
+        if (nextIndex === -1) {
+          return direction > 0 ? firstEnabledIndex : lastEnabledIndex;
+        }
+
+        let candidate = nextIndex;
+        let remainingSteps = steps;
+
+        while (remainingSteps > 0) {
+          const potentialIndex = findNextEnabledIndex(candidate + direction, direction);
+          if (potentialIndex === -1) {
+            break;
+          }
+
+          candidate = potentialIndex;
+          nextIndex = candidate;
+          remainingSteps -= 1;
+        }
+
+        return nextIndex;
+      });
+    };
+
     const handleTypeahead = (key: string) => {
-      const cleanedKey = key.toLowerCase();
-      typeaheadRef.current = `${typeaheadRef.current}${cleanedKey}`;
+      const now = Date.now();
+      const { query, timestamp } = typeaheadStateRef.current;
+      const isStale = now - timestamp > 500;
+      const nextQuery = (isStale ? '' : query) + key.toLowerCase();
+      typeaheadStateRef.current = { query: nextQuery, timestamp: now };
 
-      const query = typeaheadRef.current;
-      const startIndex = activeIndex >= 0 ? activeIndex : -1;
+      if (!isOpen) {
+        setIsOpen(true);
+      }
 
-      const matchFromIndex = (index: number) => {
-        for (let i = index + 1; i < filteredOptions.length; i += 1) {
-          const option = filteredOptions[i];
-          if (!option.disabled && option.label.toLowerCase().startsWith(query)) {
-            return i;
+      const startIndex = activeOptionIndex >= 0 ? activeOptionIndex + 1 : 0;
+      const findMatch = (fromIndex: number) => {
+        for (let index = fromIndex; index < filteredOptions.length; index += 1) {
+          const option = filteredOptions[index];
+          if (!option.disabled && option.label.toLowerCase().startsWith(nextQuery)) {
+            return index;
           }
         }
         return -1;
       };
 
-      let matchIndex = matchFromIndex(startIndex);
-      if (matchIndex === -1) {
-        matchIndex = matchFromIndex(-1);
+      let matchedIndex = findMatch(startIndex);
+      if (matchedIndex === -1) {
+        matchedIndex = findMatch(0);
       }
 
-      if (matchIndex !== -1) {
-        focusOption(matchIndex);
-      }
-
-      if (typeaheadTimeoutRef.current) {
-        clearTimeout(typeaheadTimeoutRef.current);
-      }
-      typeaheadTimeoutRef.current = setTimeout(() => {
-        typeaheadRef.current = '';
-        typeaheadTimeoutRef.current = null;
-      }, 500);
-    };
-
-    const openListbox = () => {
-      if (!isOpen) {
-        setIsOpen(true);
+      if (matchedIndex !== -1) {
+        setActiveOptionIndex(matchedIndex);
       }
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    const processKeyDown = (
+      event: React.KeyboardEvent<HTMLElement>,
+      options: { allowTypeahead: boolean; allowSpaceSelect: boolean }
+    ) => {
+      const { allowTypeahead, allowSpaceSelect } = options;
       if (disabled || readonly) return;
 
-      const { key } = e;
-      const isPrintableKey = key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey;
+      const closeDropdown = () => {
+        setIsOpen(false);
+        setSearchTerm('');
+        comboboxRef.current?.focus();
+        resetTypeahead();
+      };
 
-      switch (key) {
+      switch (event.key) {
         case 'ArrowDown': {
-          e.preventDefault();
-          const wasOpen = isOpen;
-          openListbox();
-          if (!wasOpen) {
-            focusOption(findFirstEnabledIndex());
-            break;
+          event.preventDefault();
+          if (!isOpen) {
+            setIsOpen(true);
+            const firstEnabledIndex = getFirstEnabledIndex();
+            if (firstEnabledIndex !== -1) {
+              setActiveOptionIndex(firstEnabledIndex);
+            }
+          } else {
+            moveActiveBy(1);
           }
-          const next = findNextEnabledIndex(activeIndex, 1);
-          focusOption(next);
           break;
         }
         case 'ArrowUp': {
-          e.preventDefault();
-          const wasOpen = isOpen;
-          openListbox();
-          if (!wasOpen) {
-            focusOption(findLastEnabledIndex());
-            break;
+          event.preventDefault();
+          if (!isOpen) {
+            setIsOpen(true);
+            const lastEnabledIndex = getLastEnabledIndex();
+            if (lastEnabledIndex !== -1) {
+              setActiveOptionIndex(lastEnabledIndex);
+            }
+          } else {
+            moveActiveBy(-1);
           }
-          const prev = findNextEnabledIndex(activeIndex, -1);
-          focusOption(prev);
           break;
         }
         case 'Home': {
-          e.preventDefault();
-          const wasOpen = isOpen;
-          openListbox();
-          const firstIndex = findFirstEnabledIndex();
-          focusOption(firstIndex);
-          if (!wasOpen) {
-            break;
+          if (isOpen) {
+            event.preventDefault();
+            const firstEnabledIndex = getFirstEnabledIndex();
+            if (firstEnabledIndex !== -1) {
+              setActiveOptionIndex(firstEnabledIndex);
+            }
           }
           break;
         }
         case 'End': {
-          e.preventDefault();
-          const wasOpen = isOpen;
-          openListbox();
-          const lastIndex = findLastEnabledIndex();
-          focusOption(lastIndex);
-          if (!wasOpen) {
-            break;
+          if (isOpen) {
+            event.preventDefault();
+            const lastEnabledIndex = getLastEnabledIndex();
+            if (lastEnabledIndex !== -1) {
+              setActiveOptionIndex(lastEnabledIndex);
+            }
           }
           break;
         }
         case 'PageDown': {
-          e.preventDefault();
-          const wasOpen = isOpen;
-          openListbox();
-          if (!wasOpen) {
-            focusOption(findFirstEnabledIndex());
-            break;
+          if (isOpen) {
+            event.preventDefault();
+            moveActiveBy(10);
           }
-          if (filteredOptions.length === 0) break;
-          const step = Math.max(Math.floor(filteredOptions.length / 10), 1);
-          let target = activeIndex;
-          for (let i = 0; i < step; i += 1) {
-            const next = findNextEnabledIndex(target, 1);
-            if (next === -1) break;
-            target = next;
-          }
-          focusOption(target);
           break;
         }
         case 'PageUp': {
-          e.preventDefault();
-          const wasOpen = isOpen;
-          openListbox();
-          if (!wasOpen) {
-            focusOption(findLastEnabledIndex());
-            break;
+          if (isOpen) {
+            event.preventDefault();
+            moveActiveBy(-10);
           }
-          if (filteredOptions.length === 0) break;
-          const step = Math.max(Math.floor(filteredOptions.length / 10), 1);
-          let target = activeIndex;
-          for (let i = 0; i < step; i += 1) {
-            const prev = findNextEnabledIndex(target, -1);
-            if (prev === -1) break;
-            target = prev;
-          }
-          focusOption(target);
           break;
         }
-        case 'Enter':
-        case ' ': {
+        case 'Enter': {
           if (!isOpen) {
-            e.preventDefault();
-            openListbox();
+            event.preventDefault();
+            setIsOpen(true);
+            const firstEnabledIndex = getFirstEnabledIndex();
+            if (firstEnabledIndex !== -1) {
+              setActiveOptionIndex(firstEnabledIndex);
+            }
             break;
           }
 
-          e.preventDefault();
-          if (activeIndex >= 0) {
-            const option = filteredOptions[activeIndex];
-            if (option) {
-              handleOptionSelect(option);
+          event.preventDefault();
+          const option = filteredOptions[activeOptionIndex];
+          if (option) {
+            handleOptionSelect(option, { focusCombobox: true });
+          }
+          break;
+        }
+        case ' ': {
+          if (!allowSpaceSelect) {
+            return;
+          }
+
+          if (!isOpen) {
+            event.preventDefault();
+            setIsOpen(true);
+            const firstEnabledIndex = getFirstEnabledIndex();
+            if (firstEnabledIndex !== -1) {
+              setActiveOptionIndex(firstEnabledIndex);
             }
+            break;
+          }
+
+          event.preventDefault();
+          const option = filteredOptions[activeOptionIndex];
+          if (option) {
+            handleOptionSelect(option, { focusCombobox: true });
           }
           break;
         }
         case 'Escape': {
           if (isOpen) {
-            e.preventDefault();
-            setIsOpen(false);
-            setSearchTerm('');
+            event.preventDefault();
+            closeDropdown();
           }
           break;
         }
         default: {
-          if (isPrintableKey) {
-            e.preventDefault();
-            openListbox();
-            handleTypeahead(key);
+          if (
+            allowTypeahead &&
+            event.key.length === 1 &&
+            !event.altKey &&
+            !event.ctrlKey &&
+            !event.metaKey
+          ) {
+            handleTypeahead(event.key);
           }
           break;
         }
       }
     };
 
-    if (!visible) return null;
+    const handleComboboxKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      processKeyDown(event as React.KeyboardEvent<HTMLElement>, {
+        allowTypeahead: true,
+        allowSpaceSelect: true
+      });
+    };
+
+    const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+      processKeyDown(event as unknown as React.KeyboardEvent<HTMLElement>, {
+        allowTypeahead: false,
+        allowSpaceSelect: false
+      });
+    };
 
     const resolvedError = errorMessage ?? (error || undefined);
+
+    useEffect(() => {
+      if (!isOpen) {
+        setActiveOptionIndex(-1);
+        resetTypeahead();
+        return;
+      }
+
+      const firstEnabledIndex = filteredOptions.findIndex(option => !option.disabled);
+      let lastEnabledIndex = -1;
+      for (let index = filteredOptions.length - 1; index >= 0; index -= 1) {
+        if (!filteredOptions[index]?.disabled) {
+          lastEnabledIndex = index;
+          break;
+        }
+      }
+
+      if (firstEnabledIndex === -1 || lastEnabledIndex === -1) {
+        setActiveOptionIndex(-1);
+        return;
+      }
+
+      setActiveOptionIndex(currentIndex => {
+        if (
+          currentIndex >= 0 &&
+          currentIndex < filteredOptions.length &&
+          !filteredOptions[currentIndex]?.disabled
+        ) {
+          return currentIndex;
+        }
+
+        if (!multiple && !Array.isArray(value)) {
+          const selectedIndex = filteredOptions.findIndex(
+            option => option.value === value
+          );
+          if (selectedIndex !== -1 && !filteredOptions[selectedIndex]?.disabled) {
+            return selectedIndex;
+          }
+        }
+
+        if (multiple && Array.isArray(value) && value.length > 0) {
+          const selectedIndex = filteredOptions.findIndex(option =>
+            value.includes(option.value)
+          );
+          if (selectedIndex !== -1 && !filteredOptions[selectedIndex]?.disabled) {
+            return selectedIndex;
+          }
+        }
+
+        return firstEnabledIndex;
+      });
+    }, [filteredOptions, isOpen, multiple, value]);
+
+    useEffect(() => {
+      if (!isOpen) {
+        resetTypeahead();
+      }
+    }, [isOpen]);
+
+    if (!visible) return null;
 
     const sizeClassName = (() => {
       const capitalizedSize = size.charAt(0).toUpperCase() + size.slice(1);
@@ -485,6 +552,11 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
     const showPlaceholder = !selectedOptions ||
       (multiple && Array.isArray(selectedOptions) && selectedOptions.length === 0);
 
+    const getOptionId = (index: number) => `${listboxId}-option-${index}`;
+    const activeOptionId = isOpen && activeOptionIndex >= 0
+      ? getOptionId(activeOptionIndex)
+      : undefined;
+
     return (
       <DynFieldContainer
         id={idProp}
@@ -498,9 +570,10 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
       >
         <div ref={selectRef} className={getStyleClass('container')}>
           <div
+            ref={comboboxRef}
             className={selectClasses}
             onClick={handleToggle}
-            onKeyDown={handleKeyDown}
+            onKeyDown={handleComboboxKeyDown}
             tabIndex={disabled ? -1 : 0}
             role="combobox"
             aria-expanded={isOpen}
@@ -510,11 +583,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
             aria-readonly={readonly || undefined}
             aria-labelledby={labelId}
             aria-controls={isOpen ? listboxId : undefined}
-            aria-activedescendant={
-              isOpen && activeIndex >= 0
-                ? `${listboxId}-option-${activeIndex}`
-                : undefined
-            }
+            aria-activedescendant={activeOptionId}
             aria-describedby={
               resolvedError
                 ? `${fieldId}-error`
@@ -578,6 +647,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                     placeholder="Pesquisar..."
                     value={searchTerm}
                     onChange={handleSearchChange}
+                    onKeyDown={handleSearchKeyDown}
                     className={getStyleClass('searchInput')}
                     aria-label="Pesquisar opções"
                   />
@@ -599,11 +669,11 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                   id={listboxId}
                   aria-multiselectable={multiple || undefined}
                 >
-                  {filteredOptions.map((option, optionIndex) => {
+                  {filteredOptions.map((option, index) => {
                     const isSelected = multiple && Array.isArray(value)
                       ? value.includes(option.value)
                       : value === option.value;
-                    const isActive = optionIndex === activeIndex;
+                    const isActive = index === activeOptionIndex;
 
                     return (
                       <div
@@ -617,6 +687,13 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                         role="option"
                         aria-selected={isSelected}
                         aria-disabled={option.disabled || undefined}
+                        id={getOptionId(index)}
+                        data-active={isActive ? 'true' : undefined}
+                        onMouseEnter={() => {
+                          if (!option.disabled) {
+                            setActiveOptionIndex(index);
+                          }
+                        }}
                         onClick={() => handleOptionSelect(option)}
                         ref={(element) => {
                           optionRefs.current[optionIndex] = element;
