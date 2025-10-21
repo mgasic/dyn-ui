@@ -10,7 +10,7 @@ const meta: Meta<typeof DynGauge> = {
     docs: {
       description: {
         component:
-          'Gauge component for displaying progress and metrics with customizable appearance. Automatically derives accessible progressbar labels using provided titles, aria-labels, and value formatting.',
+          'Gauge component for displaying progress and metrics with customizable appearance. Automatically derives accessible progressbar labels using provided titles, aria-labels, and value formatting, and forwards any additional `aria-*` attributes to the progressbar wrapper.',
       },
     },
   },
@@ -110,7 +110,7 @@ export const AccessibleUsage: Story = {
     docs: {
       description: {
         story:
-          'When `showValue` is hidden, the gauge still announces its formatted value to assistive technologies via `aria-valuetext`. You can override the accessible label with `aria-label` and provide custom text with `aria-valuetext` if needed.',
+          'When `showValue` is hidden, the gauge still announces its formatted value to assistive technologies via `aria-valuetext`. You can override the accessible label with `aria-label`, provide custom text with `aria-valuetext`, and include extra attributes such as `aria-live` or `aria-errormessage` which are passed through to the progressbar element.',
       },
     },
   },

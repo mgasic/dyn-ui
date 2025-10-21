@@ -110,6 +110,22 @@ describe('DynGauge', () => {
     expect(gauge).toHaveAttribute('aria-valuetext', 'Battery quarter charged');
   });
 
+  it('forwards additional aria-* attributes to the root progressbar', () => {
+    render(
+      <DynGauge
+        value={40}
+        animated={false}
+        aria-label="Queue depth"
+        aria-live="polite"
+        aria-errormessage="queue-error"
+      />
+    );
+
+    const gauge = screen.getByRole('progressbar', { name: 'Queue depth' });
+    expect(gauge).toHaveAttribute('aria-live', 'polite');
+    expect(gauge).toHaveAttribute('aria-errormessage', 'queue-error');
+  });
+
   it('omits the value display when showValue is false', () => {
     render(<DynGauge value={70} showValue={false} animated={false} />);
 
