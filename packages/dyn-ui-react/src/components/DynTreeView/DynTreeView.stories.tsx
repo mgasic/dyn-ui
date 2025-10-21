@@ -394,3 +394,26 @@ export const AllFeatures: Story = {
     },
   },
 };
+
+export const WithDynTreeNodeLayout: Story = {
+  args: {
+    treeData: fileSystemData,
+    useDynTreeNodeLayout: true,
+    nodeLayoutProps: {
+      gap: 'sm',
+      p: 'xs',
+      direction: 'row',
+    },
+    showIcon: true,
+    selectable: true,
+    checkable: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Wraps each rendered node with the DynTreeNode layout primitive to align DynTreeView with the new layout semantics.',
+      },
+    },
+  },
+};

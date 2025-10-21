@@ -1,2 +1,4 @@
 export { DynModal } from './DynModal';
-export type * from './DynModal.types';
+export type { DynModalProps, DynModalRef } from './DynModal.types';
+export { DYN_MODAL_DEFAULT_PROPS } from './DynModal.types';
+
