@@ -1,7 +1,8 @@
 export type {
   DynIconProps,
   DynIconSizeToken,
-  DynIconTone,
+  DynIconVariant,
+  DynIconSemanticColor,
   IconDictionary,
   ProcessedIcon,
 } from '../components/DynIcon/DynIcon.types';
