@@ -63,7 +63,6 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
     const selectRef = useRef<HTMLDivElement>(null);
     const comboboxRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
     const typeaheadRef = useRef('');
     const typeaheadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -674,21 +673,18 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                     const isSelected = multiple && Array.isArray(value)
                       ? value.includes(option.value)
                       : value === option.value;
-                    const isActive = index === activeOptionIndex;
 
                     return (
                       <DynSelectOption
                         key={option.value}
-                        id={`${listboxId}-option-${optionIndex}`}
+                        id={getOptionId(index)}
+                        index={index}
                         option={option}
-                        multiple={multiple}
                         isSelected={isSelected}
-                        isActive={isActive}
+                        isActive={index === activeOptionIndex}
+                        isMultiple={Boolean(multiple)}
+                        onActivate={setActiveOptionIndex}
                         onSelect={handleOptionSelect}
-                        onActivate={() => focusOption(optionIndex)}
-                        ref={(element) => {
-                          optionRefs.current[optionIndex] = element;
-                        }}
                       />
                     );
                   })}

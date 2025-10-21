@@ -1,5 +1,2 @@
 export { DynSelectOption } from './DynSelectOption';
-export type {
-  DynSelectOptionProps,
-  DynSelectOptionClassNames,
-} from './DynSelectOption.types';
+export type { DynSelectOptionProps } from './DynSelectOption.types';

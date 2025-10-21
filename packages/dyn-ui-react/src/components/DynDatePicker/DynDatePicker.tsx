@@ -103,6 +103,30 @@ const sizeClassMap: Record<InputSize, string | undefined> = {
   medium: undefined,
   large: styles.sizeLarge,
 };
+// Helper utilities used by the component
+const normalizeDate = (date: Date) => startOfDay(date);
+
+const addDays = (date: Date, days: number) => {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+};
+
+const addMonths = (date: Date, months: number) => {
+  return new Date(date.getFullYear(), date.getMonth() + months, 1);
+};
+
+const isBeforeMonth = (a: Date, b: Date) => {
+  return a.getFullYear() < b.getFullYear() || (a.getFullYear() === b.getFullYear() && a.getMonth() < b.getMonth());
+};
+
+const isAfterMonth = (a: Date, b: Date) => {
+  return a.getFullYear() > b.getFullYear() || (a.getFullYear() === b.getFullYear() && a.getMonth() > b.getMonth());
+};
+
+const formatISODate = (date: Date) => getDateKey(date);
+
+const getWeekStartsOn = (locale: string) => getFirstDayOfWeek(locale);
 
 export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props, ref) => {
   const {
@@ -141,67 +165,10 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const calendarGridRef = useRef<HTMLDivElement>(null);
-
-  const [value, setValue] = useState<Date | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(new Date()));
-  const [activeDate, setActiveDate] = useState<Date | null>(null);
-  const [liveMessage, setLiveMessage] = useState('');
-
   const activeDayRef = useRef<HTMLButtonElement | null>(null);
 
-  const today = useMemo(() => normalizeDate(new Date()), []);
-
-  const normalizedMinDate = useMemo(() => (minDate ? normalizeDate(minDate) : null), [minDate]);
-  const normalizedMaxDate = useMemo(() => (maxDate ? normalizeDate(maxDate) : null), [maxDate]);
-
-  const clampToRange = useCallback(
-    (date: Date): Date => {
-      let next = normalizeDate(date);
-      if (normalizedMinDate && next < normalizedMinDate) {
-        next = new Date(normalizedMinDate);
-      }
-      if (normalizedMaxDate && next > normalizedMaxDate) {
-        next = new Date(normalizedMaxDate);
-      }
-      return next;
-    },
-    [normalizedMinDate, normalizedMaxDate]
-  );
-
-  const [focusedDate, setFocusedDate] = useState<Date>(() => clampToRange(today));
-  const [visibleMonth, setVisibleMonth] = useState<Date>(() => startOfMonth(clampToRange(today)));
-
-  const isDateDisabled = useCallback(
-    (date: Date): boolean => {
-      const normalized = normalizeDate(date);
-      if (normalizedMinDate && normalized < normalizedMinDate) {
-        return true;
-      }
-      if (normalizedMaxDate && normalized > normalizedMaxDate) {
-        return true;
-      }
-      return false;
-    },
-    [normalizedMinDate, normalizedMaxDate]
-  );
-
-  const clampMonthToRange = useCallback(
-    (month: Date): Date => {
-      if (normalizedMinDate && isBeforeMonth(month, normalizedMinDate)) {
-        return startOfMonth(normalizedMinDate);
-      }
-      if (normalizedMaxDate && isAfterMonth(month, normalizedMaxDate)) {
-        return startOfMonth(normalizedMaxDate);
-      }
-      return month;
-    },
-    [normalizedMinDate, normalizedMaxDate]
-  );
-
   const { error, validate, clearError } = useDynFieldValidation({
-    value,
+    value: propValue as any,
     ...(required ? { required } : {}),
     ...(validation ? { validation } : {}),
   });
@@ -213,245 +180,156 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
     parseDate,
     isValidDate,
     getRelativeDescription,
-  } = useDynDateParser({
-    format,
-    locale,
-    ...(customParser ? { customParser } : {}),
-  });
+  } = useDynDateParser({ format, locale, ...(customParser ? { customParser } : {}) });
 
-  const firstDayOfWeek = useMemo(() => getFirstDayOfWeek(locale), [locale]);
-  const accessibleFormatter = useMemo(() => createAccessibleFormatter(locale), [locale]);
-  const monthFormatter = useMemo(() => createMonthFormatter(locale), [locale]);
+  // Normalize min/max
+  const normalizedMinDate = useMemo(() => (minDate ? normalizeDate(minDate) : null), [minDate]);
+  const normalizedMaxDate = useMemo(() => (maxDate ? normalizeDate(maxDate) : null), [maxDate]);
+
   const today = useMemo(() => startOfDay(new Date()), []);
 
-  const minDateStart = useMemo(() => (minDate ? startOfDay(minDate) : null), [minDate]);
-  const maxDateStart = useMemo(() => (maxDate ? startOfDay(maxDate) : null), [maxDate]);
-
-  const isDateDisabled = useCallback(
-    (date: Date) => {
-      const candidate = startOfDay(date).getTime();
-
-      if (minDateStart && candidate < minDateStart.getTime()) {
-        return true;
-      }
-
-      if (maxDateStart && candidate > maxDateStart.getTime()) {
-        return true;
-      }
-
-      return false;
-    },
-    [minDateStart, maxDateStart]
-  );
-
-  const clampDateToRange = useCallback(
-    (date: Date) => {
-      let candidate = startOfDay(date);
-
-      if (minDateStart && candidate.getTime() < minDateStart.getTime()) {
-        candidate = new Date(minDateStart);
-      }
-
-      if (maxDateStart && candidate.getTime() > maxDateStart.getTime()) {
-        candidate = new Date(maxDateStart);
-      }
-
-      return candidate;
-    },
-    [minDateStart, maxDateStart]
-  );
-
-  const getFirstFocusableDay = useCallback(
-    (monthDate: Date) => {
-      const firstOfMonth = startOfMonth(monthDate);
-
-      for (let dayOffset = 0; dayOffset < 31; dayOffset += 1) {
-        const candidate = new Date(firstOfMonth);
-        candidate.setDate(firstOfMonth.getDate() + dayOffset);
-
-        if (candidate.getMonth() !== firstOfMonth.getMonth()) {
-          break;
-        }
-
-        if (!isDateDisabled(candidate)) {
-          return candidate;
-        }
-      }
-
-      return null;
-    },
-    [isDateDisabled]
-  );
-
-  const parseExternalValue = useCallback(
-    (input: DynDatePickerProps['value']): Date | null => {
-      if (!input) {
-        return null;
-      }
-
-      const candidate = input instanceof Date ? input : new Date(input);
-      return isValidDate(candidate) ? normalizeDate(candidate) : null;
-    },
-    [isValidDate]
-  );
+  // value state
+  const [value, setValue] = useState<Date | null>(() => {
+    if (!propValue) return null;
+    const candidate = propValue instanceof Date ? propValue : new Date(propValue as any);
+    return isValidDate(candidate) ? normalizeDate(candidate) : null;
+  });
 
   useEffect(() => {
-    const nextValue = parseExternalValue(propValue);
+    const next = propValue ? (propValue instanceof Date ? propValue : new Date(propValue as any)) : null;
+    const nextNorm = next && isValidDate(next) ? normalizeDate(next) : null;
     setValue(prev => {
       const prevTime = prev?.getTime();
-      const nextTime = nextValue?.getTime();
-      return prevTime === nextTime ? prev : nextValue;
+      const nextTime = nextNorm?.getTime();
+      return prevTime === nextTime ? prev : nextNorm;
     });
-    setDisplayValue(nextValue ? formatDate(nextValue) : '');
-    if (nextValue) {
-      const normalized = startOfDay(nextValue);
-      setCurrentMonth(prev => {
-        const nextMonth = startOfMonth(normalized);
-        return prev.getTime() === nextMonth.getTime() ? prev : nextMonth;
-      });
-      setActiveDate(normalized);
-    }
-  }, [propValue, formatDate, parseExternalValue, setDisplayValue]);
+    setDisplayValue(nextNorm ? formatDate(nextNorm) : '');
+  }, [propValue, formatDate, isValidDate, setDisplayValue]);
+
+  const clampDateToRange = useCallback(
+    (d: Date) => {
+      let candidate = startOfDay(d);
+      if (normalizedMinDate && candidate.getTime() < normalizedMinDate.getTime()) candidate = new Date(normalizedMinDate);
+      if (normalizedMaxDate && candidate.getTime() > normalizedMaxDate.getTime()) candidate = new Date(normalizedMaxDate);
+      return candidate;
+    },
+    [normalizedMinDate, normalizedMaxDate]
+  );
+
+  const isDateDisabled = useCallback(
+    (d: Date) => {
+      const t = startOfDay(d).getTime();
+      if (normalizedMinDate && t < normalizedMinDate.getTime()) return true;
+      if (normalizedMaxDate && t > normalizedMaxDate.getTime()) return true;
+      return false;
+    },
+    [normalizedMinDate, normalizedMaxDate]
+  );
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+
+  const [visibleMonth, setVisibleMonth] = useState<Date>(() => startOfMonth(clampDateToRange(today)));
+  const [focusedDate, setFocusedDate] = useState<Date>(() => clampDateToRange(today));
+
+  const normalizedValue = useMemo(() => (value ? normalizeDate(value) : null), [value]);
+
+  const weekStartsOn = useMemo(() => getWeekStartsOn(locale), [locale]);
+
+  const weekdayFormatter = useMemo(() => new Intl.DateTimeFormat(locale, { weekday: 'short' }), [locale]);
+
+  const weekDayOrder = useMemo(() => Array.from({ length: 7 }, (_, index) => (weekStartsOn + index) % 7), [weekStartsOn]);
+
+  const weekDays = useMemo(
+    () =>
+      weekDayOrder.map(dayIndex => {
+        const baseDate = new Date(2021, 7, 1);
+        const baseDay = baseDate.getDay();
+        baseDate.setDate(baseDate.getDate() - baseDay + dayIndex);
+        return weekdayFormatter.format(baseDate);
+      }),
+    [weekDayOrder, weekdayFormatter]
+  );
+
+  const calendarStart = useMemo(() => {
+    const firstOfMonth = startOfMonth(visibleMonth);
+    const offset = (firstOfMonth.getDay() - weekStartsOn + 7) % 7;
+    return addDays(firstOfMonth, -offset);
+  }, [visibleMonth, weekStartsOn]);
 
   const calendarDays = useMemo(() => {
-    const firstOfMonth = startOfMonth(currentMonth);
-    const start = new Date(firstOfMonth);
-    const offset = (firstOfMonth.getDay() - firstDayOfWeek + 7) % 7;
-    start.setDate(firstOfMonth.getDate() - offset);
+    return Array.from({ length: 42 }, (_, index) => {
+      const date = addDays(calendarStart, index);
+      const iso = formatISODate(date);
+      const isCurrentMonth = date.getMonth() === visibleMonth.getMonth();
+      const isSelected = normalizedValue ? date.getTime() === normalizedValue.getTime() : false;
+      const isFocused = focusedDate ? date.getTime() === focusedDate.getTime() : false;
+      const isToday = date.getTime() === today.getTime();
+      const disabledDate = isDateDisabled(date);
 
-    const days: CalendarDay[] = [];
-    for (let index = 0; index < 42; index += 1) {
-      const date = new Date(start);
-      date.setDate(start.getDate() + index);
-
-      days.push({
+      return {
         date,
-        isOutsideMonth: date.getMonth() !== firstOfMonth.getMonth(),
-        isDisabled: isDateDisabled(date),
-      });
-    }
-
-    return days;
-  }, [currentMonth, firstDayOfWeek, isDateDisabled]);
-
-  const weekdayLabels = useMemo(() => {
-    try {
-      const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
-      const reference = new Date(Date.UTC(2024, 0, 7));
-      const labels: string[] = [];
-
-      for (let index = 0; index < 7; index += 1) {
-        const date = new Date(reference);
-        const diff = ((firstDayOfWeek + index) % 7) - reference.getUTCDay();
-        date.setUTCDate(reference.getUTCDate() + diff);
-        labels.push(formatter.format(date));
-      }
-
-      return labels;
-    } catch {
-      return ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-    }
-  }, [firstDayOfWeek, locale]);
-
-  const canGoPrev = useMemo(() => {
-    if (!minDateStart) {
-      return true;
-    }
-
-    const lastDayOfPrevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0);
-    return !isDateDisabled(lastDayOfPrevMonth);
-  }, [currentMonth, isDateDisabled, minDateStart]);
-
-  const canGoNext = useMemo(() => {
-    if (!maxDateStart) {
-      return true;
-    }
-
-    const firstDayOfNextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
-    return !isDateDisabled(firstDayOfNextMonth);
-  }, [currentMonth, isDateDisabled, maxDateStart]);
-
-  const handleDocumentClick = useCallback((event: MouseEvent) => {
-    if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-      setIsOpen(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    document.addEventListener('mousedown', handleDocumentClick);
-    return () => {
-      document.removeEventListener('mousedown', handleDocumentClick);
-    };
-  }, [isOpen, handleDocumentClick]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      activeDayRef.current = null;
-      setLiveMessage('');
-      return;
-    }
-
-    if (activeDate && !isDateDisabled(activeDate)) {
-      setCurrentMonth(prev => {
-        const monthDate = startOfMonth(activeDate);
-        return prev.getTime() === monthDate.getTime() ? prev : monthDate;
-      });
-      return;
-    }
-
-    const preferredValue = value && !isDateDisabled(value) ? startOfDay(value) : null;
-    let baselineMonth = preferredValue ? startOfMonth(preferredValue) : startOfMonth(currentMonth);
-    let focusTarget = preferredValue;
-
-    if (!focusTarget) {
-      const todayCandidate = !isDateDisabled(today) ? today : null;
-      if (todayCandidate) {
-        focusTarget = todayCandidate;
-        baselineMonth = startOfMonth(todayCandidate);
-      }
-    }
-
-    if (!focusTarget) {
-      focusTarget = getFirstFocusableDay(baselineMonth);
-    }
-
-    if (!focusTarget) {
-      focusTarget = clampDateToRange(new Date());
-    }
-
-    const normalizedTarget = clampDateToRange(focusTarget);
-    setCurrentMonth(prev => {
-      const monthDate = startOfMonth(normalizedTarget);
-      return prev.getTime() === monthDate.getTime() ? prev : monthDate;
+        iso,
+        label: date.getDate(),
+        isCurrentMonth,
+        isSelected,
+        isFocused,
+        isToday,
+        isDisabled: disabledDate,
+      };
     });
-    setActiveDate(normalizedTarget);
-  }, [
-    activeDate,
-    clampDateToRange,
-    currentMonth,
-    getFirstFocusableDay,
-    isDateDisabled,
-    isOpen,
-    today,
-    value,
-  ]);
+  }, [calendarStart, focusedDate, isDateDisabled, normalizedValue, today, visibleMonth]);
+
+  const monthFormatter = useMemo(() => new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }), [locale]);
+  const monthLabel = useMemo(() => monthFormatter.format(visibleMonth), [monthFormatter, visibleMonth]);
+
+  const accessibleFormatter = useMemo(() => createAccessibleFormatter(locale), [locale]);
+
+  // Navigation availability
+  const prevMonthDisabled = useMemo(() => {
+    if (!normalizedMinDate) return false;
+    const prevMonth = addMonths(visibleMonth, -1);
+    return isBeforeMonth(prevMonth, normalizedMinDate);
+  }, [normalizedMinDate, visibleMonth]);
+
+  const nextMonthDisabled = useMemo(() => {
+    if (!normalizedMaxDate) return false;
+    const nextMonth = addMonths(visibleMonth, 1);
+    return isAfterMonth(nextMonth, normalizedMaxDate);
+  }, [normalizedMaxDate, visibleMonth]);
+
+  const todayDisabled = isDateDisabled(today);
+
+  // Document click to close
+  useEffect(() => {
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) document.addEventListener('mousedown', handleDocumentClick);
+    return () => document.removeEventListener('mousedown', handleDocumentClick);
+  }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen && activeDate) {
-      setLiveMessage(accessibleFormatter.format(activeDate));
+    if (isOpen) {
+      // ensure focused date & visible month when opening
+      const base = normalizedValue ?? today;
+      const baseClamped = clampDateToRange(base ?? new Date());
+      setFocusedDate(baseClamped);
+      setVisibleMonth(startOfMonth(baseClamped));
     }
-  }, [activeDate, accessibleFormatter, isOpen]);
+  }, [isOpen, normalizedValue, clampDateToRange, today]);
 
   useEffect(() => {
-    if (isOpen && activeDayRef.current) {
-      activeDayRef.current.focus();
+    if (isOpen && calendarGridRef.current && focusedDate) {
+      const target = calendarGridRef.current.querySelector<HTMLButtonElement>(`[data-date="${formatISODate(focusedDate)}"]`);
+      target?.focus();
     }
-  }, [activeDate, isOpen]);
+  }, [isOpen, calendarGridRef, focusedDate]);
 
+  // Imperative handle
   useImperativeHandle(ref, () => ({
     focus: () => inputRef.current?.focus(),
     validate: () => validate(),
@@ -463,7 +341,8 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
     },
     getValue: () => value,
     setValue: (newValue: any) => {
-      const nextValue = parseExternalValue(newValue);
+      const candidate = newValue ? (newValue instanceof Date ? newValue : new Date(newValue)) : null;
+      const nextValue = candidate && isValidDate(candidate) ? normalizeDate(candidate) : null;
       setValue(nextValue);
       setDisplayValue(nextValue ? formatDate(nextValue) : '');
       onChange?.(nextValue);
@@ -472,39 +351,27 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
 
   const emitChange = useCallback(
     (nextValue: Date | null) => {
-      const normalizedValue = nextValue ? startOfDay(nextValue) : null;
-
-      setValue(normalizedValue);
-      setDisplayValue(normalizedValue ? formatDate(normalizedValue) : '');
-      if (normalizedValue) {
-        const monthDate = startOfMonth(normalizedValue);
-        setCurrentMonth(prev => (prev.getTime() === monthDate.getTime() ? prev : monthDate));
-        setActiveDate(normalizedValue);
-      } else {
-        setActiveDate(null);
+      const normalizedVal = nextValue ? startOfDay(nextValue) : null;
+      setValue(normalizedVal);
+      setDisplayValue(normalizedVal ? formatDate(normalizedVal) : '');
+      if (normalizedVal) {
+        setVisibleMonth(startOfMonth(normalizedVal));
+        setFocusedDate(normalizedVal);
       }
-      onChange?.(normalizedValue);
+      onChange?.(normalizedVal);
     },
     [formatDate, onChange, setDisplayValue]
   );
-
-  const normalizedValue = useMemo(() => (value ? normalizeDate(value) : null), [value]);
 
   const handleInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const inputValue = event.target.value;
       setDisplayValue(inputValue);
-
-      const parsedDate = parseDate(inputValue);
-      if (parsedDate && isValidDate(parsedDate)) {
-        const normalizedParsed = normalizeDate(parsedDate);
-        if (normalizedMinDate && normalizedParsed < normalizedMinDate) {
-          return;
-        }
-        if (normalizedMaxDate && normalizedParsed > normalizedMaxDate) {
-          return;
-        }
-
+      const parsed = parseDate(inputValue);
+      if (parsed && isValidDate(parsed)) {
+        const normalizedParsed = startOfDay(parsed);
+        if (normalizedMinDate && normalizedParsed < normalizedMinDate) return;
+        if (normalizedMaxDate && normalizedParsed > normalizedMaxDate) return;
         emitChange(normalizedParsed);
         clearError();
       } else if (!inputValue) {
@@ -512,39 +379,27 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
         clearError();
       }
     },
-    [
-      parseDate,
-      isValidDate,
-      normalizedMinDate,
-      normalizedMaxDate,
-      emitChange,
-      clearError,
-    ]
+    [parseDate, isValidDate, normalizedMinDate, normalizedMaxDate, emitChange, clearError]
   );
 
-  const focusDate = useCallback(
-    (target: Date) => {
-      const normalized = clampDateToRange(target);
-      if (isDateDisabled(normalized)) {
-        return;
-      }
+  const handleClearClick = useCallback(() => {
+    emitChange(null);
+    clearError();
+    setIsOpen(false);
+    inputRef.current?.focus();
+  }, [emitChange, clearError]);
 
-      setCurrentMonth(prev => {
-        const monthDate = startOfMonth(normalized);
-        return prev.getTime() === monthDate.getTime() ? prev : monthDate;
-      });
-      setActiveDate(normalized);
-    },
-    [clampDateToRange, isDateDisabled]
-  );
+  const handleTodayClick = useCallback(() => {
+    const todayClamped = clampDateToRange(new Date());
+    emitChange(todayClamped);
+    setIsOpen(false);
+    inputRef.current?.focus();
+  }, [clampDateToRange, emitChange]);
 
   const handleDaySelection = useCallback(
-    (day: Date) => {
-      if (isDateDisabled(day)) {
-        return;
-      }
-
-      const normalized = clampDateToRange(day);
+    (d: Date) => {
+      if (isDateDisabled(d)) return;
+      const normalized = clampDateToRange(d);
       emitChange(normalized);
       clearError();
       setIsOpen(false);
@@ -555,217 +410,62 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
 
   const handleMonthNavigation = useCallback(
     (offset: number) => {
-      if ((offset < 0 && !canGoPrev) || (offset > 0 && !canGoNext)) {
-        return;
-      }
-
-      setCurrentMonth(prevMonth => {
-        const nextMonth = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + offset, 1);
-        const focusTarget = getFirstFocusableDay(nextMonth) ?? clampDateToRange(nextMonth);
-        const normalized = clampDateToRange(focusTarget);
-        setActiveDate(normalized);
-        return startOfMonth(normalized);
+      const next = addMonths(visibleMonth, offset === 0 ? 0 : offset);
+      setVisibleMonth(prev => {
+        const candidate = addMonths(prev, offset);
+        if (normalizedMinDate && isBeforeMonth(candidate, normalizedMinDate)) return prev;
+        if (normalizedMaxDate && isAfterMonth(candidate, normalizedMaxDate)) return prev;
+        return candidate;
       });
     },
-    [canGoNext, canGoPrev, clampDateToRange, getFirstFocusableDay]
+    [visibleMonth, normalizedMinDate, normalizedMaxDate]
   );
-
-  const handleDayKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLButtonElement>, day: Date) => {
-      switch (event.key) {
-        case 'Enter':
-        case ' ': {
-          event.preventDefault();
-          handleDaySelection(day);
-          break;
-        }
-        case 'ArrowUp':
-        case 'ArrowDown':
-        case 'ArrowLeft':
-        case 'ArrowRight': {
-          event.preventDefault();
-          const movementMap: Record<string, number> = {
-            ArrowUp: -7,
-            ArrowDown: 7,
-            ArrowLeft: -1,
-            ArrowRight: 1,
-          };
-          const delta = movementMap[event.key];
-          const nextDate = new Date(day);
-          nextDate.setDate(day.getDate() + delta);
-          focusDate(nextDate);
-          break;
-        }
-        case 'Home': {
-          event.preventDefault();
-          const weekdayIndex = (day.getDay() - firstDayOfWeek + 7) % 7;
-          const nextDate = new Date(day);
-          nextDate.setDate(day.getDate() - weekdayIndex);
-          focusDate(nextDate);
-          break;
-        }
-        case 'End': {
-          event.preventDefault();
-          const weekdayIndex = (day.getDay() - firstDayOfWeek + 7) % 7;
-          const nextDate = new Date(day);
-          nextDate.setDate(day.getDate() + (6 - weekdayIndex));
-          focusDate(nextDate);
-          break;
-        }
-        case 'PageUp': {
-          event.preventDefault();
-          handleMonthNavigation(-1);
-          break;
-        }
-        case 'PageDown': {
-          event.preventDefault();
-          handleMonthNavigation(1);
-          break;
-        }
-        case 'Escape': {
-          event.preventDefault();
-          setIsOpen(false);
-          inputRef.current?.focus();
-          break;
-        }
-        default:
-          break;
-      }
-    },
-    [focusDate, firstDayOfWeek, handleDaySelection, handleMonthNavigation]
-  );
-
-  const handleCalendarToggle = useCallback(() => {
-    if (disabled || readonly) {
-      return;
-    }
-
-    setIsOpen(prev => {
-      const next = !prev;
-      if (!next) {
-        inputRef.current?.focus();
-      }
-      return next;
-    });
-  }, [disabled, readonly]);
-
-  const handleTodayClick = useCallback(() => {
-    handleDaySelection(new Date());
-  }, [handleDaySelection]);
-
-  const handleClearClick = useCallback(() => {
-    emitChange(null);
-    clearError();
-    setIsOpen(false);
-    inputRef.current?.focus();
-  }, [clearError, emitChange]);
-
-  const handleBlur = useCallback(() => {
-    setFocused(false);
-    validate();
-    onBlur?.();
-  }, [validate, onBlur]);
-
-  const handleFocus = useCallback(() => {
-    setFocused(true);
-    clearError();
-    onFocus?.();
-  }, [clearError, onFocus]);
-
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
-      switch (event.key) {
-        case 'Enter':
-        case 'ArrowDown':
-          if (!isOpen) {
-            setIsOpen(true);
-            event.preventDefault();
-          }
-          break;
-        case 'Escape':
-          if (isOpen) {
-            setIsOpen(false);
-            event.preventDefault();
-          }
-          break;
-        default:
-          break;
-      }
-    },
-    [isOpen]
-  );
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    const base = clampToRange(normalizedValue ?? today);
-    setFocusedDate(base);
-    setVisibleMonth(startOfMonth(base));
-  }, [clampToRange, isOpen, normalizedValue, today]);
-
-  useEffect(() => {
-    if (!isOpen || !calendarGridRef.current) {
-      return;
-    }
-    const target = calendarGridRef.current.querySelector<HTMLButtonElement>(
-      `[data-date="${formatISODate(focusedDate)}"]`
-    );
-    target?.focus();
-  }, [focusedDate, isOpen]);
-
-  const weekStartsOn = useMemo(() => getWeekStartsOn(locale), [locale]);
 
   const moveFocusBy = useCallback(
     (amount: number) => {
       setFocusedDate(prev => {
-        const reference = prev ?? clampToRange(today);
+        const reference = prev ?? clampDateToRange(today);
         let next = addDays(reference, amount);
-        next = clampToRange(next);
-        const direction = amount >= 0 ? 1 : -1;
+        next = clampDateToRange(next);
         let guard = 0;
         while (isDateDisabled(next) && guard < 31) {
-          const boundary = direction > 0 ? normalizedMaxDate : normalizedMinDate;
-          if (boundary && next.getTime() === boundary.getTime()) {
-            return prev ?? reference;
-          }
-          next = addDays(next, direction);
+          next = addDays(next, amount >= 0 ? 1 : -1);
           guard += 1;
         }
         setVisibleMonth(startOfMonth(next));
         return next;
       });
     },
-    [clampToRange, isDateDisabled, normalizedMaxDate, normalizedMinDate, today]
+    [clampDateToRange, isDateDisabled, today]
   );
 
   const focusStartOfWeek = useCallback(() => {
     setFocusedDate(prev => {
-      const reference = prev ?? clampToRange(today);
+      const reference = prev ?? clampDateToRange(today);
       const currentDay = reference.getDay();
       const diff = (currentDay - weekStartsOn + 7) % 7;
-      const next = clampToRange(addDays(reference, -diff));
+      const next = clampDateToRange(addDays(reference, -diff));
       if (!isDateDisabled(next)) {
         setVisibleMonth(startOfMonth(next));
         return next;
       }
       return prev ?? reference;
     });
-  }, [clampToRange, isDateDisabled, today, weekStartsOn]);
+  }, [clampDateToRange, isDateDisabled, today, weekStartsOn]);
 
   const focusEndOfWeek = useCallback(() => {
     setFocusedDate(prev => {
-      const reference = prev ?? clampToRange(today);
+      const reference = prev ?? clampDateToRange(today);
       const currentDay = reference.getDay();
       const diff = 6 - ((currentDay - weekStartsOn + 7) % 7);
-      const next = clampToRange(addDays(reference, diff));
+      const next = clampDateToRange(addDays(reference, diff));
       if (!isDateDisabled(next)) {
         setVisibleMonth(startOfMonth(next));
         return next;
       }
       return prev ?? reference;
     });
-  }, [clampToRange, isDateDisabled, today, weekStartsOn]);
+  }, [clampDateToRange, isDateDisabled, today, weekStartsOn]);
 
   const handleDayKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>, day: { date: Date; isDisabled: boolean }) => {
@@ -796,9 +496,7 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
           break;
         case 'Enter':
         case ' ': {
-          if (!day.isDisabled) {
-            handleDaySelection(day.date);
-          }
+          if (!day.isDisabled) handleDaySelection(day.date);
           event.preventDefault();
           break;
         }
@@ -811,103 +509,42 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
           break;
       }
     },
-    [focusEndOfWeek, focusStartOfWeek, handleDaySelection, moveFocusBy]
+    [moveFocusBy, focusStartOfWeek, focusEndOfWeek, handleDaySelection]
   );
 
-  const weekDayOrder = useMemo(
-    () => Array.from({ length: 7 }, (_, index) => (weekStartsOn + index) % 7),
-    [weekStartsOn]
-  );
-
-  const weekdayFormatter = useMemo(
-    () => new Intl.DateTimeFormat(locale, { weekday: 'short' }),
-    [locale]
-  );
-
-  const weekDays = useMemo(
-    () =>
-      weekDayOrder.map(dayIndex => {
-        const baseDate = new Date(2021, 7, 1);
-        const baseDay = baseDate.getDay();
-        baseDate.setDate(baseDate.getDate() - baseDay + dayIndex);
-        return weekdayFormatter.format(baseDate);
-      }),
-    [weekDayOrder, weekdayFormatter]
-  );
-
-  const calendarStart = useMemo(() => {
-    const firstOfMonth = startOfMonth(visibleMonth);
-    const offset = (firstOfMonth.getDay() - weekStartsOn + 7) % 7;
-    return addDays(firstOfMonth, -offset);
-  }, [visibleMonth, weekStartsOn]);
-
-  const calendarDays = useMemo(() => {
-    return Array.from({ length: 42 }, (_, index) => {
-      const date = addDays(calendarStart, index);
-      const iso = formatISODate(date);
-      const isCurrentMonth = date.getMonth() === visibleMonth.getMonth();
-      const isSelected = normalizedValue ? date.getTime() === normalizedValue.getTime() : false;
-      const isFocused = date.getTime() === focusedDate.getTime();
-      const isToday = date.getTime() === today.getTime();
-      const disabledDate = isDateDisabled(date);
-
-      return {
-        date,
-        iso,
-        label: date.getDate(),
-        isCurrentMonth,
-        isSelected,
-        isFocused,
-        isToday,
-        isDisabled: disabledDate,
-      };
+  const handleCalendarToggle = useCallback(() => {
+    if (disabled || readonly) return;
+    setIsOpen(prev => {
+      const next = !prev;
+      if (!next) inputRef.current?.focus();
+      return next;
     });
-  }, [calendarStart, focusedDate, isDateDisabled, normalizedValue, today, visibleMonth]);
+  }, [disabled, readonly]);
 
-  const monthFormatter = useMemo(
-    () => new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }),
-    [locale]
+  const handleInputKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      switch (event.key) {
+        case 'Enter':
+        case 'ArrowDown':
+          if (!isOpen) {
+            setIsOpen(true);
+            event.preventDefault();
+          }
+          break;
+        case 'Escape':
+          if (isOpen) {
+            setIsOpen(false);
+            event.preventDefault();
+          }
+          break;
+        default:
+          break;
+      }
+    },
+    [isOpen]
   );
 
-  const ariaLabelFormatter = useMemo(
-    () =>
-      new Intl.DateTimeFormat(locale, {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      }),
-    [locale]
-  );
-
-  const monthLabel = useMemo(() => monthFormatter.format(visibleMonth), [monthFormatter, visibleMonth]);
-
-  const activeDateAnnouncement = useMemo(
-    () => (isOpen ? ariaLabelFormatter.format(focusedDate) : ''),
-    [ariaLabelFormatter, focusedDate, isOpen]
-  );
-
-  const prevMonthDisabled = useMemo(() => {
-    if (!normalizedMinDate) {
-      return false;
-    }
-    const prevMonth = addMonths(visibleMonth, -1);
-    return isBeforeMonth(prevMonth, normalizedMinDate);
-  }, [normalizedMinDate, visibleMonth]);
-
-  const nextMonthDisabled = useMemo(() => {
-    if (!normalizedMaxDate) {
-      return false;
-    }
-    const nextMonth = addMonths(visibleMonth, 1);
-    return isAfterMonth(nextMonth, normalizedMaxDate);
-  }, [normalizedMaxDate, visibleMonth]);
-
-  const todayDisabled = isDateDisabled(today);
-
-  if (!visible) {
-    return null;
-  }
+  if (!visible) return null;
 
   const fieldError = errorMessage ?? (error || undefined);
 
@@ -921,21 +558,9 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
     isOpen && styles.stateOpen
   );
 
-  const describedBy =
-    [
-      fieldError ? `${inputId}-error` : null,
-      help ? `${inputId}-help` : null,
-    ]
-      .filter(Boolean)
-      .join(' ') || undefined;
+  const describedBy = [fieldError ? `${inputId}-error` : null, help ? `${inputId}-help` : null].filter(Boolean).join(' ') || undefined;
 
-  const relativeText = useMemo(
-    () => (value ? getRelativeDescription(value) : null),
-    [value, getRelativeDescription]
-  );
-
-  const monthLabel = monthFormatter.format(currentMonth);
-  const monthLabelId = `${dropdownId}-month`;
+  const relativeText = useMemo(() => (value ? getRelativeDescription(value) : null), [value, getRelativeDescription]);
 
   return (
     <DynFieldContainer
@@ -960,9 +585,17 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
             disabled={disabled}
             readOnly={readonly}
             onChange={handleInputChange}
-            onBlur={handleBlur}
-            onFocus={handleFocus}
-            onKeyDown={handleKeyDown}
+            onBlur={() => {
+              setFocused(false);
+              validate();
+              onBlur?.();
+            }}
+            onFocus={() => {
+              setFocused(true);
+              clearError();
+              onFocus?.();
+            }}
+            onKeyDown={handleInputKeyDown}
             aria-invalid={Boolean(fieldError)}
             aria-describedby={describedBy}
             aria-expanded={isOpen}
@@ -986,13 +619,7 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
           </button>
 
           {displayValue && !readonly && !disabled && (
-            <button
-              type="button"
-              className={styles.clearButton}
-              onClick={handleClearClick}
-              tabIndex={-1}
-              aria-label="Limpar data"
-            >
+            <button type="button" className={styles.clearButton} onClick={handleClearClick} tabIndex={-1} aria-label="Limpar data">
               <DynIcon icon="dyn-icon-close" />
             </button>
           )}
@@ -1003,16 +630,11 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
         {isOpen && (
           <div id={dropdownId} className={styles.dropdown} role="dialog" aria-modal="false">
             <div className={styles.srOnly} aria-live="polite" aria-atomic="true">
-              {liveMessage}
+              {focusedDate ? accessibleFormatter.format(focusedDate) : ''}
             </div>
 
             <div className={styles.shortcuts}>
-              <button
-                type="button"
-                className={styles.shortcut}
-                onClick={handleTodayClick}
-                disabled={todayDisabled}
-              >
+              <button type="button" className={styles.shortcut} onClick={handleTodayClick} disabled={todayDisabled}>
                 Hoje
               </button>
               <button type="button" className={styles.shortcut} onClick={handleClearClick}>
@@ -1022,77 +644,62 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
 
             <div className={styles.calendarSection}>
               <div className={styles.calendarHeader}>
-                <button
-                  type="button"
-                  className={styles.monthButton}
-                  onClick={() => handleMonthNavigation(-1)}
-                  aria-label="Mês anterior"
-                  disabled={!canGoPrev}
-                >
+                <button type="button" className={styles.monthButton} onClick={() => handleMonthNavigation(-1)} aria-label="Mês anterior" disabled={prevMonthDisabled}>
                   ‹
                 </button>
-                <div id={monthLabelId} className={styles.monthLabel} aria-live="polite">
+                <div className={styles.monthLabel} aria-live="polite">
                   {monthLabel}
                 </div>
-                <button
-                  type="button"
-                  className={styles.monthButton}
-                  onClick={() => handleMonthNavigation(1)}
-                  aria-label="Próximo mês"
-                  disabled={!canGoNext}
-                >
+                <button type="button" className={styles.monthButton} onClick={() => handleMonthNavigation(1)} aria-label="Próximo mês" disabled={nextMonthDisabled}>
                   ›
                 </button>
               </div>
 
               <div className={styles.weekdayRow} role="row">
-                {weekdayLabels.map((weekday, index) => (
-                  <div key={`${weekday}-${index}`} className={styles.weekday} role="columnheader" aria-label={weekday}>
-                    {weekday}
+                {weekDays.map((wd, i) => (
+                  <div key={`${wd}-${i}`} className={styles.weekday} role="columnheader" aria-label={wd}>
+                    {wd}
                   </div>
                 ))}
               </div>
 
-              <div className={styles.calendarGrid} role="grid" aria-labelledby={monthLabelId}>
+              <div className={styles.calendarGrid} role="grid" aria-labelledby={dropdownId} ref={calendarGridRef}>
                 {Array.from({ length: 6 }).map((_, weekIndex) => (
                   <div key={weekIndex} className={styles.weekRow} role="row">
                     {calendarDays.slice(weekIndex * 7, weekIndex * 7 + 7).map(day => {
-                      const isSelected = isSameDay(value, day.date);
-                      const isActive = isSameDay(activeDate, day.date);
-                      const isToday = isSameDay(today, day.date);
                       const dayClasses = cn(
                         styles.day,
-                        day.isOutsideMonth && styles.dayOutside,
+                        !day.isCurrentMonth && styles.dayOutside,
                         day.isDisabled && styles.dayDisabled,
-                        isSelected && styles.daySelected,
-                        isActive && styles.dayActive,
-                        isToday && styles.dayToday
+                        day.isSelected && styles.daySelected,
+                        day.isFocused && styles.dayActive,
+                        day.isToday && styles.dayToday
                       );
 
                       return (
                         <button
-                          key={getDateKey(day.date)}
+                          key={day.iso}
                           type="button"
                           className={dayClasses}
                           role="gridcell"
-                          aria-selected={isSelected}
+                          aria-selected={day.isSelected}
                           aria-disabled={day.isDisabled || undefined}
-                          aria-current={isToday ? 'date' : undefined}
+                          aria-current={day.isToday ? 'date' : undefined}
                           aria-label={accessibleFormatter.format(day.date)}
-                          tabIndex={isActive && !day.isDisabled ? 0 : -1}
-                          data-date={getDateKey(day.date)}
+                          tabIndex={day.isFocused && !day.isDisabled ? 0 : -1}
+                          data-date={day.iso}
                           disabled={day.isDisabled}
                           onClick={() => handleDaySelection(day.date)}
-                          onKeyDown={event => handleDayKeyDown(event, day.date)}
+                          onKeyDown={event => handleDayKeyDown(event, day)}
                           ref={node => {
-                            if (isActive) {
+                            if (day.isFocused) {
                               activeDayRef.current = node;
                             } else if (activeDayRef.current === node) {
                               activeDayRef.current = null;
                             }
                           }}
                         >
-                          {day.date.getDate()}
+                          {day.label}
                         </button>
                       );
                     })}

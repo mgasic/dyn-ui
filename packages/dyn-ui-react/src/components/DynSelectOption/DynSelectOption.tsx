@@ -1,72 +1,38 @@
-import { forwardRef, useCallback } from 'react';
-import type { MouseEvent as ReactMouseEvent } from 'react';
 import classNames from 'classnames';
+import { forwardRef } from 'react';
 import type { DynSelectOptionProps } from './DynSelectOption.types';
-import styles from '../DynSelect/DynSelect.module.css';
 import { DynIcon } from '../DynIcon';
+import styles from '../DynSelect/DynSelect.module.css';
+
+const getClassName = (key: keyof typeof styles) => styles[key];
 
 export const DynSelectOption = forwardRef<HTMLDivElement, DynSelectOptionProps>(
   (
     {
       id,
+      index,
       option,
       isSelected,
       isActive,
-      multiple = false,
-      onSelect,
+      isMultiple,
       onActivate,
-      classNames: classNameOverrides,
-      children,
+      onSelect,
+      className,
+      classes,
     },
-    ref,
+    ref
   ) => {
-    const { label, disabled, value } = option;
+    const handleActivate = () => {
+      if (!option.disabled) {
+        onActivate(index);
+      }
+    };
 
-    const handleClick = useCallback(
-      (event: ReactMouseEvent<HTMLDivElement>) => {
-        if (disabled) {
-          event.preventDefault();
-          return;
-        }
-        onSelect(option, event);
-      },
-      [disabled, onSelect, option],
-    );
-
-    const handleActivate = useCallback(
-      (event: ReactMouseEvent<HTMLDivElement>) => {
-        if (disabled) return;
-        onActivate?.(option, event);
-      },
-      [disabled, onActivate, option],
-    );
-
-    const rootClassName = classNames(
-      styles.option,
-      {
-        [styles.optionSelected]: isSelected,
-        [styles.optionActive]: isActive,
-        [styles.optionDisabled]: disabled,
-      },
-      classNameOverrides?.root,
-      isSelected && classNameOverrides?.selected,
-      isActive && classNameOverrides?.active,
-      disabled && classNameOverrides?.disabled,
-    );
-
-    const checkboxClassName = classNames(
-      styles.checkbox,
-      classNameOverrides?.checkbox,
-      {
-        [styles.checkboxChecked]: isSelected,
-      },
-      isSelected ? classNameOverrides?.checkboxChecked : undefined,
-    );
-
-    const textClassName = classNames(
-      styles.optionText,
-      classNameOverrides?.text,
-    );
+    const handleClick = () => {
+      if (!option.disabled) {
+        onSelect(option);
+      }
+    };
 
     return (
       <div
@@ -74,22 +40,46 @@ export const DynSelectOption = forwardRef<HTMLDivElement, DynSelectOptionProps>(
         ref={ref}
         role="option"
         aria-selected={isSelected}
-        aria-disabled={disabled || undefined}
-        data-value={value}
-        className={rootClassName}
-        onClick={handleClick}
+        aria-disabled={option.disabled || undefined}
+        className={classNames(
+          getClassName('option'),
+          className,
+          classes?.option,
+          {
+            [getClassName('optionSelected')]: isSelected,
+            [getClassName('optionDisabled')]: option.disabled,
+            [getClassName('optionActive')]: isActive,
+          },
+          isSelected ? classes?.optionSelected : null,
+          option.disabled ? classes?.optionDisabled : null,
+          isActive ? classes?.optionActive : null
+        )}
+        data-active={isActive ? 'true' : undefined}
         onMouseEnter={handleActivate}
         onMouseDown={(event) => event.preventDefault()}
+        onClick={handleClick}
       >
-        {multiple && (
-          <span className={checkboxClassName} aria-hidden="true">
+        {isMultiple && (
+          <span
+            className={classNames(
+              getClassName('checkbox'),
+              classes?.checkbox,
+              {
+                [getClassName('checkboxChecked')]: isSelected,
+              },
+              isSelected ? classes?.checkboxChecked : null
+            )}
+            aria-hidden="true"
+          >
             {isSelected && <DynIcon icon="dyn-icon-check" />}
           </span>
         )}
-        <span className={textClassName}>{children ?? label}</span>
+        <span className={classNames(getClassName('optionText'), classes?.optionText)}>
+          {option.label}
+        </span>
       </div>
     );
-  },
+  }
 );
 
 DynSelectOption.displayName = 'DynSelectOption';
