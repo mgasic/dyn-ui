@@ -19,6 +19,8 @@ const CLASS_NAME_MAP = {
   'DynButton-module_fullWidth': 'dyn-btn--full-width',
   'DynButton-module_content': 'dyn-btn__content',
   'DynButton-module_icon': 'dyn-btn__icon',
+  'DynButton-module_iconStart': 'dyn-btn__icon--start',
+  'DynButton-module_iconEnd': 'dyn-btn__icon--end',
   'DynButton-module_label': 'dyn-btn__label',
   'DynButton-module_spinner': 'dyn-spinner',
   

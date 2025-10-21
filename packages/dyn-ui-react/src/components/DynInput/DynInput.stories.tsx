@@ -41,6 +41,17 @@ const meta: Meta<typeof DynInput> = {
     placeholder: { control: 'text' },
     help: { control: 'text' },
     value: { control: 'text' },
+    prefix: { control: 'text', description: 'Prefiks prikazan unutar inputa' },
+    suffix: { control: 'text', description: 'Sufiks prikazan unutar inputa' },
+    warningMessage: { control: 'text' },
+    successMessage: { control: 'text' },
+    loadingMessage: { control: 'text' },
+    loading: { control: 'boolean' },
+    state: {
+      control: 'select',
+      options: ['default', 'error', 'warning', 'success', 'loading'],
+      description: 'Forsira vizuelno stanje inputa'
+    },
     form: {
       control: 'text',
       description: 'ID forme sa kojom je input povezan preko HTML `form` atributa'
@@ -87,6 +98,38 @@ export const States: Story = {
       <DynInput name="states-error" label="Sa greškom" errorMessage="Neispravan unos" />
       <DynInput name="states-disabled" label="Disabled" disabled value="Onemogućeno" />
       <DynInput name="states-readonly" label="Readonly" readonly value="Samo za čitanje" />
+    </div>
+  )
+};
+
+export const ValidationMessaging: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: '1rem', maxWidth: 480 }}>
+      <DynInput
+        name="validation-error"
+        label="Greška"
+        errorMessage="Ovo polje je obavezno"
+        required
+      />
+      <DynInput
+        name="validation-warning"
+        label="Upozorenje"
+        warningMessage="Proverite format vrednosti"
+        prefix="R$"
+      />
+      <DynInput
+        name="validation-success"
+        label="Uspeh"
+        valid
+        successMessage="Izgleda odlično"
+        suffix="✓"
+      />
+      <DynInput
+        name="validation-loading"
+        label="Učitavanje"
+        loading
+        loadingMessage="Učitavanje podataka..."
+      />
     </div>
   )
 };

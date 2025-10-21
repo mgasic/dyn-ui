@@ -1,2 +1,2 @@
 export { DynInput } from './DynInput';
-export type { DynInputProps } from './DynInput.types';
+export type { DynInputProps, DynInputRef } from './DynInput.types';

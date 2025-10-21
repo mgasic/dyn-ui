@@ -141,6 +141,31 @@ describe('DynBox', () => {
       expect(element).toHaveAttribute('data-custom', 'value');
       expect(element).toHaveAttribute('title', 'Tooltip text');
     });
+
+    it('applies border side classes without forwarding props to the DOM', () => {
+      render(
+        <DynBox
+          data-testid="border-box"
+          border="default"
+          borderTop
+          borderRight
+          borderBottom
+          borderLeft
+        />
+      );
+
+      const element = screen.getByTestId('border-box');
+
+      expect(element).toHaveClass(getStyleClass('box--border'));
+      expect(element).toHaveClass(getStyleClass('box--border-top'));
+      expect(element).toHaveClass(getStyleClass('box--border-right'));
+      expect(element).toHaveClass(getStyleClass('box--border-bottom'));
+      expect(element).toHaveClass(getStyleClass('box--border-left'));
+      expect(element).not.toHaveAttribute('borderTop');
+      expect(element).not.toHaveAttribute('borderRight');
+      expect(element).not.toHaveAttribute('borderBottom');
+      expect(element).not.toHaveAttribute('borderLeft');
+    });
   });
 
   describe('Accessibility', () => {

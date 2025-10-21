@@ -1,11 +1,13 @@
 /* DynTable Component Styles */
+
 .dyn-table {
   --dyn-table-background: var(--dyn-color-surface, #ffffff);
   --dyn-table-background-subtle: var(--dyn-color-surface-hover, #f8fafc);
-  --dyn-table-background-selected: var(
-    --dyn-color-primary-alpha,
-    rgba(37, 99, 235, 0.16)
-  );
+  --dyn-table-row-background: var(--dyn-table-background);
+  --dyn-table-row-background-alt: var(--dyn-table-background-subtle);
+  --dyn-table-accent-color: var(--dyn-color-primary, #2563eb);
+  --dyn-table-accent-color-rgb: 37 99 235;
+  --dyn-table-background-selected: rgb(var(--dyn-table-accent-color-rgb, 37 99 235) / 0.16);
   --dyn-table-border-color: var(--dyn-color-border-light, #e2e8f0);
   --dyn-table-header-border-color: var(--dyn-color-border-light, #e2e8f0);
   --dyn-table-divider-color: var(--dyn-color-border-light, #e2e8f0);
@@ -16,17 +18,16 @@
   --dyn-table-sort-trigger-gap: var(--dyn-spacing-xs, 0.5rem);
   --dyn-table-sort-trigger-padding: var(--dyn-spacing-xxs, 0.25rem);
   --dyn-table-sort-trigger-hover-bg: var(--dyn-color-surface, #ffffff);
-  --dyn-table-sort-trigger-hover-color: var(--dyn-color-primary, #2563eb);
+  --dyn-table-sort-trigger-hover-color: var(--dyn-table-accent-color);
   --dyn-table-sort-icon-color: var(--dyn-table-text-tertiary);
-  --dyn-table-sort-icon-active-color: var(--dyn-color-primary, #2563eb);
+  --dyn-table-sort-icon-active-color: var(--dyn-table-accent-color);
   --dyn-table-action-button-bg: var(--dyn-color-surface, #ffffff);
   --dyn-table-action-button-border-color: var(--dyn-color-border-light, #e2e8f0);
   --dyn-table-action-button-color: var(--dyn-color-text-secondary, #64748b);
   --dyn-table-action-button-hover-bg: var(--dyn-color-surface-hover, #f8fafc);
   --dyn-table-action-button-hover-border-color: var(--dyn-color-border, #cbd5f5);
-  --dyn-table-action-button-hover-color: var(--dyn-color-primary, #2563eb);
-  --dyn-table-action-button-focus-shadow: 0 0 0 2px
-    var(--dyn-color-primary-alpha, rgba(37, 99, 235, 0.24));
+  --dyn-table-action-button-hover-color: var(--dyn-table-accent-color);
+  --dyn-table-action-button-focus-shadow: 0 0 0 2px rgb(var(--dyn-table-accent-color-rgb, 37 99 235) / 0.32);
 
   display: flex;
   flex-direction: column;
@@ -36,6 +37,27 @@
   font-family: var(--dyn-font-family-base, inherit);
   color: var(--dyn-table-text-color);
   overflow: hidden;
+}
+
+.dyn-table--color-neutral,
+.dyn-table--color-primary {
+  --dyn-table-accent-color: var(--dyn-color-primary, #2563eb);
+  --dyn-table-accent-color-rgb: 37 99 235;
+}
+
+.dyn-table--color-success {
+  --dyn-table-accent-color: var(--dyn-color-success, #10b981);
+  --dyn-table-accent-color-rgb: 16 185 129;
+}
+
+.dyn-table--color-warning {
+  --dyn-table-accent-color: var(--dyn-color-warning, #f59e0b);
+  --dyn-table-accent-color-rgb: 245 158 11;
+}
+
+.dyn-table--color-danger {
+  --dyn-table-accent-color: var(--dyn-color-danger, #dc2626);
+  --dyn-table-accent-color-rgb: 220 38 38;
 }
 
 .dyn-table__wrapper {
@@ -71,6 +93,7 @@
 .dyn-table__row {
   border-bottom: var(--dyn-border-width-hairline, 1px) solid var(--dyn-table-divider-color);
   transition: background-color var(--dyn-duration-normal) var(--dyn-timing-standard);
+  background-color: var(--dyn-table-row-background);
 }
 
 .dyn-table__row:last-child {
@@ -85,13 +108,22 @@
   background-color: var(--dyn-table-background-selected);
 }
 
-/* Striped variant */
-.dyn-table--striped .dyn-table__row:nth-child(even) {
-  background-color: var(--dyn-table-background-subtle);
+/* Variant modifiers */
+.dyn-table--variant-zebra .dyn-table__body .dyn-table__row:nth-child(even):not(.dyn-table__row--selected) {
+  background-color: var(--dyn-table-row-background-alt);
 }
 
-.dyn-table--striped .dyn-table__row--selected {
-  background-color: var(--dyn-table-background-selected);
+.dyn-table--variant-minimal {
+  border: none;
+  box-shadow: none;
+}
+
+.dyn-table--variant-minimal .dyn-table__row {
+  border-bottom-color: transparent;
+}
+
+.dyn-table--variant-minimal .dyn-table__cell--header {
+  background: transparent;
 }
 
 /* Table Cells */
@@ -447,4 +479,13 @@
   .dyn-table__head tr {
     border-bottom-width: 3px;
   }
+}
+.dyn-table__foot {
+  background: var(--dyn-table-background-subtle);
+  border-top: var(--dyn-border-width-hairline, 1px) solid var(--dyn-table-divider-color);
+}
+
+.dyn-table__foot .dyn-table__cell {
+  font-weight: var(--dyn-font-weight-medium);
+  color: var(--dyn-table-text-secondary);
 }

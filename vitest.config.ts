@@ -16,5 +16,14 @@ export default defineConfig({
     setupFiles: ['./packages/dyn-ui-react/test/setupTests.ts'],
     globals: true,
     exclude: [...configDefaults.exclude, 'tests/e2e/**'],
+    reporters: ['default', 'junit'],
+    outputFile: {
+      junit: 'reports/coverage/vitest-junit.xml',
+    },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'html'],
+      reportsDirectory: 'reports/coverage',
+    },
   },
 });
