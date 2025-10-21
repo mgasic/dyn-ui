@@ -23,34 +23,38 @@ describe('DynModalPlacement', () => {
     expect(wrapper).toHaveAttribute('data-alignment', 'center');
   });
 
-  it('supports all horizontal alignment options', () => {
-    (['start', 'center', 'end', 'stretch'] as const).forEach(alignment => {
-      const { container, unmount } = render(
-        <DynModalPlacement alignment={alignment} data-testid={`placement-${alignment}`}>
-          <div>Modal content</div>
-        </DynModalPlacement>
-      );
+  it.each([
+    ['start', 'alignStart'],
+    ['center', 'alignCenter'],
+    ['end', 'alignEnd'],
+    ['stretch', 'alignStretch']
+  ] as const)('supports %s alignment', (alignment, classKey) => {
+    const { container } = render(
+      <DynModalPlacement alignment={alignment} data-testid={`placement-${alignment}`}>
+        <div>Modal content</div>
+      </DynModalPlacement>
+    );
 
-      const wrapper = container.firstElementChild as HTMLElement;
-      expect(wrapper).toHaveClass(getClass(`align${alignment.charAt(0).toUpperCase()}${alignment.slice(1)}`));
-      expect(wrapper.getAttribute('data-alignment')).toBe(alignment);
-      unmount();
-    });
+    const wrapper = container.firstElementChild as HTMLElement;
+    expect(wrapper).toHaveClass(getClass(classKey));
+    expect(wrapper.getAttribute('data-alignment')).toBe(alignment);
   });
 
-  it('supports all vertical placement options', () => {
-    (['top', 'center', 'bottom', 'fullscreen'] as const).forEach(placement => {
-      const { container, unmount } = render(
-        <DynModalPlacement placement={placement} data-testid={`placement-${placement}`}>
-          <div>Modal content</div>
-        </DynModalPlacement>
-      );
+  it.each([
+    ['top', 'placementTop'],
+    ['center', 'placementCenter'],
+    ['bottom', 'placementBottom'],
+    ['fullscreen', 'placementFullscreen']
+  ] as const)('supports %s placement', (placement, classKey) => {
+    const { container } = render(
+      <DynModalPlacement placement={placement} data-testid={`placement-${placement}`}>
+        <div>Modal content</div>
+      </DynModalPlacement>
+    );
 
-      const wrapper = container.firstElementChild as HTMLElement;
-      expect(wrapper).toHaveClass(getClass(`placement${placement.charAt(0).toUpperCase()}${placement.slice(1)}`));
-      expect(wrapper.getAttribute('data-placement')).toBe(placement);
-      unmount();
-    });
+    const wrapper = container.firstElementChild as HTMLElement;
+    expect(wrapper).toHaveClass(getClass(classKey));
+    expect(wrapper.getAttribute('data-placement')).toBe(placement);
   });
 
   it('respects spacing props', () => {
