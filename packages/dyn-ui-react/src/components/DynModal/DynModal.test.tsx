@@ -1,4 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React, { useState } from 'react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -30,14 +32,17 @@ describe('DynModal', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Primary action' })).toHaveFocus());
   });
 
-  it('focuses the first focusable element and traps focus with Tab navigation', async () => {
-    renderBasicModal();
-    const user = userEvent.setup();
-
-    const firstButton = await screen.findByRole('button', { name: 'Primary action' });
-    await waitFor(() => expect(firstButton).toHaveFocus());
-
-    const link = screen.getByRole('link', { name: 'Secondary link' });
+  it('renders modal content when open and forwards placement props', () => {
+    render(
+      <DynModal
+        isOpen
+        placement="bottom"
+        alignment="start"
+        data-testid="dyn-modal"
+      >
+        <div>Visible content</div>
+      </DynModal>
+    );
 
     await user.tab();
     expect(link).toHaveFocus();
@@ -69,7 +74,55 @@ describe('DynModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('does not call onClose when disabled via overlay or Escape', async () => {
+  it('does not dismiss when disabled', async () => {
+    const onClose = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <DynModal isOpen disabled onClose={onClose}>
+        <button type="button">Focusable</button>
+      </DynModal>
+    );
+
+    const backdrop = screen.getByTestId('dyn-modal-backdrop');
+    await user.click(backdrop);
+    await user.keyboard('{Escape}');
+
+    expect(onClose).not.toHaveBeenCalled();
+    const modal = screen.getByTestId('dyn-modal');
+    expect(modal).toHaveAttribute('aria-disabled', 'true');
+    expect(modal).toHaveAttribute('data-disabled', 'true');
+  });
+
+  it('maintains focus trap when disabled', async () => {
+    const user = userEvent.setup();
+    render(
+      <div>
+        <button type="button">Outside</button>
+        <DynModal isOpen disabled>
+          <button type="button">Inside first</button>
+          <button type="button">Inside second</button>
+        </DynModal>
+      </div>
+    );
+
+    const firstButton = screen.getByRole('button', { name: /inside first/i });
+    const secondButton = screen.getByRole('button', { name: /inside second/i });
+    const outsideButton = screen.getByRole('button', { name: /outside/i });
+
+    await waitFor(() => expect(firstButton).toHaveFocus());
+
+    await user.tab();
+    expect(secondButton).toHaveFocus();
+
+    await user.tab();
+    expect(firstButton).toHaveFocus();
+    expect(outsideButton).not.toHaveFocus();
+
+    await user.tab({ shift: true });
+    expect(secondButton).toHaveFocus();
+  });
+
+  it('handles escape key press when enabled', async () => {
     const onClose = vi.fn();
     renderBasicModal({ onClose, disabled: true });
 
@@ -114,7 +167,28 @@ describe('DynModal', () => {
     await waitFor(() => expect(trigger).toHaveFocus());
   });
 
-  it('supports rendering as a different element via the `as` prop', () => {
+  it('traps focus within the modal when tabbing', async () => {
+    const user = userEvent.setup();
+    render(
+      <DynModal isOpen>
+        <button type="button">First</button>
+        <button type="button">Second</button>
+      </DynModal>
+    );
+
+    const firstButton = screen.getByRole('button', { name: /first/i });
+    const secondButton = screen.getByRole('button', { name: /second/i });
+
+    await waitFor(() => expect(firstButton).toHaveFocus());
+
+    await user.tab();
+    expect(secondButton).toHaveFocus();
+
+    await user.tab();
+    expect(firstButton).toHaveFocus();
+  });
+
+  it('locks document scroll when open', () => {
     render(
       <DynModal open as="section" aria-label="Section modal">
         Content
@@ -131,6 +205,44 @@ describe('DynModal', () => {
         <button type="button">Action</button>
       </DynModal>
     );
+  });
+
+  it('supports custom aria-label and polymorphic rendering', () => {
+    render(
+      <DynModal isOpen as="section" aria-label="Settings dialog">
+        <div>Settings</div>
+      </DynModal>
+    );
+
+    const modal = screen.getByLabelText('Settings dialog');
+    expect(modal.tagName).toBe('SECTION');
+  });
+
+  it('restores focus to the trigger element when closed', async () => {
+    const user = userEvent.setup();
+
+    const Wrapper = () => {
+      const [open, setOpen] = useState(false);
+      return (
+        <div>
+          <button type="button" onClick={() => setOpen(true)}>
+            Open modal
+          </button>
+          <DynModal isOpen={open} onClose={() => setOpen(false)} closeOnEsc>
+            <button type="button">Close</button>
+          </DynModal>
+        </div>
+      );
+    };
+
+    render(<Wrapper />);
+
+    const trigger = screen.getByRole('button', { name: /open modal/i });
+    await user.click(trigger);
+
+    await user.keyboard('{Escape}');
+
+    expect(trigger).toHaveFocus();
   });
 });
 

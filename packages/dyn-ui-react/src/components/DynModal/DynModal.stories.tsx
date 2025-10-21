@@ -1,165 +1,177 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import React, { useState } from 'react';
-import { DynButton } from '../DynButton';
+import React, { useCallback, useState, type ReactNode } from 'react';
 import { DynModal } from './DynModal';
+import type { DynModalProps } from './DynModal.types';
+import { DynButton } from '../DynButton';
+import { DynContainer } from '../DynContainer';
 
 const meta: Meta<typeof DynModal> = {
   title: 'Components/DynModal',
   component: DynModal,
-  tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
         component:
-          'DynModal provides a high-accessibility dialog with built-in focus management, escape/overlay dismissal, and polymorphic rendering via the `as` prop. It automatically returns focus to the trigger when closed and exposes granular control over dismissal affordances.',
-      },
-    },
-  },
-  argTypes: {
-    open: {
-      control: 'boolean',
-      description: 'Controls visibility of the modal dialog.',
-      table: { defaultValue: { summary: 'false' } },
-    },
-    disabled: {
-      control: 'boolean',
-      description: 'Prevents overlay and ESC dismissal when true.',
-      table: { defaultValue: { summary: 'false' } },
-    },
-    closeOnOverlayClick: {
-      control: 'boolean',
-      description: 'Determines whether clicking the scrim closes the modal.',
-      table: { defaultValue: { summary: 'true' } },
-    },
-    closeOnEscape: {
-      control: 'boolean',
-      description: 'Determines whether pressing Escape closes the modal.',
-      table: { defaultValue: { summary: 'true' } },
-    },
-    overlayClassName: {
-      control: 'text',
-      description: 'Custom class name applied to the overlay.',
-    },
-    className: {
-      control: 'text',
-      description: 'Custom class name applied to the dialog surface.',
-    },
-    as: {
-      control: 'text',
-      description: 'Polymorphic element override for the dialog surface.',
-      table: { defaultValue: { summary: 'div' } },
-    },
-    'aria-label': {
-      control: 'text',
-      description: 'Accessible label when no visible heading is provided.',
-    },
-    'aria-labelledby': {
-      control: 'text',
-      description: 'ID of an element that labels the dialog.',
-    },
-    'aria-describedby': {
-      control: 'text',
-      description: 'ID of an element describing the dialog contents.',
-    },
-    onClose: {
-      action: 'closed',
-      description: 'Called when the modal requests to close (ESC or overlay).',
-    },
-  },
-  args: {
-    open: true,
-    'aria-label': 'Example modal',
-  },
+          'Enterprise modal component with built-in focus trapping, scroll locking and accessible dismissal controls.'
+      }
+    }
+  }
 };
 
 export default meta;
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof DynModal>;
 
-export const Default: Story = {
-  args: {
-    children: (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h2 style={{ margin: 0 }}>Team invitation</h2>
-        <p style={{ margin: 0 }}>
-          Invite teammates to collaborate on the current workspace. Everyone you add will receive an email
-          notification with a link to join the project.
-        </p>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-          <span>Email address</span>
-          <input type="email" placeholder="teammate@example.com" style={{ padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #cbd5f5' }} />
-        </label>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-          <DynButton kind="tertiary" label="Cancel" />
-          <DynButton label="Send invite" />
-        </div>
-      </div>
-    ),
-  },
+const useModalState = (initial = false) => {
+  const [open, setOpen] = useState(initial);
+  const openModal = useCallback(() => setOpen(true), []);
+  const closeModal = useCallback(() => setOpen(false), []);
+  return { open, openModal, closeModal };
 };
 
-export const WithTrigger: Story = {
-  render: (args) => {
-    const [open, setOpen] = useState(false);
-    return (
-      <div style={{ minHeight: '60vh', display: 'grid', placeItems: 'center' }}>
-        <DynButton label="Launch modal" onClick={() => setOpen(true)} />
-        <DynModal
-          {...args}
-          open={open}
-          onClose={() => setOpen(false)}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <h2 style={{ margin: 0 }}>Keyboard and focus management</h2>
-            <p style={{ margin: 0 }}>
-              The modal traps focus inside while open and restores focus to the triggering button once closed.
+const PlaygroundModal: React.FC<
+  Partial<Omit<DynModalProps, 'isOpen' | 'onClose'>> & {
+    label?: string;
+    description?: string;
+    content?: (close: () => void) => React.ReactNode;
+  }
+> = ({ label = 'Open modal', description, content, ...props }) => {
+  const { open, openModal, closeModal } = useModalState();
+
+  return (
+    <div style={{ minHeight: '60vh', display: 'grid', placeItems: 'center' }}>
+      <DynButton onClick={openModal}>{label}</DynButton>
+      <DynModal
+        isOpen={open}
+        onClose={closeModal}
+        aria-label={description ?? 'Example modal dialog'}
+        {...props}
+      >
+        <DynContainer spacing="md" className="storybook-modal-content">
+          {content?.(closeModal) ?? (
+            <>
+              <header>
+                <h2 style={{ margin: 0 }}>Modal heading</h2>
+                <p style={{ margin: 0, color: 'var(--dyn-color-text-secondary, #64748b)' }}>
+                  {description ?? 'Showcases modal focus management and dismissal behaviours.'}
+                </p>
+              </header>
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                <DynButton kind="secondary" onClick={closeModal}>
+                  Cancel
+                </DynButton>
+                <DynButton kind="primary" onClick={closeModal}>
+                  Confirm
+                </DynButton>
+              </div>
+            </>
+          )}
+        </DynContainer>
+      </DynModal>
+    </div>
+  );
+};
+
+export const Basic: Story = {
+  name: 'Basic Modal',
+  render: () => <PlaygroundModal />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Default modal showcasing accessible naming, focus trapping and automatic focus return to the trigger button.'
+      }
+    }
+  }
+};
+
+export const PreventOutsideClose: Story = {
+  name: 'Prevent Outside Close',
+  render: () => (
+    <PlaygroundModal
+      closeOnBackdropClick={false}
+      description="Backdrop clicks are ignored while keyboard dismissal remains available."
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Set `closeOnBackdropClick` to `false` to require an explicit action within the modal to dismiss it.'
+      }
+    }
+  }
+};
+
+export const Disabled: Story = {
+  name: 'Disabled Modal',
+  render: () => (
+    <PlaygroundModal
+      disabled
+      description="Modal interactions are disabled; focus remains on the trigger while the dialog stays visible."
+      content={() => (
+        <>
+          <header>
+            <h2 style={{ margin: 0 }}>Processing data…</h2>
+            <p style={{ margin: 0, color: 'var(--dyn-color-text-secondary, #64748b)' }}>
+              Backdrop clicks and Escape are disabled until processing completes.
             </p>
-            <DynButton label="Close" kind="secondary" onClick={() => setOpen(false)} />
+          </header>
+          <p style={{ margin: 0 }}>
+            Use the `disabled` state to prevent premature dismissal while background tasks finish.
+          </p>
+        </>
+      )}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Disabled modals announce `aria-disabled` and block backdrop/Escape dismissal.'
+      }
+    }
+  }
+};
+
+export const FormContent: Story = {
+  name: 'Form Content',
+  render: () => (
+    <PlaygroundModal
+      description="Focus is trapped inside the form inputs until the dialog closes."
+      content={closeModal => (
+        <>
+          <header>
+            <h2 style={{ margin: 0 }}>Invite teammate</h2>
+            <p style={{ margin: 0, color: 'var(--dyn-color-text-secondary, #64748b)' }}>
+              All fields keep focus inside the modal until you submit or cancel.
+            </p>
+          </header>
+          <label style={{ display: 'block' }}>
+            Name
+            <input type="text" placeholder="Jane Doe" style={{ width: '100%', marginTop: '0.5rem' }} />
+          </label>
+          <label style={{ display: 'block' }}>
+            Email
+            <input type="email" placeholder="jane@example.com" style={{ width: '100%', marginTop: '0.5rem' }} />
+          </label>
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+            <DynButton kind="secondary" onClick={closeModal}>
+              Save draft
+            </DynButton>
+            <DynButton kind="primary" onClick={closeModal}>
+              Send
+            </DynButton>
           </div>
-        </DynModal>
-      </div>
-    );
-  },
-  args: {
-    open: undefined,
-    'aria-label': 'Interactive modal',
-  },
+        </>
+      )}
+    />
+  ),
   parameters: {
     docs: {
       description: {
-        story:
-          'An interactive example that demonstrates opening and closing the modal, including focus restoration to the launch button.',
-      },
-    },
-  },
+        story: 'Ideal for forms—focus remains inside the modal and is restored to the trigger on close.'
+      }
+    }
+  }
 };
-
-export const NonDismissable: Story = {
-  args: {
-    open: true,
-    disabled: true,
-    closeOnEscape: false,
-    closeOnOverlayClick: false,
-    'aria-label': 'Non dismissable modal',
-    children: (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h2 style={{ margin: 0 }}>Important update</h2>
-        <p style={{ margin: 0 }}>
-          This modal cannot be dismissed via the overlay or ESC key. Provide an explicit action inside the dialog to
-          continue.
-        </p>
-        <DynButton label="Acknowledge" />
-      </div>
-    ),
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Use the disabled and dismissal control props when the experience must remain on screen until a primary action is taken.',
-      },
-    },
-  },
-};
-
