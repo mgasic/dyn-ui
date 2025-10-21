@@ -5,62 +5,76 @@
 }
 
 .dyn-label {
-  display: inline-block;
-  margin-bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
   font-weight: 500;
   color: var(--color-neutral-dark-90, #333);
   font-size: 0.875rem;
   line-height: 1.4;
-
-  /* Text content */
-  .dyn-label-text {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  /* Requirement indicators */
-  .dyn-label-requirement {
-    font-size: 0.875em;
-    font-weight: normal;
-  }
-
-  .dyn-label-required-asterisk {
-    color: var(--color-feedback-negative, #f44336);
-    font-weight: bold;
-    margin-left: 0.125rem;
-  }
-
-  .dyn-label-optional-text {
-    color: var(--color-neutral-dark-70, #666);
-    font-style: italic;
-    font-weight: normal;
-  }
-
-  /* Disabled state */
-  &.dyn-label-disabled {
-    color: var(--color-neutral-dark-70, #666);
-    opacity: 0.6;
-    cursor: not-allowed;
-
-    .dyn-label-required-asterisk {
-      color: var(--color-neutral-dark-70, #666);
-    }
-
-    .dyn-label-optional-text {
-      color: var(--color-neutral-dark-50, #888);
-    }
-  }
-
-  /* Focus within for better accessibility */
-  &:focus-within {
-    .dyn-label-text {
-      color: var(--color-action-default, #0066cc);
-    }
-  }
 }
 
-/* Help text */
+.dyn-label--with-requirement {
+  gap: 0.5rem;
+}
+
+.dyn-label--disabled {
+  color: var(--color-neutral-dark-70, #666);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dyn-label-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dyn-label:focus-within .dyn-label-text {
+  color: var(--color-action-default, #0066cc);
+}
+
+.dyn-label-requirement {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875em;
+  font-weight: normal;
+}
+
+.dyn-label--required .dyn-label-required-asterisk {
+  color: var(--color-feedback-negative, #f44336);
+  font-weight: bold;
+}
+
+.dyn-label-required-asterisk {
+  display: inline-block;
+  color: var(--color-feedback-negative, #f44336);
+  font-weight: bold;
+  margin-left: 0.125rem;
+}
+
+.dyn-label--optional .dyn-label-optional-text {
+  color: var(--color-neutral-dark-70, #666);
+  font-style: italic;
+  font-weight: normal;
+}
+
+.dyn-label-optional-text {
+  color: var(--color-neutral-dark-70, #666);
+  font-style: italic;
+  font-weight: normal;
+}
+
+.dyn-label--disabled .dyn-label-required-asterisk {
+  color: var(--color-neutral-dark-70, #666);
+}
+
+.dyn-label--disabled .dyn-label-optional-text {
+  color: var(--color-neutral-dark-50, #888);
+}
+
 .dyn-label-help-text {
   font-size: 0.75rem;
   color: var(--color-neutral-dark-70, #666);
@@ -68,14 +82,6 @@
   margin-top: 0.125rem;
 }
 
-/* Field-specific styling */
-.dyn-label-field {
-  margin-bottom: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-/* High contrast mode support */
 @media (prefers-contrast: high) {
   .dyn-label {
     font-weight: 600;
@@ -86,14 +92,12 @@
   }
 }
 
-/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .dyn-label {
     transition: none;
   }
 }
 
-/* Print styles */
 @media print {
   .dyn-label {
     color: black !important;

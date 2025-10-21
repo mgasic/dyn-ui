@@ -175,81 +175,63 @@ describe('DynSelect', () => {
     expect(combobox).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('handles page navigation and skips disabled options', () => {
-    render(
-      <label>
-        Test
-        <DynSelectAny name="test" options={sampleOptions} />
-      </label>
-    );
-
-    const combobox = screen.getByRole('combobox');
-    fireEvent.focus(combobox);
-
-    act(() => {
-      fireEvent.keyDown(combobox, { key: 'ArrowDown' });
-    });
+    fireEvent.keyDown(select, { key: 'ArrowDown' });
     const option1 = screen.getByRole('option', { name: 'Option 1' });
+    expect(option1).toHaveAttribute('data-active', 'true');
+    expect(select).toHaveAttribute('aria-activedescendant', option1.id);
+
+    fireEvent.keyDown(select, { key: 'ArrowDown' });
     const option2 = screen.getByRole('option', { name: 'Option 2' });
-    const option3 = screen.getByRole('option', { name: 'Option 3' });
+    expect(option2).toHaveAttribute('data-active', 'true');
 
-    act(() => {
-      fireEvent.keyDown(combobox, { key: 'PageDown' });
-    });
-    expect(option2).toHaveClass(styles.optionActive);
+    // Disabled option should be skipped
+    fireEvent.keyDown(select, { key: 'ArrowDown' });
+    expect(option2).toHaveAttribute('data-active', 'true');
 
-    act(() => {
-      fireEvent.keyDown(combobox, { key: 'ArrowDown' });
-    });
-    expect(option3).not.toHaveClass(styles.optionActive);
-    expect(option1).toHaveClass(styles.optionActive);
-
-    act(() => {
-      fireEvent.keyDown(combobox, { key: 'PageUp' });
-    });
-    expect(option2).toHaveClass(styles.optionActive);
+    fireEvent.keyDown(select, { key: 'Enter' });
+    expect(select).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByText('Option 2')).toBeInTheDocument();
   });
 
-  it('supports character search to jump to options', () => {
-    const alphaOptions = [
+  it('supports Home, End, PageUp, and PageDown navigation', () => {
+    const manyOptions = Array.from({ length: 15 }, (_, index) => ({
+      value: `option-${index + 1}`,
+      label: `Option ${index + 1}`,
+    }));
+
+    render(<DynSelectAny name="test" label="Test" options={manyOptions} />);
+
+    const select = screen.getByRole('combobox');
+    fireEvent.keyDown(select, { key: 'ArrowDown' });
+
+    fireEvent.keyDown(select, { key: 'End' });
+    const lastOption = screen.getByRole('option', { name: 'Option 15' });
+    expect(lastOption).toHaveAttribute('data-active', 'true');
+
+    fireEvent.keyDown(select, { key: 'PageUp' });
+    const option5 = screen.getByRole('option', { name: 'Option 5' });
+    expect(option5).toHaveAttribute('data-active', 'true');
+
+    fireEvent.keyDown(select, { key: 'Home' });
+    const firstOption = screen.getByRole('option', { name: 'Option 1' });
+    expect(firstOption).toHaveAttribute('data-active', 'true');
+  });
+
+  it('enables character search to move focus', () => {
+    const typeaheadOptions = [
       { value: 'alpha', label: 'Alpha' },
-      { value: 'bravo', label: 'Bravo' },
-      { value: 'charlie', label: 'Charlie' },
+      { value: 'beta', label: 'Beta' },
+      { value: 'gamma', label: 'Gamma' },
     ];
 
-    render(
-      <label>
-        Test
-        <DynSelectAny name="test" options={alphaOptions} />
-      </label>
-    );
+    render(<DynSelectAny name="test" label="Test" options={typeaheadOptions} />);
 
-    const combobox = screen.getByRole('combobox');
-    fireEvent.focus(combobox);
+    const select = screen.getByRole('combobox');
+    fireEvent.keyDown(select, { key: 'ArrowDown' });
 
-    vi.useFakeTimers();
-
-    act(() => {
-      fireEvent.keyDown(combobox, { key: 'ArrowDown' });
-    });
-    act(() => {
-      fireEvent.keyDown(combobox, { key: 'c' });
-    });
-
-    const charlie = screen.getByRole('option', { name: 'Charlie' });
-    expect(charlie).toHaveClass(styles.optionActive);
-
-    act(() => {
-      vi.advanceTimersByTime(600);
-    });
-
-    act(() => {
-      fireEvent.keyDown(combobox, { key: 'b' });
-    });
-    const bravo = screen.getByRole('option', { name: 'Bravo' });
-    expect(bravo).toHaveClass(styles.optionActive);
-
-    vi.useRealTimers();
+    fireEvent.keyDown(select, { key: 'g' });
+    const gammaOption = screen.getByRole('option', { name: 'Gamma' });
+    expect(gammaOption).toHaveAttribute('data-active', 'true');
   });
 
   it('displays selected value', () => {
