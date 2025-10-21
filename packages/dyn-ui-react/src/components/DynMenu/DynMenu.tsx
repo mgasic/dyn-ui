@@ -15,12 +15,14 @@ import type { DynMenuProps, DynMenuItem as DynMenuEntry } from './DynMenu.types'
 
 const getStyleClass = (name: string) => (styles as Record<string, string>)[name] || '';
 
+const isMenuItemDisabled = (item?: DynMenuEntry) => Boolean(item?.disabled || item?.loading);
+
 const findFirstEnabled = (items: DynMenuEntry[]) =>
-  items.findIndex((item) => !item.disabled);
+  items.findIndex((item) => !isMenuItemDisabled(item));
 
 const findLastEnabled = (items: DynMenuEntry[]) => {
   for (let index = items.length - 1; index >= 0; index -= 1) {
-    if (!items[index]?.disabled) return index;
+    if (!isMenuItemDisabled(items[index])) return index;
   }
   return -1;
 };
@@ -30,7 +32,7 @@ const findNextEnabled = (items: DynMenuEntry[], start: number, delta: number) =>
   let next = start;
   for (let iteration = 0; iteration < items.length; iteration += 1) {
     next = (next + delta + items.length) % items.length;
-    if (!items[next]?.disabled) {
+    if (!isMenuItemDisabled(items[next])) {
       return next;
     }
   }
@@ -248,8 +250,7 @@ const DynMenuComponent: React.FC<DynMenuProps> = ({
       case 'Enter':
       case ' ': {
         event.preventDefault();
-        if (focusIndex >= 0 && !resolvedItems[focusIndex]?.disabled) {
-          lastTriggerRef.current = itemRefs.current[focusIndex] ?? lastTriggerRef.current;
+        if (focusIndex >= 0 && !isMenuItemDisabled(resolvedItems[focusIndex])) {
           setOpenIndex((prev) => (prev === focusIndex ? null : focusIndex));
         }
         break;
@@ -280,7 +281,7 @@ const DynMenuComponent: React.FC<DynMenuProps> = ({
   };
 
   const handleSubItemInvoke = (item: DynMenuEntry) => {
-    if (item.disabled) return;
+    if (isMenuItemDisabled(item)) return;
     if (typeof item.action === 'function') {
       try {
         item.action();
@@ -353,7 +354,7 @@ const DynMenuComponent: React.FC<DynMenuProps> = ({
         event.stopPropagation();
         if (current >= 0) {
           const activeItem = childItems[current];
-          if (activeItem && !activeItem.disabled) {
+          if (activeItem && !isMenuItemDisabled(activeItem)) {
             ignoreClickRef.current = menuIdx;
             handleSubItemInvoke(activeItem);
             setFocusIndex(menuIdx);
@@ -425,7 +426,8 @@ const DynMenuComponent: React.FC<DynMenuProps> = ({
               )}
               active={isOpen}
               open={isOpen}
-              disabled={item.disabled}
+              disabled={isMenuItemDisabled(item)}
+              loading={item.loading}
               aria-haspopup={childItems.length ? 'menu' : undefined}
               aria-expanded={childItems.length ? isOpen : undefined}
               aria-controls={childItems.length ? menuId : undefined}
@@ -466,7 +468,8 @@ const DynMenuComponent: React.FC<DynMenuProps> = ({
                     )}
                     active={activeSubIndex === subIndex}
                     tabIndex={activeSubIndex === subIndex ? 0 : -1}
-                    disabled={subItem.disabled}
+                    disabled={isMenuItemDisabled(subItem)}
+                    loading={subItem.loading}
                     onClick={() => handleSubItemInvoke(subItem)}
                   >
                     {subItem.label}
