@@ -1,6 +1,7 @@
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import DynTreeView from './DynTreeView';
-import { DynTreeViewProps, DynTreeNode } from './DynTreeView.types';
+import { DynTreeNode } from './DynTreeView.types';
 
 const meta: Meta<typeof DynTreeView> = {
   title: 'Data Display/DynTreeView',
@@ -278,6 +279,24 @@ export const WithoutIcons: Story = {
   },
 };
 
+export const KeyboardNavigation: Story = {
+  args: {
+    treeData: simpleData,
+    selectable: true,
+    checkable: true,
+    showIcon: true,
+  },
+  render: (args) => (
+    <div>
+      <p style={{ marginBottom: 12 }}>
+        Focus the tree and use the Arrow keys, Home/End, and Enter/Space to traverse and interact with
+        nodes.
+      </p>
+      <DynTreeView {...args} />
+    </div>
+  ),
+};
+
 // Organization Chart
 export const OrganizationChart: Story = {
   args: {
@@ -306,6 +325,44 @@ export const Empty: Story = {
   args: {
     ...Default.args,
     treeData: [],
+  },
+};
+
+export const WithinForm: Story = {
+  args: {
+    treeData: simpleData,
+    selectable: true,
+    multiple: true,
+    checkable: false,
+  },
+  render: (args) => {
+    const FormExample: React.FC = () => {
+      const [selected, setSelected] = React.useState<string[]>([]);
+      const [submitted, setSubmitted] = React.useState<string>('');
+
+      return (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            setSubmitted(selected.join(', '));
+          }}
+          style={{ display: 'grid', gap: 12 }}
+        >
+          <DynTreeView
+            {...args}
+            selectable
+            multiple
+            selectedKeys={selected}
+            onSelect={setSelected}
+          />
+          <input type="hidden" name="selection" value={selected.join(',')} />
+          <button type="submit">Submit</button>
+          <p>Last submitted selection: {submitted || 'None'}</p>
+        </form>
+      );
+    };
+
+    return <FormExample />;
   },
 };
 
