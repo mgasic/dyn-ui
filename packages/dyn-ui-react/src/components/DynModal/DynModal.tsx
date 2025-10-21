@@ -157,7 +157,7 @@ export const DynModal = forwardRef(
     }, [isOpen, returnFocusElement]);
 
     useEffect(() => {
-      if (!isOpen || disabled) return;
+      if (!isOpen) return;
       const element = internalRef.current;
       if (!element) return;
 
@@ -167,7 +167,7 @@ export const DynModal = forwardRef(
     }, [isOpen, disabled]);
 
     useEffect(() => {
-      if (!isOpen || disabled) return;
+      if (!isOpen) return;
       if (typeof document === 'undefined') return;
       const element = internalRef.current;
       if (!element) return;
