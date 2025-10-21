@@ -63,7 +63,7 @@ export type * from './DynMenu';
 export type * from './DynMenuItem';
 export type * from './DynPage';
 export type * from './DynSelect';
-export type * from './DynSelectOption';
+export type { DynSelectOptionProps, DynSelectOptionClassNames } from './DynSelectOption';
 export type * from './DynStepper';
 export type * from './DynTable';
 export type * from './DynTabs';
