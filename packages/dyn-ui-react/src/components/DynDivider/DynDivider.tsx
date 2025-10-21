@@ -14,42 +14,40 @@ const DynDividerComponent = (
   {
     label,
     labelPosition = DYN_DIVIDER_DEFAULT_PROPS.labelPosition,
-    direction = DYN_DIVIDER_DEFAULT_PROPS.direction,
-    thickness = DYN_DIVIDER_DEFAULT_PROPS.thickness,
-    lineStyle = DYN_DIVIDER_DEFAULT_PROPS.lineStyle,
+    variant = DYN_DIVIDER_DEFAULT_PROPS.variant,
+    size = DYN_DIVIDER_DEFAULT_PROPS.size,
     color = DYN_DIVIDER_DEFAULT_PROPS.color,
-    spacing = DYN_DIVIDER_DEFAULT_PROPS.spacing,
     children,
     className,
     id,
+    'aria-label': ariaLabelProp,
+    'aria-labelledby': ariaLabelledByProp,
+    'aria-describedby': ariaDescribedByProp,
+    role: _role,
     'data-testid': dataTestId = DYN_DIVIDER_DEFAULT_PROPS['data-testid'],
     ...rest
   }: DynDividerProps,
   ref: ForwardedRef<DynDividerRef>
 ) => {
   const generatedId = useId();
-  const orientation = direction === 'vertical' ? 'vertical' : 'horizontal';
+  const orientation = variant === 'vertical' ? 'vertical' : 'horizontal';
   const labelContent = children ?? label;
   const labelId = labelContent ? `${id ?? `dyn-divider-${generatedId}`}-label` : undefined;
   const ariaLabel =
-    !labelId && typeof labelContent === 'string' ? labelContent : undefined;
+    ariaLabelProp ?? (!labelId && typeof labelContent === 'string' ? labelContent : undefined);
 
-  const directionClass = styles[`direction${toPascalCase(orientation)}` as keyof typeof styles];
-  const thicknessClass = styles[`thickness${toPascalCase(thickness)}` as keyof typeof styles];
-  const styleClass = styles[`lineStyle${toPascalCase(lineStyle)}` as keyof typeof styles];
+  const variantClass = styles[`variant${toPascalCase(variant)}` as keyof typeof styles];
+  const sizeClass = styles[`size${toPascalCase(size)}` as keyof typeof styles];
   const colorClass = styles[`color${toPascalCase(color)}` as keyof typeof styles];
-  const spacingClass = styles[`spacing${toPascalCase(spacing)}` as keyof typeof styles];
   const labelPositionClass = labelContent
     ? styles[`label${toPascalCase(labelPosition)}` as keyof typeof styles]
     : undefined;
 
   const dividerClassName = cn(
     styles.root,
-    directionClass,
-    thicknessClass,
-    styleClass,
+    variantClass,
+    sizeClass,
     colorClass,
-    spacingClass,
     Boolean(labelContent) && styles.withLabel,
     labelPositionClass,
     className
@@ -61,19 +59,20 @@ const DynDividerComponent = (
       id={id}
       role="separator"
       aria-orientation={orientation}
-      aria-labelledby={labelId}
+      aria-labelledby={ariaLabelledByProp ?? labelId}
       aria-label={ariaLabel}
+      aria-describedby={ariaDescribedByProp}
       className={dividerClassName}
       data-testid={dataTestId}
       {...rest}
     >
-      <span className={styles.line} aria-hidden="true" />
+      {variant !== 'text' ? <span className={styles.line} aria-hidden="true" /> : null}
       {labelContent ? (
         <span className={styles.label} id={labelId}>
           {labelContent}
         </span>
       ) : null}
-      <span className={styles.line} aria-hidden="true" />
+      {variant !== 'text' ? <span className={styles.line} aria-hidden="true" /> : null}
     </div>
   );
 };
