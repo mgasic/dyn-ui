@@ -37,6 +37,11 @@ export type DynFieldContainerSurfaceProps = Pick<
 type PolymorphicComponentProps<E extends ElementType, P> = P &
   Omit<ComponentPropsWithoutRef<E>, keyof P>;
 
+type DynFieldContainerSurfaceProps = Pick<
+  DynBoxProps<'div'>,
+  'background' | 'border' | 'radius'
+>;
+
 export interface DynFieldContainerBaseProps
   extends Omit<BaseComponentProps, 'children'>,
     AccessibilityProps,
