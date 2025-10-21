@@ -43,7 +43,7 @@ All notable changes to the DYN UI React library will be documented in this file.
 #### DynDivider & DynLabel
 - Added missing default exports for consistency
 - Ensured proper component API standardization
-- Removed deprecated SCSS module and leftover backup file now that DynLabel uses CSS modules exclusively
+- Removed deprecated SCSS module and leftover backup file now that DynLabel uses CSS modules exclusively, and aligned the CSS module class names with the component implementation
 
 ### 📁 File Structure Improvements
 - Removed all .scss files and standardized on .module.css
