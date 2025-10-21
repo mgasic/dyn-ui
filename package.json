@@ -48,7 +48,7 @@
     "metrics:collect": "pnpm exec tsx scripts/collect-metrics.ts",
 
     "clean": "node scripts/clean.mjs",
-    "clean:ts": "rimraf **/.tsbuildinfo && pnpm exec tsc --build --clean",
+    "clean:ts": "node scripts/clean-tsbuild.mjs && pnpm exec tsc --build --clean",
 
     "typecheck:dyn-ui": "pnpm exec tsc --project packages/dyn-ui-react/tsconfig.json --noEmit",
     "typecheck:strict": "pnpm exec tsc --project packages/dyn-ui-react/tsconfig.json --noEmit --skipLibCheck false",
@@ -58,7 +58,7 @@
     "typecheck:build": "pnpm exec tsc --build --verbose --listFiles",
 
     "debug:deps": "pnpm exec tsc --showConfig --project packages/dyn-ui-react/tsconfig.json",
-    "debug:resolution": "pnpm exec tsc --project packages/dyn-ui-react/tsconfig.json --traceResolution --noEmit 2>&1 | tee typescript-debug.log",
+    "debug:resolution": "node scripts/ts-trace.mjs",
 
     "validate:all": "pnpm run typecheck && pnpm run lint && pnpm run format:check"
   },
