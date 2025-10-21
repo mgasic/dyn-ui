@@ -4,6 +4,7 @@ import {
   useEffect,
   useId,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -19,6 +20,7 @@ import type {
 } from './DynTextArea.types';
 import { DYN_TEXT_AREA_DEFAULT_PROPS } from './DynTextArea.types';
 import styles from './DynTextArea.module.css';
+import { useI18n } from '../../i18n';
 
 const DynTextAreaComponent = (
   {
@@ -64,6 +66,15 @@ const DynTextAreaComponent = (
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fallbackId = useId();
   const fieldId = id ?? name ?? `${fallbackId}-textarea`;
+
+  const { t } = useI18n();
+
+  const translatedPlaceholder = useMemo(() => {
+    if (typeof placeholder !== 'string') return undefined;
+    const trimmed = placeholder.trim();
+    if (!trimmed) return undefined;
+    return t({ id: trimmed, defaultMessage: trimmed });
+  }, [placeholder, t]);
 
   const { error, validate, clearError } = useDynFieldValidation({
     value,
@@ -275,59 +286,27 @@ const DynTextAreaComponent = (
 
   return (
     <DynFieldContainer {...fieldContainerProps}>
-      <div className={fieldWrapperClasses} data-status={resolvedStatus}>
-        <textarea
-          {...restProps}
-          ref={textareaRef}
-          id={fieldId}
-          name={name}
-          className={textareaClasses}
-          placeholder={placeholder}
-          value={value}
-          disabled={disabled}
-          readOnly={readonly}
-          required={required}
-          rows={rows}
-          cols={cols}
-          maxLength={maxLength}
-          style={style}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          aria-invalid={isErrorState || undefined}
-          aria-required={required || undefined}
-          aria-describedby={ariaDescribedBy}
-          aria-busy={isLoadingState || undefined}
-          data-status={resolvedStatus}
-          data-testid={dataTestId}
-        />
-
-        {resolvedStatusMessage ? (
-          <p
-            id={statusId}
-            className={cn(
-              styles.statusMessage,
-              resolvedStatus === 'warning' && styles.statusMessageWarning,
-              resolvedStatus === 'success' && styles.statusMessageSuccess,
-              resolvedStatus === 'loading' && styles.statusMessageLoading
-            )}
-            role={resolvedStatus === 'loading' ? 'status' : undefined}
-            aria-live={resolvedStatus === 'loading' ? 'polite' : 'off'}
-          >
-            {resolvedStatusMessage}
-          </p>
-        ) : null}
-
-        {counterId && maxLength !== undefined ? (
-          <p
-            id={counterId}
-            className={styles.characterCount}
-            aria-live="polite"
-          >
-            {`${value.length}/${maxLength}`}
-          </p>
-        ) : null}
-      </div>
+      <textarea
+        {...rest}
+        ref={textareaRef}
+        id={fieldId}
+        name={name}
+        className={textareaClasses}
+        placeholder={translatedPlaceholder ?? placeholder}
+        value={value}
+        disabled={disabled}
+        readOnly={readonly}
+        required={required}
+        rows={rows}
+        cols={cols}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        aria-invalid={Boolean(resolvedError)}
+        aria-required={required || undefined}
+        aria-describedby={describedById}
+        data-testid={dataTestId}
+      />
     </DynFieldContainer>
   );
 };
