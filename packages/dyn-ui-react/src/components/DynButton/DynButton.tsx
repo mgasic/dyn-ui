@@ -271,7 +271,7 @@ const DynButtonInner = <E extends ElementType = 'button'>(
     ...rest,
   } as ElementProps<E>;
 
-  if (isNativeButton) {
+  if (isNativeButton || typeof Component !== 'string') {
     (componentProps as React.ButtonHTMLAttributes<HTMLButtonElement>).type = typeProp;
     (componentProps as React.ButtonHTMLAttributes<HTMLButtonElement>).disabled = isDisabled;
   }
