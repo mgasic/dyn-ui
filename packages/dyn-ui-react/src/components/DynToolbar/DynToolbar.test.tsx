@@ -195,6 +195,47 @@ describe('DynToolbar', () => {
     expect(searchInput).toHaveAttribute('placeholder', 'Search placeholder');
   });
 
+  it('keeps focus on the search input when navigating with arrow keys', async () => {
+    const user = userEvent.setup();
+    const searchAndActionItems: ToolbarItem[] = [
+      {
+        id: 'search1',
+        type: 'search',
+        label: 'Search placeholder'
+      },
+      {
+        id: 'bold',
+        label: 'Bold',
+        action: jest.fn()
+      }
+    ];
+
+    render(
+      <DynToolbar
+        items={searchAndActionItems}
+        responsive={false}
+        overflowMenu={false}
+        showLabels
+      />
+    );
+
+    const searchInput = screen.getByRole('searchbox');
+    const boldButton = screen.getByRole('button', { name: 'Bold' });
+
+    searchInput.focus();
+    expect(searchInput).toHaveFocus();
+    expect(searchInput).toHaveAttribute('tabindex', '0');
+    expect(boldButton).toHaveAttribute('tabindex', '-1');
+
+    await user.keyboard('{ArrowRight}');
+
+    await waitFor(() => {
+      expect(searchInput).toHaveFocus();
+      expect(searchInput).toHaveAttribute('tabindex', '0');
+      expect(boldButton).toHaveAttribute('tabindex', '-1');
+    });
+  });
+
   it('renders custom components', () => {
     const customItems: ToolbarItem[] = [
       {

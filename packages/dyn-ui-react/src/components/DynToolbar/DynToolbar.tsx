@@ -31,6 +31,53 @@ const isSymbolicIcon = (icon: string) => {
 
 const OVERFLOW_FOCUS_KEY = '__overflow__';
 
+const TEXTUAL_INPUT_TYPES = new Set([
+  'text',
+  'search',
+  'url',
+  'tel',
+  'email',
+  'password',
+  'number',
+  'date',
+  'datetime-local',
+  'month',
+  'time',
+  'week'
+]);
+
+const isEditableTextControl = (target: EventTarget | null): boolean => {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  if (target.isContentEditable) {
+    return true;
+  }
+
+  if (target instanceof HTMLTextAreaElement) {
+    return !target.readOnly && !target.disabled;
+  }
+
+  if (target instanceof HTMLInputElement) {
+    if (target.readOnly || target.disabled) {
+      return false;
+    }
+
+    const inputType = target.type?.toLowerCase();
+
+    if (!inputType) {
+      return true;
+    }
+
+    if (TEXTUAL_INPUT_TYPES.has(inputType)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
   {
     as: asProp,
@@ -408,6 +455,11 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
   const handleToolbarKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLElement>) => {
+      if (isEditableTextControl(event.target)) {
+        onKeyDownProp?.(event);
+        return;
+      }
+
       const key = event.key;
       let handled = false;
 
