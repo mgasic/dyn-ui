@@ -9,6 +9,8 @@ describe('DynDivider', () => {
     expect(divider).toBeInTheDocument();
     expect(divider).toHaveAttribute('role', 'separator');
     expect(divider).toHaveAttribute('aria-orientation', 'horizontal');
+    expect(divider.className).toContain('variantHorizontal');
+    expect(divider.className).toContain('sizeMd');
   });
 
   it('renders an accessible label when provided', () => {
@@ -39,28 +41,29 @@ describe('DynDivider', () => {
     expect(labelElement).toContainElement(customLabel);
   });
 
-  it('applies configuration modifiers to the class list', () => {
+  it('applies vertical variant tokens', () => {
     render(
-      <DynDivider
-        label="Summary"
-        labelPosition="right"
-        direction="vertical"
-        thickness="thick"
-        lineStyle="dashed"
-        color="primary"
-        spacing="lg"
-      />
+      <DynDivider label="Summary" labelPosition="right" variant="vertical" size="lg" color="primary" />
     );
 
     const divider = screen.getByTestId('dyn-divider');
     const className = divider.className;
 
     expect(divider).toHaveAttribute('aria-orientation', 'vertical');
-    expect(className).toContain('directionVertical');
-    expect(className).toContain('thicknessThick');
-    expect(className).toContain('lineStyleDashed');
+    expect(className).toContain('variantVertical');
+    expect(className).toContain('sizeLg');
     expect(className).toContain('colorPrimary');
-    expect(className).toContain('spacingLg');
     expect(className).toContain('labelRight');
+  });
+
+  it('renders text variant without decorative lines while keeping separator semantics', () => {
+    render(<DynDivider variant="text" aria-label="Section" label="Overview" />);
+
+    const divider = screen.getByRole('separator');
+    const lines = divider.querySelectorAll('[aria-hidden="true"]');
+
+    expect(divider).toHaveAttribute('aria-orientation', 'horizontal');
+    expect(divider.className).toContain('variantText');
+    expect(lines.length).toBe(0);
   });
 });
