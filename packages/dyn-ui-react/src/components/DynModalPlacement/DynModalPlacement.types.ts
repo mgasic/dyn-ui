@@ -14,6 +14,9 @@ export type DynModalVerticalPlacement = 'top' | 'center' | 'bottom' | 'fullscree
 /** Supported horizontal alignment values inside the placement container. */
 export type DynModalHorizontalAlignment = 'start' | 'center' | 'end' | 'stretch';
 
+/** Spacing value accepted by placement props. */
+export type DynModalSpacingValue = number | string;
+
 /**
  * Shared placement configuration that can be passed down from DynModal.
  */
@@ -28,12 +31,12 @@ export interface DynModalPlacementConfig {
    * Optional padding applied to the wrapper. Accepts number (pixels) or full CSS string value.
    * Defaults to `var(--dyn-space-8, 2rem)`.
    */
-  padding?: number | string;
+  padding?: DynModalSpacingValue;
   /**
    * Gap between stacked modal children when more than one modal is rendered.
    * Defaults to `var(--dyn-space-6, 1.5rem)`.
    */
-  gap?: number | string;
+  gap?: DynModalSpacingValue;
   /**
    * Allows the modal content to overflow the viewport without clipping.
    * By default the wrapper will create an auto-scroll container.

@@ -234,6 +234,36 @@ describe('DynTreeView', () => {
       expect(updatedTree!).toHaveClass('show-line');
       expect(updatedTree!).toHaveClass('dyn-tree-view--show-line');
     });
+
+    it('wraps node content with DynTreeNode when enabled', () => {
+      render(
+        <DynTreeView
+          treeData={sampleTreeData}
+          useDynTreeNodeLayout
+          nodeLayoutProps={{ gap: 'md', direction: 'row' }}
+        />
+      );
+
+      const firstNode = screen.getByRole('treeitem', { name: /parent 1/i });
+      expect(firstNode).toHaveClass('dyn-tree-node', 'dyn-tree-node--row');
+      expect(firstNode).toHaveStyle({
+        gap: 'var(--dyn-spacing-md, var(--spacing-md, 1rem))',
+      });
+    });
+
+    it('allows nodeLayoutProps styles to override indentation', () => {
+      render(
+        <DynTreeView
+          treeData={sampleTreeData}
+          defaultExpandAll
+          useDynTreeNodeLayout
+          nodeLayoutProps={{ style: { paddingLeft: 8 } }}
+        />
+      );
+
+      const childNode = screen.getByRole('treeitem', { name: /child 1/i });
+      expect(childNode).toHaveStyle({ paddingLeft: '8px' });
+    });
   });
 
   describe('Keyboard interactions', () => {
