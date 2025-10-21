@@ -1,24 +1,21 @@
 import React, { forwardRef } from 'react';
 import classNames from 'classnames';
 import type { DynTreeNodeComponent, DynTreeNodeProps, DynTreeNodeSpacing } from './DynTreeNode.types';
+import { tokens } from '../../tokens';
 import styles from './DynTreeNode.module.css';
 
-const SPACING_TOKENS: Record<string, string> = {
-  none: '0',
-  '0': '0',
-  xs: '0.25rem',
-  sm: '0.5rem',
-  md: '1rem',
-  lg: '1.5rem',
-  xl: '2rem',
-  '2xl': '3rem',
-};
+const spacingValues = tokens.spacing as Record<string, string>;
 
 const toSpacingVar = (token: string) => {
-  if (token === '0') return '0';
+  if (token === '0' || token === 'none') return '0';
   const normalized = token.toLowerCase();
-  const fallback = SPACING_TOKENS[normalized] ?? token;
+  const fallback = spacingValues[normalized] ?? spacingValues[token] ?? token;
   return `var(--dyn-spacing-${normalized}, var(--spacing-${normalized}, ${fallback}))`;
+};
+
+const hasSpacingToken = (token: string) => {
+  const normalized = token.toLowerCase();
+  return normalized in spacingValues || token in spacingValues;
 };
 
 const resolveSpacing = (value?: DynTreeNodeSpacing) => {
@@ -31,13 +28,9 @@ const resolveSpacing = (value?: DynTreeNodeSpacing) => {
   const trimmed = value.trim();
   if (!trimmed) return undefined;
   if (trimmed === 'auto') return 'auto';
-  if (trimmed === '0') return '0';
-  if (trimmed.toLowerCase() === 'none') return '0';
-  if (SPACING_TOKENS[trimmed]) {
+  if (trimmed === '0' || trimmed.toLowerCase() === 'none') return '0';
+  if (hasSpacingToken(trimmed)) {
     return toSpacingVar(trimmed);
-  }
-  if (SPACING_TOKENS[trimmed.toLowerCase()]) {
-    return toSpacingVar(trimmed.toLowerCase());
   }
   return trimmed;
 };
