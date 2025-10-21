@@ -124,6 +124,26 @@ describe('DynStepper', () => {
     expect(screen.getByLabelText('Step 2')).toHaveAccessibleName('Step 2');
   });
 
+  it('normalizes whitespace-only titles when computing aria-labels', () => {
+    const stepsWithWhitespaceTitles: StepItem[] = [
+      {
+        id: 'shipping',
+        title: '   ',
+        label: 'Shipping Details',
+        content: <div>Shipping Content</div>
+      },
+      {
+        id: 'billing',
+        content: <div>Billing Content</div>
+      }
+    ];
+
+    render(<DynStepper steps={stepsWithWhitespaceTitles} showLabels={false} />);
+
+    expect(screen.getByLabelText('Shipping Details')).toHaveAccessibleName('Shipping Details');
+    expect(screen.getByLabelText('Step 2')).toHaveAccessibleName('Step 2');
+  });
+
   it('respects defaultActiveStep prop', () => {
     render(<DynStepper steps={mockSteps} defaultActiveStep={1} />);
 
