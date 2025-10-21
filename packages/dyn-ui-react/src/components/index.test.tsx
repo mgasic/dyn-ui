@@ -26,6 +26,7 @@ import {
   DynContainer,
   DynDivider,
   DynGrid,
+  DynComponentName,
   DynPage,
   DynUI,
 
@@ -98,6 +99,7 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynContainer)).toBe(true);
     expect(isComponentExport(DynDivider)).toBe(true);
     expect(isComponentExport(DynGrid)).toBe(true);
+    expect(isComponentExport(DynComponentName)).toBe(true);
     expect(isComponentExport(DynPage)).toBe(true);
     expect(isComponentExport(DynUI)).toBe(true);
   });

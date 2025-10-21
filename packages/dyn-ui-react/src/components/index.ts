@@ -4,6 +4,7 @@
 export { DynAvatar } from './DynAvatar';
 export { DynBadge } from './DynBadge';
 export { DynBox } from './DynBox';
+export { DynComponentName } from './DynComponentName';
 export { DynBreadcrumb } from './DynBreadcrumb';
 export { DynBreadcrumbItem } from './DynBreadcrumbItem';
 export { DynButton } from './DynButton';
@@ -51,6 +52,7 @@ export { generateInitials } from '../utils/dynFormatters';
 export type * from './DynAvatar';
 export type * from './DynBadge';
 export type * from './DynBox';
+export type * from './DynComponentName';
 export type * from './DynBreadcrumb';
 export type * from './DynBreadcrumbItem';
 export type * from './DynButton';

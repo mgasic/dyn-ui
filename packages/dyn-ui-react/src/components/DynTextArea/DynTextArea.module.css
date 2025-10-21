@@ -10,8 +10,22 @@
   --dyn-textarea-disabled-color: var(--dyn-color-text-disabled, var(--color-text-disabled, #9ca3af));
   --dyn-textarea-readonly-bg: var(--dyn-color-surface-readonly, var(--color-surface-readonly, #f9fafb));
   --dyn-textarea-error: var(--dyn-color-danger, var(--color-danger, #d32f2f));
+  --dyn-textarea-warning: var(--dyn-color-warning, var(--color-warning, #f59e0b));
+  --dyn-textarea-success: var(--dyn-color-success, var(--color-success, #10b981));
+  --dyn-textarea-loading: var(--dyn-color-info, var(--color-info, #3b82f6));
+  --dyn-textarea-status-text: var(
+    --dyn-color-text-secondary,
+    var(--color-text-secondary, #6b7280)
+  );
 
   display: flex;
+  width: 100%;
+}
+
+.fieldWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dyn-spacing-xs, var(--spacing-xs, 0.5rem));
   width: 100%;
 }
 
@@ -61,6 +75,31 @@
   border-color: var(--dyn-textarea-error);
 }
 
+.textareaWarning {
+  border-color: var(--dyn-textarea-warning);
+}
+
+.textareaSuccess {
+  border-color: var(--dyn-textarea-success);
+}
+
+.textareaLoading {
+  border-color: var(--dyn-textarea-loading);
+  cursor: progress;
+  background-image: linear-gradient(
+    90deg,
+    rgba(59, 130, 246, 0.08) 0%,
+    rgba(59, 130, 246, 0.16) 50%,
+    rgba(59, 130, 246, 0.08) 100%
+  );
+  background-size: 200% 100%;
+  animation: textareaLoadingAnimation 1.5s ease-in-out infinite;
+}
+
+.textareaAutoResize {
+  overflow-y: hidden;
+}
+
 .textareaResizeNone {
   resize: none;
 }
@@ -71,6 +110,40 @@
 
 .textareaResizeBoth {
   resize: both;
+}
+
+.statusMessage {
+  margin: 0;
+  font-size: var(--dyn-font-size-sm, var(--font-size-sm, 0.875rem));
+  color: var(--dyn-textarea-status-text);
+}
+
+.statusMessageWarning {
+  color: var(--dyn-textarea-warning);
+}
+
+.statusMessageSuccess {
+  color: var(--dyn-textarea-success);
+}
+
+.statusMessageLoading {
+  color: var(--dyn-textarea-loading);
+}
+
+.characterCount {
+  margin: 0;
+  align-self: flex-end;
+  font-size: var(--dyn-font-size-sm, var(--font-size-sm, 0.875rem));
+  color: var(--dyn-textarea-status-text);
+}
+
+@keyframes textareaLoadingAnimation {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @media (max-width: 767px) {

@@ -15,12 +15,17 @@ const meta: Meta<typeof DynPage> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'Complete page layout component with header, breadcrumbs, actions, and flexible content area.'
+        component:
+          'Complete page layout component with header, breadcrumbs, actions, flexible content area, and semantic helpers for accessible landmarks.'
       }
     }
   },
   tags: ['autodocs'],
   argTypes: {
+    as: {
+      control: 'text',
+      description: 'Polymorphic element rendered by the page root. Defaults to `<main>`.'
+    },
     size: {
       control: 'select',
       options: ['small', 'medium', 'large']
@@ -28,6 +33,11 @@ const meta: Meta<typeof DynPage> = {
     padding: {
       control: 'select',
       options: ['none', 'xs', 'sm', 'md', 'lg', 'xl']
+    },
+    headerPadding: {
+      control: 'select',
+      options: ['none', 'xs', 'sm', 'md', 'lg', 'xl'],
+      description: 'Overrides header padding using design tokens.'
     },
     background: {
       control: 'select',
@@ -251,6 +261,97 @@ export const CustomPadding: Story = {
         </div>
       </div>
     )
+  }
+};
+
+export const AlternativeSemantic: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'DynPage renders a `<main>` by default. Use the `as` prop with an explicit `aria-labelledby` reference when embedding the page layout inside other landmarks.'
+      }
+    }
+  },
+  render: (args) => {
+    const headingId = 'reports-dashboard-heading';
+
+    return (
+      <div style={{ padding: '1.5rem', background: '#f8fafc' }}>
+        <h1 id={headingId} style={{ marginBottom: '1rem' }}>
+          Executive Reports Overview
+        </h1>
+        <DynPage {...args} aria-labelledby={headingId} />
+      </div>
+    );
+  },
+  args: {
+    as: 'section',
+    title: 'Reports Dashboard',
+    subtitle: 'Embedded inside a larger document structure',
+    breadcrumbs,
+    actions,
+    children: <SampleContent />
+  }
+};
+
+export const CustomHeaderSlot: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The `slots.header` render prop allows replacing the header content while preserving breadcrumb and action helpers.'
+      }
+    }
+  },
+  args: {
+    title: 'Analytics Overview',
+    subtitle: 'Custom header composition via slot',
+    breadcrumbs,
+    actions,
+    slots: {
+      header: ({ titleId, renderBreadcrumbs, renderActions, subtitle }) => (
+        <>
+          <div style={{ marginBottom: '1rem' }}>{renderBreadcrumbs()}</div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              gap: '1.5rem'
+            }}
+          >
+            <div>
+              <h1 id={titleId} style={{ margin: 0 }}>
+                Quarterly Analytics
+              </h1>
+              {subtitle && (
+                <p style={{ margin: '0.25rem 0 0', color: '#475569' }}>{subtitle}</p>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>{renderActions()}</div>
+          </div>
+        </>
+      )
+    },
+    children: <SampleContent />
+  }
+};
+
+export const ResponsivePadding: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Responsive breakpoints automatically collapse large paddings on narrow viewports. Resize the Storybook canvas to see the `padding="xl"` tokens adjust to mobile spacing.'
+      }
+    }
+  },
+  args: {
+    title: 'Responsive Padding',
+    subtitle: 'Uses spacing tokens that adapt on small screens',
+    padding: 'xl',
+    children: <SampleContent />
   }
 };
 

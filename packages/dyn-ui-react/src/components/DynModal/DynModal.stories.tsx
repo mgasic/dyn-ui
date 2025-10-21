@@ -12,8 +12,20 @@ const meta: Meta<typeof DynModal> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'Enterprise modal component with built-in focus trapping, scroll locking and accessible dismissal controls.'
+        component: `Enterprise modal component with built-in focus trapping, scroll locking and accessible dismissal controls.
+
+### Accessibility
+
+- Opening the modal captures focus on the first focusable element (or the dialog itself) and prevents tabbing outside.
+- Dismissing the modal restores focus to the trigger element or a custom \`returnFocusElement\`.
+- Escape and backdrop clicks call \`onClose\` when enabled, while disabled modals announce \`aria-disabled\`.
+
+### Keyboard interactions
+
+- Tab/Shift+Tab cycle through focusable elements within the modal.
+- Escape invokes \`onClose\` (unless \`closeOnEsc\` is \`false\`).
+- Focus is restored to the opener once the modal unmounts.
+`
       }
     }
   }
@@ -58,10 +70,10 @@ const PlaygroundModal: React.FC<
                 </p>
               </header>
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                <DynButton kind="secondary" onClick={closeModal}>
+                <DynButton variant="secondary" onClick={closeModal}>
                   Cancel
                 </DynButton>
-                <DynButton kind="primary" onClick={closeModal}>
+                <DynButton variant="primary" onClick={closeModal}>
                   Confirm
                 </DynButton>
               </div>
@@ -156,10 +168,10 @@ export const FormContent: Story = {
             <input type="email" placeholder="jane@example.com" style={{ width: '100%', marginTop: '0.5rem' }} />
           </label>
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-            <DynButton kind="secondary" onClick={closeModal}>
+            <DynButton variant="secondary" onClick={closeModal}>
               Save draft
             </DynButton>
-            <DynButton kind="primary" onClick={closeModal}>
+            <DynButton variant="primary" onClick={closeModal}>
               Send
             </DynButton>
           </div>

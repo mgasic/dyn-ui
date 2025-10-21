@@ -1,12 +1,35 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {
+  DYN_BADGE_COLORS,
+  DYN_BADGE_SIZES,
+  DYN_BADGE_STATES,
+  DYN_BADGE_VARIANTS,
+} from '../../types/badge.types';
 import { DynBadge } from './DynBadge';
 import styles from './DynBadge.module.css';
 
 const classes = styles as Record<string, string>;
 
 describe('DynBadge', () => {
+  describe('Exports', () => {
+    it('re-exports runtime badge tokens', () => {
+      expect(DYN_BADGE_SIZES).toEqual(['small', 'medium', 'large']);
+      expect(DYN_BADGE_VARIANTS).toEqual(['solid', 'soft', 'outline', 'dot']);
+      expect(DYN_BADGE_STATES).toEqual(['neutral', 'info', 'success', 'warning', 'danger']);
+      expect(DYN_BADGE_COLORS).toEqual([
+        'primary',
+        'secondary',
+        'neutral',
+        'info',
+        'success',
+        'warning',
+        'danger',
+      ]);
+    });
+  });
+
   describe('Basic Functionality', () => {
     it('renders badge with text content', () => {
       render(<DynBadge>New</DynBadge>);

@@ -209,6 +209,14 @@
   line-height: 0;
 }
 
+.iconStart {
+  order: 0;
+}
+
+.iconEnd {
+  order: 2;
+}
+
 .label {
   display: inline-flex;
   align-items: center;
