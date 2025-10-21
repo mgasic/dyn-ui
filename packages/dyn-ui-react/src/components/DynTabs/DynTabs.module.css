@@ -13,6 +13,10 @@
   position: relative;
 }
 
+.tabs--disabled {
+  opacity: var(--dyn-opacity-disabled, 0.5);
+}
+
 /* Position variants */
 .tabs--top {
   flex-direction: column;
@@ -58,6 +62,12 @@
   border-bottom: var(--dyn-border-width, 1px) solid var(--dyn-color-border, var(--color-border, #e5e7eb));
   padding: var(--dyn-spacing-xs, var(--spacing-xs, 0.25rem));
   gap: var(--dyn-spacing-xxs, var(--spacing-xxs, 0.125rem));
+}
+
+.tablist[aria-orientation='vertical'] {
+  flex-direction: column;
+  border-bottom: none;
+  border-right: var(--dyn-border-width, 1px) solid var(--dyn-color-border, var(--color-border, #e5e7eb));
 }
 
 /* Close buttons container (visual placement over tabs) */

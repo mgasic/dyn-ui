@@ -4,6 +4,7 @@ import { cn } from '../../utils/classNames';
 import type { ThemeSwitcherProps } from './ThemeSwitcher.types';
 export type { ThemeSwitcherProps } from './ThemeSwitcher.types';
 import styles from './ThemeSwitcher.module.css';
+import { useI18n } from '../../i18n';
 
 const sizeClassMap: Record<NonNullable<ThemeSwitcherProps['size']>, string> = {
   sm: styles.sizeSm,
@@ -17,6 +18,13 @@ const roundedClassMap: Record<NonNullable<ThemeSwitcherProps['rounded']>, string
   full: styles.roundedFull,
 };
 
+const toHumanReadable = (value: string) =>
+  value
+    .split(/[-_]/g)
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ') || value;
+
 export function ThemeSwitcher({
   themes,
   size = 'md',
@@ -28,31 +36,51 @@ export function ThemeSwitcher({
   activeButtonClassName,
 }: ThemeSwitcherProps) {
   const { theme, setTheme, availableThemes } = useTheme();
+  const { t } = useI18n();
   const themeList = themes && themes.length ? themes : availableThemes;
 
   const handleThemeChange = (newTheme: Theme) => {
-    console.log(`Switching theme from ${theme} to ${newTheme}`);
     setTheme(newTheme);
     onChange?.(newTheme);
   };
 
+  const switcherLabel = React.useMemo(
+    () => t({ id: 'theme.switcher', defaultMessage: 'Theme switcher' }),
+    [t]
+  );
+
+  const resolveLabel = React.useCallback(
+    (value: Theme) => {
+      const provided = labels?.[value];
+      if (typeof provided === 'string') {
+        const trimmed = provided.trim();
+        if (trimmed) {
+          return t({ id: trimmed, defaultMessage: trimmed });
+        }
+      }
+      const fallback = toHumanReadable(String(value));
+      return t({ id: `theme.${String(value)}`, defaultMessage: fallback });
+    },
+    [labels, t]
+  );
+
   return (
     <div
       role="tablist"
-      aria-label="Theme switcher"
+      aria-label={switcherLabel}
       className={cn(styles.toggleGroup, sizeClassMap[size], roundedClassMap[rounded], className)}
     >
-      {themeList.map((t) => {
-        const isActive = theme === t;
-        const label = labels?.[t] ?? t.charAt(0).toUpperCase() + t.slice(1);
+      {themeList.map((themeName) => {
+        const isActive = theme === themeName;
+        const label = resolveLabel(themeName);
 
         return (
           <button
-            key={t}
+            key={themeName}
             type="button"
             role="tab"
             aria-selected={isActive}
-            onClick={() => handleThemeChange(t)}
+            onClick={() => handleThemeChange(themeName)}
             className={cn(
               styles.toggleGroupButton,
               buttonClassName,

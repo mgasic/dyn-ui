@@ -26,6 +26,7 @@ import {
   DynContainer,
   DynDivider,
   DynGrid,
+  DynComponentName,
   DynPage,
   DynUI,
 
@@ -34,6 +35,7 @@ import {
   DynGauge,
   DynListItem,
   DynListView,
+  DynNewComponent,
   DynTable,
   DynTreeView,
 
@@ -97,6 +99,7 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynContainer)).toBe(true);
     expect(isComponentExport(DynDivider)).toBe(true);
     expect(isComponentExport(DynGrid)).toBe(true);
+    expect(isComponentExport(DynComponentName)).toBe(true);
     expect(isComponentExport(DynPage)).toBe(true);
     expect(isComponentExport(DynUI)).toBe(true);
   });
@@ -108,6 +111,10 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynListView)).toBe(true);
     expect(isComponentExport(DynTable)).toBe(true);
     expect(isComponentExport(DynTreeView)).toBe(true);
+  });
+
+  it('exports utility layout helpers', () => {
+    expect(isComponentExport(DynNewComponent)).toBe(true);
   });
 
   it('exports all navigation components', () => {

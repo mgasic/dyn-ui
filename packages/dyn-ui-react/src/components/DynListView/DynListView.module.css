@@ -203,6 +203,14 @@
     transform var(--dyn-transition-fast, 0.15s ease);
 }
 
+.rootZebra .option:nth-child(even),
+:global(.dyn-list-view--zebra .dyn-list-view__item:nth-child(even)) {
+  background-color: var(
+    --dyn-list-view-zebra-background,
+    var(--dyn-color-background-hover, rgba(15, 23, 42, 0.04))
+  );
+}
+
 .actionButton:hover:not(:disabled),
 .action-button:hover:not(:disabled),
 :global(.dyn-list-view__action-button:hover) {

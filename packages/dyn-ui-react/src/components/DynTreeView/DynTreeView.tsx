@@ -261,6 +261,22 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
         nodeRefs.current[node.key] = element as HTMLDivElement | null;
       };
 
+      const handleNodeClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
+        if (event.defaultPrevented || node.disabled) {
+          return;
+        }
+        if (selectable) {
+          handleSelect(node, !isSelected);
+        }
+        setFocusedKey(node.key);
+      };
+
+      const handleNodeFocus: React.FocusEventHandler<HTMLDivElement> = () => {
+        if (!node.disabled) {
+          setFocusedKey(node.key);
+        }
+      };
+
       const nodeProps = {
         ref: setNodeRef,
         id: nodeId,
@@ -273,6 +289,8 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
         'aria-posinset': position,
         tabIndex: focusedKey === node.key ? 0 : -1,
         'data-parent-key': parentKey,
+        onClick: handleNodeClick,
+        onFocus: handleNodeFocus,
       };
 
       const sharedContent = (
@@ -281,7 +299,11 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
           {hasChildren ? (
             <div
               className={styles['dyn-tree-view__node-switcher']}
-              onClick={() => handleExpand(node.key, !isExpanded)}
+              onClick={(event) => {
+                event.stopPropagation();
+                handleExpand(node.key, !isExpanded);
+                setFocusedKey(node.key);
+              }}
             >
               <span className={styles['dyn-tree-view__expand-icon']}>
                 {isExpanded ? '▼' : '▶'}
@@ -300,7 +322,12 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
                 type="checkbox"
                 checked={isChecked}
                 disabled={node.disabled}
-                onChange={(e) => handleCheck(node, e.target.checked)}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleCheck(node, e.target.checked);
+                  setFocusedKey(node.key);
+                }}
+                onClick={(event) => event.stopPropagation()}
               />
             </div>
           )}
@@ -321,15 +348,6 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
               }
             )}
             style={{ paddingLeft: (level - 1) * 24 }}
-            role="treeitem"
-            aria-selected={selectable ? isSelected : undefined}
-            aria-disabled={node.disabled ? true : undefined}
-            aria-expanded={hasChildren ? isExpanded : undefined}
-            aria-level={level}
-            aria-setsize={setSize}
-            aria-posinset={position}
-            tabIndex={focusedKey === node.key ? 0 : -1}
-            data-parent-key={parentKey}
           >
             {node.title}
           </div>
