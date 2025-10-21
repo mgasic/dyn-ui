@@ -1,2 +1,6 @@
 export { DynFieldContainer } from './DynFieldContainer';
-export type { DynFieldContainerProps } from './DynFieldContainer.types';
+export type {
+  DynFieldContainerProps,
+  DynFieldContainerRef,
+  DynFieldContainerSpacingProps,
+} from './DynFieldContainer.types';
