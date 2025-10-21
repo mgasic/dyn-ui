@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DynNewComponent snapshots > matches the default wrapper snapshot 1`] = `
+<div>
+  <div
+    class="_root_052305"
+    data-testid="dyn-new-component"
+    style="--dyn-new-component-gap: var(--dyn-spacing-md, var(--spacing-md, 1rem)); --dyn-new-component-padding: var(--dyn-spacing-lg, var(--spacing-lg, 1.5rem)); --dyn-new-component-margin: var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem));"
+  >
+    <div>
+      First block
+    </div>
+    <div>
+      Second block
+    </div>
+  </div>
+</div>
+`;

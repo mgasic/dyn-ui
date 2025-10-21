@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import type { CSSProperties } from 'react';
 import { DynUI } from './DynUI';
+import { DynTreeNode } from '../DynTreeNode';
 
 const meta: Meta<typeof DynUI> = {
   title: 'Components/Layout/DynUI',
@@ -113,4 +115,50 @@ export const ResponsiveSpacing: Story = {
       <p>Gap increases to `lg` on medium screens.</p>
     </DynUI>
   ),
+};
+
+export const RootLayoutWithTree: Story = {
+  render: () => {
+    const surfaceStyles: CSSProperties = { display: 'flex', flexDirection: 'column' };
+    const treeStyles = {
+      '--dyn-tree-node-nested-offset': '1.5rem',
+      '--dyn-tree-node-nested-gap': '0.75rem',
+      border: '1px solid var(--dyn-color-border-muted, rgba(15, 23, 42, 0.12))',
+      borderRadius: '0.75rem',
+      padding: '1rem',
+    } as CSSProperties;
+
+    return (
+      <DynUI as="main" tone="surface" p="lg" gap="md" style={surfaceStyles}>
+        <header>
+          <h2>Team Overview</h2>
+          <p>DynUI provides the root layout surface while DynTreeNode handles nested hierarchy.</p>
+        </header>
+        <DynTreeNode direction="column" gap="sm" style={treeStyles}>
+          <DynTreeNode>
+            <strong>Design</strong>
+          </DynTreeNode>
+          <DynTreeNode direction="column" gap="xs">
+            <DynTreeNode>Foundations</DynTreeNode>
+            <DynTreeNode>Components</DynTreeNode>
+          </DynTreeNode>
+          <DynTreeNode>
+            <strong>Engineering</strong>
+          </DynTreeNode>
+          <DynTreeNode direction="column" gap="xs">
+            <DynTreeNode>Frontend</DynTreeNode>
+            <DynTreeNode>Backend</DynTreeNode>
+          </DynTreeNode>
+        </DynTreeNode>
+      </DynUI>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Illustrates DynUI as the root semantic container with DynTreeNode orchestrating nested structure using shared spacing tokens.',
+      },
+    },
+  },
 };

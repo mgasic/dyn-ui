@@ -1,5 +1,6 @@
 import React, { forwardRef, useMemo } from 'react';
 import { cn } from '../../utils/classNames';
+import { tokens } from '../../tokens';
 import type {
   DynComponentNameBreakpoint,
   DynComponentNameProps,
@@ -11,14 +12,7 @@ import styles from './DynComponentName.module.css';
 
 const RESPONSIVE_BREAKPOINTS: Exclude<DynComponentNameBreakpoint, 'base'>[] = ['sm', 'md', 'lg', 'xl'];
 
-const SPACING_TOKENS: Record<Exclude<DynComponentNameSpacingToken, '0' | 'auto'>, string> = {
-  xs: '0.25rem',
-  sm: '0.5rem',
-  md: '1rem',
-  lg: '1.5rem',
-  xl: '2rem',
-  '2xl': '3rem',
-};
+const spacingValues = tokens.spacing as Record<string, string>;
 
 const isResponsiveObject = (
   value: DynComponentNameResponsiveSpacingValue | undefined
@@ -72,7 +66,7 @@ const toSpacingCssValue = (
     return '0';
   }
 
-  const token = SPACING_TOKENS[value as Exclude<DynComponentNameSpacingToken, '0' | 'auto'>];
+  const token = spacingValues[value as string] ?? spacingValues[String(value).toLowerCase()];
   if (token) {
     return `var(--dyn-spacing-${value}, var(--spacing-${value}, ${token}))`;
   }

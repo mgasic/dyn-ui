@@ -1,6 +1,7 @@
 import React, { forwardRef, useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { cn } from '../../utils/classNames';
+import { tokens } from '../../tokens';
 import {
   DYN_CONTAINER_DEFAULT_PROPS,
   type DynContainerBaseProps,
@@ -13,13 +14,17 @@ import styles from './DynContainer.module.css';
 
 const toPascalCase = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
+const spacingValues = tokens.spacing as Record<string, string>;
+const spacingVar = (key: keyof typeof spacingValues) =>
+  `var(--dyn-spacing-${key}, var(--spacing-${key}, ${spacingValues[key]}))`;
+
 const SPACING_TOKENS: Record<string, string> = {
   none: '0',
-  xs: 'var(--dyn-spacing-xs, var(--spacing-xs, 0.25rem))',
-  sm: 'var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem))',
-  md: 'var(--dyn-spacing-md, var(--spacing-md, 1rem))',
-  lg: 'var(--dyn-spacing-lg, var(--spacing-lg, 1.5rem))',
-  xl: 'var(--dyn-spacing-xl, var(--spacing-xl, 2rem))',
+  xs: spacingVar('xs'),
+  sm: spacingVar('sm'),
+  md: spacingVar('md'),
+  lg: spacingVar('lg'),
+  xl: spacingVar('xl'),
 };
 
 const MAX_WIDTH_TOKENS: Record<DynContainerMaxWidthToken, string> = {

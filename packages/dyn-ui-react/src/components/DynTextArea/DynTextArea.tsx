@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useId,
   useImperativeHandle,
@@ -11,7 +12,11 @@ import { DynFieldContainer } from '../DynFieldContainer';
 import type { DynFieldContainerProps } from '../DynFieldContainer';
 import { useDynFieldValidation } from '../../hooks/useDynFieldValidation';
 import { cn } from '../../utils/classNames';
-import type { DynTextAreaProps, DynTextAreaRef } from './DynTextArea.types';
+import type {
+  DynTextAreaProps,
+  DynTextAreaRef,
+  DynTextAreaStatus,
+} from './DynTextArea.types';
 import { DYN_TEXT_AREA_DEFAULT_PROPS } from './DynTextArea.types';
 import styles from './DynTextArea.module.css';
 
@@ -27,13 +32,18 @@ const DynTextAreaComponent = (
     required = DYN_TEXT_AREA_DEFAULT_PROPS.required,
     optional = DYN_TEXT_AREA_DEFAULT_PROPS.optional,
     visible = DYN_TEXT_AREA_DEFAULT_PROPS.visible,
-    value: valueProp = DYN_TEXT_AREA_DEFAULT_PROPS.value,
+    value: valueProp,
+    defaultValue = DYN_TEXT_AREA_DEFAULT_PROPS.defaultValue,
     errorMessage,
+    status = DYN_TEXT_AREA_DEFAULT_PROPS.status,
+    statusMessage = DYN_TEXT_AREA_DEFAULT_PROPS.statusMessage,
     validation,
     className,
     resize = DYN_TEXT_AREA_DEFAULT_PROPS.resize,
     rows = DYN_TEXT_AREA_DEFAULT_PROPS.rows,
     cols,
+    autoResize = DYN_TEXT_AREA_DEFAULT_PROPS.autoResize,
+    showCharacterCount = DYN_TEXT_AREA_DEFAULT_PROPS.showCharacterCount,
     onChange,
     onBlur,
     onFocus,
@@ -42,7 +52,14 @@ const DynTextAreaComponent = (
   }: DynTextAreaProps,
   ref: ForwardedRef<DynTextAreaRef>
 ) => {
-  const [value, setValue] = useState<string>(valueProp ?? '');
+  const {
+    maxLength,
+    style,
+    'aria-describedby': ariaDescribedByProp,
+    ...restProps
+  } = rest;
+
+  const [value, setValue] = useState<string>(() => valueProp ?? defaultValue ?? '');
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fallbackId = useId();
@@ -55,63 +72,168 @@ const DynTextAreaComponent = (
     customError: errorMessage,
   });
 
+  const adjustHeight = useCallback(() => {
+    if (!autoResize) {
+      return;
+    }
+
+    const element = textareaRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    element.style.height = 'auto';
+    element.style.height = `${element.scrollHeight}px`;
+  }, [autoResize]);
+
+  const scheduleHeightAdjustment = useCallback(() => {
+    if (!autoResize) {
+      return;
+    }
+
+    if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(adjustHeight);
+      return;
+    }
+
+    adjustHeight();
+  }, [adjustHeight, autoResize]);
+
   useImperativeHandle(
     ref,
     () => ({
       focus: () => textareaRef.current?.focus(),
+      blur: () => textareaRef.current?.blur(),
       validate: () => validate(),
       clear: () => {
         setValue('');
         onChange?.('');
         clearError();
+        scheduleHeightAdjustment();
+        if (textareaRef.current) {
+          textareaRef.current.value = '';
+        }
       },
-      getValue: () => value,
+      getValue: () => textareaRef.current?.value ?? value,
       setValue: (newValue: unknown) => {
         const stringValue = String(newValue ?? '');
         setValue(stringValue);
         onChange?.(stringValue);
+        scheduleHeightAdjustment();
+        if (textareaRef.current) {
+          textareaRef.current.value = stringValue;
+        }
       },
+      getElement: () => textareaRef.current,
     }),
-    [clearError, onChange, validate, value]
+    [adjustHeight, autoResize, clearError, onChange, scheduleHeightAdjustment, validate, value]
   );
 
   useEffect(() => {
-    setValue(valueProp ?? '');
+    if (valueProp !== undefined) {
+      setValue(valueProp);
+    }
   }, [valueProp]);
+
+  useEffect(() => {
+    if (valueProp === undefined && defaultValue !== undefined) {
+      setValue(defaultValue);
+    }
+  }, [defaultValue, valueProp]);
+
+  useEffect(() => {
+    if (!autoResize) {
+      const element = textareaRef.current;
+      if (element) {
+        element.style.height = '';
+        element.style.overflowY = '';
+      }
+      return;
+    }
+
+    const element = textareaRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    element.style.overflowY = 'hidden';
+    adjustHeight();
+
+    return () => {
+      element.style.overflowY = '';
+      element.style.height = '';
+    };
+  }, [adjustHeight, autoResize, rows]);
+
+  useEffect(() => {
+    scheduleHeightAdjustment();
+  }, [scheduleHeightAdjustment, value]);
 
   if (!visible) {
     return null;
   }
 
-  const resolvedError = errorMessage ?? (error || undefined);
-  const describedById = resolvedError
-    ? `${fieldId}-error`
-    : help
-      ? `${fieldId}-help`
+  const resolvedValidationError = errorMessage ?? (error || undefined);
+  const hasValidationError = Boolean(resolvedValidationError);
+  const resolvedStatus: DynTextAreaStatus = hasValidationError
+    ? 'error'
+    : status;
+
+  const effectiveErrorMessage =
+    resolvedStatus === 'error'
+      ? resolvedValidationError ?? (status === 'error' ? statusMessage || undefined : undefined)
       : undefined;
+
+  const resolvedStatusMessage =
+    resolvedStatus !== 'error' && statusMessage ? statusMessage : undefined;
+
+  const helpId = help ? `${fieldId}-help` : undefined;
+  const errorId = effectiveErrorMessage ? `${fieldId}-error` : undefined;
+  const statusId = resolvedStatusMessage ? `${fieldId}-status` : undefined;
+  const hasMaxLength = typeof maxLength === 'number';
+  const counterId = showCharacterCount && hasMaxLength ? `${fieldId}-counter` : undefined;
+
+  const describedByIds = [
+    ariaDescribedByProp,
+    errorId,
+    !errorId ? helpId : undefined,
+    statusId,
+    counterId,
+  ].filter(Boolean);
+
+  const ariaDescribedBy = describedByIds.length > 0 ? describedByIds.join(' ') : undefined;
 
   const textareaClasses = cn(
     styles.textarea,
     focused && styles.textareaFocused,
-    resolvedError && styles.textareaError,
+    resolvedStatus === 'error' && styles.textareaError,
+    resolvedStatus === 'warning' && styles.textareaWarning,
+    resolvedStatus === 'success' && styles.textareaSuccess,
+    resolvedStatus === 'loading' && styles.textareaLoading,
     disabled && styles.textareaDisabled,
     readonly && styles.textareaReadonly,
     resize === 'none' && styles.textareaResizeNone,
     resize === 'horizontal' && styles.textareaResizeHorizontal,
-    resize === 'both' && styles.textareaResizeBoth
+    resize === 'both' && styles.textareaResizeBoth,
+    autoResize && styles.textareaAutoResize
   );
 
   const containerClasses = cn(styles.container, className);
+  const fieldWrapperClasses = cn(styles.fieldWrapper);
+  const containerId = id ? `${id}-container` : undefined;
 
   const fieldContainerProps: Omit<DynFieldContainerProps, 'children'> = {
     label,
     required,
     optional,
     helpText: help,
-    errorText: resolvedError,
+    errorText: effectiveErrorMessage,
     className: containerClasses,
     htmlFor: fieldId,
-    id,
+    id: containerId,
+    'data-status': resolvedStatus,
   };
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -125,6 +247,11 @@ const DynTextAreaComponent = (
     setValue(newValue);
     onChange?.(newValue);
     clearError();
+
+    if (autoResize) {
+      event.target.style.height = 'auto';
+      event.target.style.height = `${event.target.scrollHeight}px`;
+    }
   };
 
   const handleFocus = () => {
@@ -143,29 +270,64 @@ const DynTextAreaComponent = (
     onBlur?.();
   };
 
+  const isErrorState = resolvedStatus === 'error';
+  const isLoadingState = resolvedStatus === 'loading';
+
   return (
     <DynFieldContainer {...fieldContainerProps}>
-      <textarea
-        {...rest}
-        ref={textareaRef}
-        id={fieldId}
-        name={name}
-        className={textareaClasses}
-        placeholder={placeholder}
-        value={value}
-        disabled={disabled}
-        readOnly={readonly}
-        required={required}
-        rows={rows}
-        cols={cols}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        aria-invalid={Boolean(resolvedError)}
-        aria-required={required || undefined}
-        aria-describedby={describedById}
-        data-testid={dataTestId}
-      />
+      <div className={fieldWrapperClasses} data-status={resolvedStatus}>
+        <textarea
+          {...restProps}
+          ref={textareaRef}
+          id={fieldId}
+          name={name}
+          className={textareaClasses}
+          placeholder={placeholder}
+          value={value}
+          disabled={disabled}
+          readOnly={readonly}
+          required={required}
+          rows={rows}
+          cols={cols}
+          maxLength={maxLength}
+          style={style}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          aria-invalid={isErrorState || undefined}
+          aria-required={required || undefined}
+          aria-describedby={ariaDescribedBy}
+          aria-busy={isLoadingState || undefined}
+          data-status={resolvedStatus}
+          data-testid={dataTestId}
+        />
+
+        {resolvedStatusMessage ? (
+          <p
+            id={statusId}
+            className={cn(
+              styles.statusMessage,
+              resolvedStatus === 'warning' && styles.statusMessageWarning,
+              resolvedStatus === 'success' && styles.statusMessageSuccess,
+              resolvedStatus === 'loading' && styles.statusMessageLoading
+            )}
+            role={resolvedStatus === 'loading' ? 'status' : undefined}
+            aria-live={resolvedStatus === 'loading' ? 'polite' : 'off'}
+          >
+            {resolvedStatusMessage}
+          </p>
+        ) : null}
+
+        {counterId && maxLength !== undefined ? (
+          <p
+            id={counterId}
+            className={styles.characterCount}
+            aria-live="polite"
+          >
+            {`${value.length}/${maxLength}`}
+          </p>
+        ) : null}
+      </div>
     </DynFieldContainer>
   );
 };

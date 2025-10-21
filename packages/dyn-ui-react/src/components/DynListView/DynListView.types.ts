@@ -1,5 +1,6 @@
+import type { ComponentPropsWithoutRef, ComponentRef, ElementType, ReactNode, ButtonHTMLAttributes } from 'react';
 import { BaseComponentProps, AccessibilityProps } from '../../types';
-import { ReactNode, ButtonHTMLAttributes } from 'react';
+import type { SpacingSize } from '../DynBox/DynBox.types';
 
 export interface DynListViewItemRenderContext {
   /** Whether the current item supports expansion */
@@ -75,7 +76,36 @@ export interface ListAction {
 
 export type ListViewSize = 'small' | 'medium' | 'large';
 
-export interface DynListViewProps extends BaseComponentProps, AccessibilityProps {
+type PolymorphicComponentProps<E extends ElementType, P> = P &
+  Omit<ComponentPropsWithoutRef<E>, keyof P>;
+
+export type DynListViewSpacingValue = SpacingSize | string | number;
+
+export interface DynListViewSpacingProps {
+  padding?: DynListViewSpacingValue;
+  p?: DynListViewSpacingValue;
+  px?: DynListViewSpacingValue;
+  py?: DynListViewSpacingValue;
+  pt?: DynListViewSpacingValue;
+  pr?: DynListViewSpacingValue;
+  pb?: DynListViewSpacingValue;
+  pl?: DynListViewSpacingValue;
+  m?: DynListViewSpacingValue;
+  mx?: DynListViewSpacingValue;
+  my?: DynListViewSpacingValue;
+  mt?: DynListViewSpacingValue;
+  mr?: DynListViewSpacingValue;
+  mb?: DynListViewSpacingValue;
+  ml?: DynListViewSpacingValue;
+  gap?: DynListViewSpacingValue;
+  rowGap?: DynListViewSpacingValue;
+  columnGap?: DynListViewSpacingValue;
+}
+
+export interface DynListViewOwnProps
+  extends BaseComponentProps,
+    AccessibilityProps,
+    DynListViewSpacingProps {
   /** Items to display in list */
   items?: ListViewItem[];
   
@@ -134,17 +164,20 @@ export interface DynListViewProps extends BaseComponentProps, AccessibilityProps
   /** Fixed height for scrollable list */
   height?: number | string;
   
-  /** ARIA label for list */
-  'aria-label'?: string;
-  
-  /** ARIA labelledby for list */
-  'aria-labelledby'?: string;
 }
+
+export type DynListViewProps<E extends ElementType = 'div'> = PolymorphicComponentProps<
+  E,
+  DynListViewOwnProps
+> & {
+  as?: E;
+};
 
 export interface DynListViewImperativeActions {
   selectAll: () => void;
   clearSelection: () => void;
 }
 
-export type DynListViewRef = HTMLDivElement & DynListViewImperativeActions;
+export type DynListViewRef<E extends ElementType = 'div'> = ComponentRef<E> &
+  DynListViewImperativeActions;
 
