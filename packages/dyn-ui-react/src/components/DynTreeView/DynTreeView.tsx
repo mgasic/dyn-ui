@@ -210,23 +210,27 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
   }, [visibleNodes, focusedKey, firstFocusableKey]);
 
   useEffect(() => {
-    if (focusedKey) {
-      const treeElement = treeRef.current;
-      const ref = nodeRefs.current[focusedKey];
-      const activeElement = document.activeElement as HTMLElement | null;
-      const activeTreeItem = activeElement?.closest('[role="treeitem"]');
-      const isTreeRootActive = activeElement === treeElement;
-      const isTreeItemActive = activeTreeItem === activeElement;
+    if (!focusedKey) {
+      return;
+    }
 
-      if (
-        treeElement &&
-        ref &&
-        activeElement &&
-        treeElement.contains(activeElement) &&
-        (isTreeRootActive || isTreeItemActive)
-      ) {
-        ref.focus();
-      }
+    const treeElement = treeRef.current;
+    const ref = nodeRefs.current[focusedKey];
+    const activeElement = document.activeElement as HTMLElement | null;
+
+    if (!treeElement || !ref || !activeElement || !treeElement.contains(activeElement)) {
+      return;
+    }
+
+    const isTreeRoot = activeElement === treeElement;
+    const isTreeItem = activeElement.getAttribute('role') === 'treeitem';
+
+    if (!isTreeRoot && !isTreeItem) {
+      return;
+    }
+
+    if (ref !== activeElement) {
+      ref.focus();
     }
   }, [focusedKey, visibleNodes]);
 
@@ -389,11 +393,14 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       const target = event.target as HTMLElement | null;
-      const closestTreeItem = target?.closest('[role="treeitem"]');
-      const isFromTreeRoot = target === event.currentTarget;
-      const isFromTreeItem = closestTreeItem === target;
+      if (!target) {
+        return;
+      }
 
-      if (!isFromTreeRoot && !isFromTreeItem) {
+      const isTreeRoot = target === event.currentTarget;
+      const isTreeItem = target.getAttribute('role') === 'treeitem';
+
+      if (!isTreeRoot && !isTreeItem) {
         return;
       }
 
