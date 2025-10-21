@@ -1,5 +1,7 @@
 import React, {
+  Children,
   forwardRef,
+  isValidElement,
   useCallback,
   useEffect,
   useMemo,
@@ -21,11 +23,17 @@ type VisibleItem = {
   originalIndex: number;
 };
 
-export const DynBreadcrumb = forwardRef<DynBreadcrumbRef, DynBreadcrumbProps>(
+type DynBreadcrumbComponentType = React.ForwardRefExoticComponent<
+  DynBreadcrumbProps & React.RefAttributes<DynBreadcrumbRef>
+> & {
+  Item: typeof DynBreadcrumbItem;
+};
+
+const DynBreadcrumbComponent = forwardRef<DynBreadcrumbRef, DynBreadcrumbProps>(
   (
     {
       className,
-      items,
+      items = [],
       size = 'medium',
       separator = 'slash',
       customSeparator,
@@ -401,7 +409,58 @@ export const DynBreadcrumb = forwardRef<DynBreadcrumbRef, DynBreadcrumbProps>(
       );
     }, [expanded, handleEllipsisClick, hasHiddenItems, hiddenItemCount, renderSeparator, showEllipsis]);
 
-    if (visibleItems.length === 0) {
+    const isBreadcrumbItemElement = (child: React.ReactNode): child is React.ReactElement<DynBreadcrumbItemProps> =>
+      isValidElement(child) &&
+      (child.type === DynBreadcrumbItem ||
+        (typeof child.type === 'object' && 'displayName' in child.type && child.type.displayName === DynBreadcrumbItem.displayName));
+
+    const childNodes = Children.toArray(children);
+    const childItems = childNodes.filter(isBreadcrumbItemElement);
+    const childExtras = childNodes.filter(child => !isBreadcrumbItemElement(child));
+
+    const firstChildFocusableIndex = childItems.findIndex(child => {
+      const props = child.props as DynBreadcrumbItemProps;
+
+      if (props.focusable !== undefined) {
+        return props.focusable;
+      }
+
+      if (props.current || props.disabled) {
+        return false;
+      }
+
+      return Boolean(props.href ?? props.as ?? props.onClick);
+    });
+
+    const enhancedChildren = childItems.map((child, index) => {
+      const props = child.props as DynBreadcrumbItemProps;
+      const isLast = index === childItems.length - 1;
+      const childFocusable =
+        props.focusable !== undefined
+          ? props.focusable
+          : !props.current && !props.disabled && Boolean(props.href ?? props.as ?? props.onClick);
+
+      const separatorElement = props.separator ?? (!isLast ? renderSeparator(index) : undefined);
+
+      return React.cloneElement(child, {
+        separator: separatorElement,
+        isLast,
+        enableStructuredData,
+        structuredDataPosition: index + 1,
+        initialTabIndex:
+          props.initialTabIndex !== undefined
+            ? props.initialTabIndex
+            : childFocusable && index === firstChildFocusableIndex
+              ? 0
+              : -1,
+        focusable: props.focusable ?? childFocusable,
+        linkComponent: props.linkComponent ?? LinkComponent,
+      });
+    });
+
+    const shouldRenderChildrenItems = enhancedChildren.length > 0;
+
+    if (!shouldRenderChildrenItems && visibleItems.length === 0) {
       return null;
     }
 
@@ -410,6 +469,50 @@ export const DynBreadcrumb = forwardRef<DynBreadcrumbRef, DynBreadcrumbProps>(
       styles[`breadcrumb--${size}`],
       shouldCollapse && showEllipsis && styles['breadcrumb--collapsed'],
       className
+    );
+
+    const firstFocusableIndex = useMemo(() => {
+      const index = visibleItems.findIndex(({ item }) => Boolean(item.href) && !item.current);
+
+      return index === -1 ? null : index;
+    }, [visibleItems]);
+
+    const renderedItems = useMemo(
+      () =>
+        visibleItems.map((visibleItem, index) => {
+          const { item, originalIndex } = visibleItem;
+          const isLast = index === visibleItems.length - 1;
+          const isCurrent = Boolean(item.current) || (isLast && !item.href);
+          const isLink = Boolean(item.href) && !isCurrent;
+
+          return (
+            <DynBreadcrumbItem
+              key={item.id ?? `breadcrumb-item-${originalIndex}`}
+              label={item.label}
+              icon={item.icon}
+              href={isLink ? item.href : undefined}
+              current={isCurrent}
+              showWhenCollapsed={Boolean(item.showWhenCollapsed)}
+              separator={!isLast ? renderSeparator(originalIndex) : undefined}
+              isLast={isLast}
+              enableStructuredData={enableStructuredData}
+              structuredDataPosition={index + 1}
+              linkComponent={LinkComponent}
+              linkProps={item.linkProps}
+              initialTabIndex={isLink && firstFocusableIndex === index ? 0 : -1}
+              focusable={isLink}
+              onClick={isLink ? handleItemClick(item) : undefined}
+            />
+          );
+        }),
+      [
+        LinkComponent,
+        enableStructuredData,
+        firstFocusableIndex,
+        handleItemClick,
+        renderSeparator,
+        visibleItems,
+      ]
     );
 
     const navStructuredDataProps = enableStructuredData
@@ -426,26 +529,33 @@ export const DynBreadcrumb = forwardRef<DynBreadcrumbRef, DynBreadcrumbProps>(
         className={breadcrumbClasses}
         aria-label={ariaLabel ?? navigationLabel}
         data-testid={dataTestId}
+        data-dyn-breadcrumb="true"
         {...navStructuredDataProps}
         {...rest}
       >
         <ol className={styles.breadcrumbList}>
-          {visibleItems[0] && renderItem(visibleItems[0], 0, visibleItems)}
-          {visibleItems.length > 1 ? (
+          {shouldRenderChildrenItems ? (
+            enhancedChildren
+          ) : (
             <>
-              {renderEllipsis()}
-              {visibleItems.slice(1).map((visibleItem, index) =>
-                renderItem(visibleItem, index + 1, visibleItems)
-              )}
+              {renderedItems.length > 0 ? renderedItems[0] : null}
+              {renderedItems.length > 1 ? (
+                <>
+                  {renderEllipsis()}
+                  {renderedItems.slice(1)}
+                </>
+              ) : null}
             </>
-          ) : null}
+          )}
         </ol>
-        {children}
+        {shouldRenderChildrenItems ? childExtras : children}
       </nav>
     );
   }
 );
+DynBreadcrumbComponent.displayName = 'DynBreadcrumb';
+DynBreadcrumbComponent.Item = DynBreadcrumbItem;
 
-DynBreadcrumb.displayName = 'DynBreadcrumb';
+export const DynBreadcrumb = DynBreadcrumbComponent as DynBreadcrumbComponentType;
 
 export default DynBreadcrumb;

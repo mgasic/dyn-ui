@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -272,11 +273,15 @@ describe('DynBreadcrumb', () => {
   });
 
   it('uses a custom link component', () => {
-    const CustomLink = ({ href, children, ...props }: any) => (
-      <a data-testid="custom-link" data-href={href} {...props}>
+    const CustomLink = React.forwardRef<HTMLAnchorElement, React.AnchorHTMLAttributes<HTMLAnchorElement>>( (
+      { href, children, ...props },
+      ref
+    ) => (
+      <a ref={ref} data-testid="custom-link" data-href={href} {...props}>
         {children}
       </a>
-    );
+    ) );
+    CustomLink.displayName = 'CustomLink';
 
     render(<DynBreadcrumb items={baseItems} linkComponent={CustomLink} />);
 
@@ -314,5 +319,61 @@ describe('DynBreadcrumb', () => {
     render(<DynBreadcrumb items={baseItems} data-testid="breadcrumb" />);
 
     expect(screen.getByTestId('breadcrumb')).toBeInTheDocument();
+  });
+
+  it('supports roving focus between breadcrumb item children', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DynBreadcrumb>
+        <DynBreadcrumb.Item href="/">Home</DynBreadcrumb.Item>
+        <DynBreadcrumb.Item href="/products">Products</DynBreadcrumb.Item>
+        <DynBreadcrumb.Item current>Details</DynBreadcrumb.Item>
+      </DynBreadcrumb>
+    );
+
+    const homeLink = screen.getByRole('link', { name: 'Home' });
+    const productsLink = screen.getByRole('link', { name: 'Products' });
+
+    expect(homeLink.tabIndex).toBe(0);
+    expect(productsLink.tabIndex).toBe(-1);
+
+    homeLink.focus();
+    await user.keyboard('{ArrowRight}');
+
+    expect(document.activeElement).toBe(productsLink);
+    expect(productsLink.tabIndex).toBe(0);
+    expect(homeLink.tabIndex).toBe(-1);
+  });
+
+  it('skips disabled breadcrumb items during keyboard navigation', async () => {
+    const handleClick = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <DynBreadcrumb>
+        <DynBreadcrumb.Item href="/">Home</DynBreadcrumb.Item>
+        <DynBreadcrumb.Item href="/reports" disabled onClick={handleClick}>
+          Reports
+        </DynBreadcrumb.Item>
+        <DynBreadcrumb.Item href="/settings">Settings</DynBreadcrumb.Item>
+      </DynBreadcrumb>
+    );
+
+    const homeLink = screen.getByRole('link', { name: 'Home' });
+    const disabledLink = screen.getByRole('link', { name: 'Reports' });
+    const settingsLink = screen.getByRole('link', { name: 'Settings' });
+
+    expect(disabledLink).toHaveAttribute('aria-disabled', 'true');
+    expect(disabledLink.tabIndex).toBe(-1);
+
+    await user.click(disabledLink);
+    expect(handleClick).not.toHaveBeenCalled();
+
+    homeLink.focus();
+    await user.keyboard('{ArrowRight}');
+
+    expect(document.activeElement).toBe(settingsLink);
+    expect(settingsLink.tabIndex).toBe(0);
   });
 });

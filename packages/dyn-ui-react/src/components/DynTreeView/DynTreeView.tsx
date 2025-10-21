@@ -224,12 +224,11 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
     }
 
     const activeElement = document.activeElement as HTMLElement | null;
-    if (activeElement && !treeElement.contains(activeElement)) {
+    if (!activeElement || !treeElement.contains(activeElement)) {
       return;
     }
 
     if (
-      activeElement &&
       activeElement !== treeElement &&
       activeElement.getAttribute('role') !== 'treeitem'
     ) {
