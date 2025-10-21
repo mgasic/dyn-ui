@@ -161,7 +161,7 @@ export const DynModal = forwardRef(
       const element = internalRef.current;
       if (!element) return;
 
-      const focusables = getFocusableElements(element);
+      const focusables = disabled ? [] : getFocusableElements(element);
       const firstFocusable = focusables[0] ?? element;
       firstFocusable.focus?.({ preventScroll: true });
     }, [isOpen, disabled]);
@@ -175,9 +175,14 @@ export const DynModal = forwardRef(
       const enforceFocus = (event: FocusEvent) => {
         const target = event.target as HTMLElement | null;
         if (!target) return;
-        if (element.contains(target)) return;
+        if (element.contains(target)) {
+          if (disabled && target !== element) {
+            element.focus?.({ preventScroll: true });
+          }
+          return;
+        }
 
-        const focusables = getFocusableElements(element);
+        const focusables = disabled ? [] : getFocusableElements(element);
         const fallback = focusables[0] ?? element;
         fallback.focus?.({ preventScroll: true });
       };
@@ -251,7 +256,7 @@ export const DynModal = forwardRef(
               if (event.key === 'Tab') {
                 const element = internalRef.current;
                 if (!element) return;
-                const focusables = getFocusableElements(element);
+                const focusables = disabled ? [] : getFocusableElements(element);
 
                 if (focusables.length === 0) {
                   event.preventDefault();
