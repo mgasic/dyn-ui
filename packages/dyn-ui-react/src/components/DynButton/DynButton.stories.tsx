@@ -19,11 +19,15 @@ const meta: Meta<typeof DynButton> = {
       control: 'text',
       description: 'The text content of the button',
     },
-    icon: {
+    startIcon: {
       control: 'text',
-      description: 'Icon name (string) or custom React node to display',
+      description: 'Icon token rendered before the label',
     },
-    kind: {
+    endIcon: {
+      control: 'text',
+      description: 'Icon token rendered after the label',
+    },
+    variant: {
       control: 'select',
       options: ['primary', 'secondary', 'tertiary'],
       description: 'Visual variant of the button',
@@ -96,6 +100,14 @@ const meta: Meta<typeof DynButton> = {
         defaultValue: { summary: 'false' },
       },
     },
+    iconOnly: {
+      control: 'boolean',
+      description: 'Hide the textual label and present the button as icon-only',
+      table: {
+        category: 'Display',
+        defaultValue: { summary: 'false' },
+      },
+    },
     'aria-label': {
       control: 'text',
       description: 'Accessible label for screen readers (auto-generated for icon-only buttons)',
@@ -119,7 +131,7 @@ const meta: Meta<typeof DynButton> = {
   },
   args: {
     label: 'Button',
-    kind: 'primary',
+    variant: 'primary',
     size: 'medium',
     type: 'button',
     danger: false,
@@ -128,6 +140,7 @@ const meta: Meta<typeof DynButton> = {
     fullWidth: false,
     hideOnMobile: false,
     iconOnlyOnMobile: false,
+    iconOnly: false,
   },
 };
 
@@ -141,6 +154,23 @@ export const Default: Story = {
   args: {
     label: 'Default Button',
   },
+  render: (renderArgs) => {
+    const { iconOnly, ...buttonArgs } = renderArgs as typeof renderArgs & { iconOnly?: boolean };
+    const props = { ...buttonArgs } as Record<string, unknown>;
+    const ariaLabel = (buttonArgs as Record<string, unknown>)['aria-label'] as string | undefined;
+
+    if (iconOnly) {
+      props.label = undefined;
+      props['aria-label'] = ariaLabel ?? 'Icon button';
+      if (!props.startIcon && !props.endIcon) {
+        props.startIcon = 'settings';
+      }
+    } else if (ariaLabel !== undefined) {
+      props['aria-label'] = ariaLabel;
+    }
+
+    return <DynButton {...(props as any)} />;
+  },
 };
 
 /**
@@ -149,9 +179,9 @@ export const Default: Story = {
 export const Variants: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-      <DynButton label="Primary" kind="primary" />
-      <DynButton label="Secondary" kind="secondary" />
-      <DynButton label="Tertiary" kind="tertiary" />
+      <DynButton label="Primary" variant="primary" />
+      <DynButton label="Secondary" variant="secondary" />
+      <DynButton label="Tertiary" variant="tertiary" />
     </div>
   ),
   parameters: {
@@ -181,9 +211,9 @@ export const Interactive: Story = {
       <div>
         <h3 style={{ marginBottom: '0.5rem' }}>With Icons</h3>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <DynButton label="Download" icon="download" />
-          <DynButton label="Settings" icon="settings" kind="secondary" />
-          <DynButton icon="help" aria-label="Help" kind="tertiary" />
+          <DynButton label="Download" startIcon="download" />
+          <DynButton label="Settings" startIcon="settings" variant="secondary" />
+          <DynButton startIcon="help" aria-label="Help" variant="tertiary" />
         </div>
       </div>
 
@@ -200,9 +230,9 @@ export const Interactive: Story = {
       <div>
         <h3 style={{ marginBottom: '0.5rem' }}>Danger Variants</h3>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <DynButton label="Delete" danger kind="primary" />
-          <DynButton label="Remove" danger kind="secondary" />
-          <DynButton label="Cancel" danger kind="tertiary" />
+          <DynButton label="Delete" danger variant="primary" />
+          <DynButton label="Remove" danger variant="secondary" />
+          <DynButton label="Cancel" danger variant="tertiary" />
         </div>
       </div>
     </div>
@@ -229,19 +259,19 @@ export const Accessibility: Story = {
             label="Toggle Menu"
             aria-expanded={false}
             aria-controls="navigation-menu"
-            icon="menu"
+            startIcon="menu"
           />
           <DynButton
             label="Favorite"
             aria-pressed={false}
-            icon="heart"
-            kind="secondary"
+            startIcon="heart"
+            variant="secondary"
           />
           <DynButton
             label="Save Draft"
             aria-describedby="save-help"
-            icon="save"
-            kind="tertiary"
+            startIcon="save"
+            variant="tertiary"
           />
         </div>
         <p id="save-help" style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
@@ -257,7 +287,7 @@ export const Accessibility: Story = {
             label="Custom announcement"
             loading
             loadingText="Saving your changes..."
-            kind="secondary"
+            variant="secondary"
           />
         </div>
         <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
@@ -268,9 +298,9 @@ export const Accessibility: Story = {
       <div>
         <h3 style={{ marginBottom: '0.5rem' }}>Icon-Only Buttons</h3>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <DynButton icon="edit" aria-label="Edit item" />
-          <DynButton icon="delete" aria-label="Delete item" danger kind="secondary" />
-          <DynButton icon="share" aria-label="Share content" kind="tertiary" />
+          <DynButton startIcon="edit" aria-label="Edit item" />
+          <DynButton startIcon="delete" aria-label="Delete item" danger variant="secondary" />
+          <DynButton startIcon="share" aria-label="Share content" variant="tertiary" />
         </div>
         <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
           Icon-only buttons automatically receive accessible labels
@@ -306,27 +336,27 @@ export const DarkTheme: Story = {
       <div>
         <h3 style={{ color: 'white', marginBottom: '1rem' }}>Button Variants</h3>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <DynButton label="Primary" kind="primary" />
-          <DynButton label="Secondary" kind="secondary" />
-          <DynButton label="Tertiary" kind="tertiary" />
+          <DynButton label="Primary" variant="primary" />
+          <DynButton label="Secondary" variant="secondary" />
+          <DynButton label="Tertiary" variant="tertiary" />
         </div>
       </div>
 
       <div>
         <h3 style={{ color: 'white', marginBottom: '1rem' }}>Danger States</h3>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <DynButton label="Delete" kind="primary" danger />
-          <DynButton label="Remove" kind="secondary" danger />
-          <DynButton label="Cancel" kind="tertiary" danger />
+          <DynButton label="Delete" variant="primary" danger />
+          <DynButton label="Remove" variant="secondary" danger />
+          <DynButton label="Cancel" variant="tertiary" danger />
         </div>
       </div>
 
       <div>
         <h3 style={{ color: 'white', marginBottom: '1rem' }}>With Icons & States</h3>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <DynButton label="Download" icon="download" />
-          <DynButton label="Loading" loading kind="secondary" />
-          <DynButton label="Disabled" disabled kind="tertiary" />
+          <DynButton label="Download" startIcon="download" />
+          <DynButton label="Loading" loading variant="secondary" />
+          <DynButton label="Disabled" disabled variant="tertiary" />
         </div>
       </div>
     </div>
@@ -353,13 +383,13 @@ export const ResponsiveBehavior: Story = {
           Resize your browser window or use device preview to see responsive behavior
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <DynButton label="Hidden on mobile" hideOnMobile icon="desktop" />
-          <DynButton label="Settings" icon="settings" iconOnlyOnMobile />
+          <DynButton label="Hidden on mobile" hideOnMobile startIcon="desktop" />
+          <DynButton label="Settings" startIcon="settings" iconOnlyOnMobile />
           <DynButton
             label="Download Report"
-            icon="download"
+            startIcon="download"
             iconOnlyOnMobile
-            kind="secondary"
+            variant="secondary"
           />
         </div>
       </div>
@@ -370,9 +400,9 @@ export const ResponsiveBehavior: Story = {
           Buttons automatically meet minimum touch target requirements (44px) on mobile
         </p>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <DynButton icon="edit" aria-label="Edit" size="small" />
-          <DynButton icon="share" aria-label="Share" size="medium" />
-          <DynButton icon="bookmark" aria-label="Bookmark" size="large" />
+          <DynButton startIcon="edit" aria-label="Edit" size="small" />
+          <DynButton startIcon="share" aria-label="Share" size="medium" />
+          <DynButton startIcon="bookmark" aria-label="Bookmark" size="large" />
         </div>
       </div>
     </div>

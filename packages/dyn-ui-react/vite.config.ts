@@ -1,6 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
+
+const ANALYZE_BUNDLE = process.env.BUNDLE_ANALYZE === 'true';
+const bundleReportPath = resolve(__dirname, '../../reports/bundle/dyn-ui-react.html');
 
 export default defineConfig({
   plugins: [react()],
@@ -52,7 +56,17 @@ export default defineConfig({
           react: 'React',
           'react-dom': 'ReactDOM'
         }
-      }
+      },
+      plugins: ANALYZE_BUNDLE
+        ? [
+            visualizer({
+              filename: bundleReportPath,
+              gzipSize: true,
+              brotliSize: true,
+              template: 'treemap'
+            })
+          ]
+        : [],
     },
     cssCodeSplit: true,
     sourcemap: true,
