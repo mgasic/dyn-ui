@@ -36,6 +36,7 @@ import {
 
   // Navigation Components
   DynMenu,
+  DynModal,
   DynBreadcrumb,
   DynTabs,
   DynStepper,
@@ -106,6 +107,10 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynTabs)).toBe(true);
     expect(isComponentExport(DynStepper)).toBe(true);
     expect(isComponentExport(DynToolbar)).toBe(true);
+  });
+
+  it('exports overlay components', () => {
+    expect(isComponentExport(DynModal)).toBe(true);
   });
 
   it('exports theme system', () => {
