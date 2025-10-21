@@ -10,7 +10,12 @@ export interface GaugeRange {
 export type GaugeSize = 'small' | 'medium' | 'large';
 export type GaugeType = 'arc' | 'circle' | 'line';
 
-export interface DynGaugeProps extends BaseComponentProps, AccessibilityProps {
+export interface DynGaugeAccessibilityProps extends AccessibilityProps {
+  /** Accessible textual representation of the current value */
+  'aria-valuetext'?: string;
+}
+
+export interface DynGaugeProps extends BaseComponentProps, DynGaugeAccessibilityProps {
   /** Current value to display */
   value: number;
   
@@ -65,8 +70,6 @@ export interface DynGaugeProps extends BaseComponentProps, AccessibilityProps {
   /** Custom value formatter */
   format?: (value: number) => string;
 
-  /** Accessible textual representation of the current value */
-  'aria-valuetext'?: string;
 }
 
 export type DynGaugeDefaultProps = Required<

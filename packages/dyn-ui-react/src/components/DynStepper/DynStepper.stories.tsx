@@ -24,7 +24,7 @@ The DynStepper component provides a comprehensive step navigation system with:
 - **Step States** - Active, completed, error, disabled, and optional states
 - **Linear/Non-linear** - Control step accessibility and progression
 - **Imperative API** - Programmatic control with nextStep, prevStep, goToStep methods
-- **Accessibility** - Full ARIA support and keyboard navigation
+- **Accessibility** - Full ARIA support and keyboard navigation (step buttons reuse their visible titles for screen readers)
 - **Customization** - Complete CSS custom properties and render functions
 
 ## Usage

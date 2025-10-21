@@ -176,113 +176,48 @@ export const InteractiveExample: Story = {
   },
 };
 
-export const KeyboardNavigationDemo: Story = {
-  render: () => {
-    const [value, setValue] = React.useState<Date | null>(new Date());
-
-    return (
-      <DynDatePicker
-        name="keyboard-demo"
-        label="Keyboard navigation demo"
-        locale="en-US"
-        format="MM/dd/yyyy"
-        value={value}
-        onChange={setValue}
-        help="Press Enter or ArrowDown to open, use Arrow keys/Home/End to move focus, and Enter to select."
-      />
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Demonstrates the roving focus calendar. Use the keyboard to open the picker, move between days, and press Escape to close.',
-      },
-    },
-  },
-};
-
-export const OpenCloseBehavior: Story = {
-  render: () => {
-    const [value, setValue] = React.useState<Date | null>(null);
-    const [status, setStatus] = React.useState('Calendar ready');
-
-    const handleChange: DynDatePickerProps['onChange'] = next => {
-      setValue(next ?? null);
-      if (next) {
-        setStatus(`Selected ${next.toLocaleDateString('en-US', {
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric',
-        })}`);
-      } else {
-        setStatus('Cleared selection');
-      }
-    };
-
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '320px' }}>
-        <DynDatePicker
-          name="open-close"
-          label="Open & close behavior"
-          locale="en-US"
-          format="MM/dd/yyyy"
-          help="Press Enter or ArrowDown to open. Use Escape to close the calendar and return focus to the field."
-          value={value}
-          onChange={handleChange}
-        />
-        <p style={{ margin: 0 }}>Status: {status}</p>
-      </div>
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Highlights the default open/close interactions. Selecting a day closes the dropdown and updates the status text.',
-      },
-    },
-  },
-};
-
-export const LocalizedWeekStarts: Story = {
+export const KeyboardNavigation: Story = {
   render: () => (
-    <div
-      style={{
-        display: 'grid',
-        gap: '1.5rem',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-      }}
-    >
-      <DynDatePicker
-        name="locale-us"
-        label="United States"
-        locale="en-US"
-        format="MM/dd/yyyy"
-        help="Calendar starts on Sunday."
-      />
-      <DynDatePicker
-        name="locale-gb"
-        label="United Kingdom"
-        locale="en-GB"
-        format="dd/MM/yyyy"
-        help="Calendar starts on Monday."
-      />
-      <DynDatePicker
-        name="locale-de"
-        label="Germany"
-        locale="de-DE"
-        format="dd.MM.yyyy"
-        help="Localized weekday abbreviations and formatting."
-      />
+    <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+        Use the arrow keys, Home/End, and PageUp/PageDown to move the roving focus across the
+        calendar grid. Press Enter to select and Escape to close.
+      </p>
+      <DynDatePicker name="keyboard" label="Keyboard navigation" />
     </div>
   ),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Compares how the calendar grid reflects locale-specific weekday ordering and formatting.',
-      },
-    },
+};
+
+export const LocalizationExamples: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+      <DynDatePicker name="locale-pt" label="Português (Brasil)" locale="pt-BR" />
+      <DynDatePicker name="locale-en" label="English (US)" locale="en-US" format="MM/dd/yyyy" />
+      <DynDatePicker name="locale-fr" label="Français" locale="fr-FR" format="dd/MM/yyyy" />
+    </div>
+  ),
+};
+
+export const RangeValidation: Story = {
+  args: {
+    name: 'range-validation',
+    label: 'Conference window',
+    locale: 'en-US',
+    minDate: new Date('2024-05-10'),
+    maxDate: new Date('2024-05-20'),
+    help: 'Only conference dates between May 10 and May 20, 2024 are available.',
   },
+};
+
+export const OpenAndCloseBehaviors: Story = {
+  render: () => (
+    <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <DynDatePicker name="open-close" label="Try opening with the keyboard" />
+      <ul style={{ fontSize: '0.875rem', margin: 0, paddingLeft: '1.25rem', color: '#4b5563' }}>
+        <li>Press Enter or Arrow Down while focused on the input to open the calendar.</li>
+        <li>Press Escape to close the dropdown from either the input or the calendar grid.</li>
+        <li>Choosing a day commits the selection and returns focus to the field.</li>
+      </ul>
+    </div>
+  ),
 };

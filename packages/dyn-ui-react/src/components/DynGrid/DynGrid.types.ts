@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { AriaAttributes, HTMLAttributes, ReactNode } from 'react';
 import type { AccessibilityProps, BaseComponentProps } from '../../types';
 import type { LayoutSize } from '../../types/layout.types';
 
@@ -33,9 +33,13 @@ export type DynGridSelectable = boolean | 'single' | 'multiple';
 export interface DynGridProps
   extends BaseComponentProps,
     AccessibilityProps,
+    AriaAttributes,
     Omit<
       HTMLAttributes<HTMLDivElement>,
-      keyof BaseComponentProps | keyof AccessibilityProps | 'children'
+      | keyof BaseComponentProps
+      | keyof AccessibilityProps
+      | keyof AriaAttributes
+      | 'children'
     > {
   columns: DynGridColumn[];
   data: Record<string, unknown>[];
