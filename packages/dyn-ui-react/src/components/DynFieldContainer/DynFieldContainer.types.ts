@@ -14,6 +14,12 @@ export interface DynFieldContainerOwnProps {
   helpText?: string;
   /** Error message displayed below the field */
   errorText?: string;
+  /** Validation state that controls tone and semantics for the feedback message */
+  validationState?: 'default' | 'error' | 'warning' | 'success' | 'loading';
+  /** Message rendered for the current validation state */
+  validationMessage?: string;
+  /** Optional id applied to the validation message element */
+  validationMessageId?: string;
   /** Controls whether validation messages are shown */
   showValidation?: boolean;
   /** Id of the input element for the label association */

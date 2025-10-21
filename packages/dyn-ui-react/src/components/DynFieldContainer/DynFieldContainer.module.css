@@ -14,6 +14,18 @@
   color: var(--dyn-color-error, #f44336);
 }
 
+.containerWarning .label {
+  color: var(--dyn-color-warning, #f59e0b);
+}
+
+.containerSuccess .label {
+  color: var(--dyn-color-success, #22c55e);
+}
+
+.containerLoading .label {
+  color: var(--dyn-color-info, #0ea5e9);
+}
+
 .containerRequired .required {
   color: var(--dyn-color-error, #f44336);
   margin-left: var(--dyn-spacing-xs, 4px);
@@ -41,16 +53,43 @@
   gap: var(--dyn-spacing-xs, 4px);
 }
 
-.error {
+.validation {
   font-size: var(--dyn-font-size-sm, 14px);
-  color: var(--dyn-color-error, #f44336);
   line-height: 1.4;
   margin-top: var(--dyn-spacing-xs, 4px);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dyn-spacing-xxs, 4px);
+}
+
+.error,
+.validationWarning,
+.validationSuccess,
+.validationLoading {
+  font-size: inherit;
+  line-height: inherit;
+  margin-top: var(--dyn-spacing-xs, 4px);
+}
+
+.error {
+  color: var(--dyn-color-error, #f44336);
 }
 
 .error::before {
   content: '⚠ ';
-  margin-right: var(--dyn-spacing-xs, 4px);
+  margin-right: var(--dyn-spacing-xxs, 4px);
+}
+
+.validationWarning {
+  color: var(--dyn-color-warning, #f59e0b);
+}
+
+.validationSuccess {
+  color: var(--dyn-color-success, #22c55e);
+}
+
+.validationLoading {
+  color: var(--dyn-color-info, #0ea5e9);
 }
 
 .help {

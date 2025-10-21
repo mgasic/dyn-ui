@@ -15,6 +15,9 @@ export const DynFieldContainer = forwardRef<HTMLDivElement, DynFieldContainerPro
       optional = false,
       helpText,
       errorText,
+      validationState,
+      validationMessage,
+      validationMessageId,
       showValidation = DYN_FIELD_CONTAINER_DEFAULT_PROPS.showValidation,
       className,
       htmlFor,
@@ -26,9 +29,16 @@ export const DynFieldContainer = forwardRef<HTMLDivElement, DynFieldContainerPro
     const dataTestId =
       dataTestIdProp ?? DYN_FIELD_CONTAINER_DEFAULT_PROPS['data-testid'];
 
+    const resolvedValidationState = validationState ?? (errorText ? 'error' : 'default');
+    const resolvedValidationMessage =
+      validationMessage ?? (resolvedValidationState === 'error' ? errorText : undefined);
+
     const containerClasses = cn(
       styles.container,
-      errorText && styles.containerError,
+      resolvedValidationState === 'error' && styles.containerError,
+      resolvedValidationState === 'warning' && styles.containerWarning,
+      resolvedValidationState === 'success' && styles.containerSuccess,
+      resolvedValidationState === 'loading' && styles.containerLoading,
       required && styles.containerRequired,
       optional && styles.containerOptional,
       className
@@ -37,6 +47,10 @@ export const DynFieldContainer = forwardRef<HTMLDivElement, DynFieldContainerPro
     const errorId = htmlFor ? `${htmlFor}-error` : undefined;
     const helpId = htmlFor ? `${htmlFor}-help` : undefined;
     const labelId = label && htmlFor ? `${htmlFor}-label` : undefined;
+    const validationId = validationMessageId ?? (resolvedValidationState === 'error' ? errorId : undefined);
+
+    const validationRole = resolvedValidationState === 'error' ? 'alert' : 'status';
+    const validationAriaLive = resolvedValidationState === 'error' ? 'assertive' : 'polite';
 
     return (
       <div
@@ -68,22 +82,34 @@ export const DynFieldContainer = forwardRef<HTMLDivElement, DynFieldContainerPro
 
         {children}
 
-        {showValidation && (helpText || errorText) && (
+        {showValidation && (helpText || resolvedValidationMessage) && (
           <div className={styles.feedback}>
-            {errorText ? (
+            {resolvedValidationMessage ? (
               <div
-                className={styles.error}
-                id={errorId}
-                role="alert"
-                aria-live="polite"
+                className={cn(
+                  styles.validation,
+                  resolvedValidationState === 'error' && styles.error,
+                  resolvedValidationState === 'warning' && styles.validationWarning,
+                  resolvedValidationState === 'success' && styles.validationSuccess,
+                  resolvedValidationState === 'loading' && styles.validationLoading
+                )}
+                id={validationId}
+                role={validationRole}
+                aria-live={validationAriaLive}
               >
-                {errorText}
+                {resolvedValidationMessage}
               </div>
             ) : helpText ? (
               <div className={styles.help} id={helpId}>
                 {helpText}
               </div>
             ) : null}
+
+            {helpText && resolvedValidationMessage && (
+              <div className={styles.help} id={helpId}>
+                {helpText}
+              </div>
+            )}
           </div>
         )}
       </div>
