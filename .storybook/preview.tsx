@@ -146,6 +146,9 @@ const preview: Preview = {
         date: /Date$/,
       },
     },
+    docs: {
+      page: DocsTemplate,
+    },
   },
   decorators: [withProviders],
 };

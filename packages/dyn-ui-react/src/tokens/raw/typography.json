@@ -1,0 +1,39 @@
+{
+  "typography": {
+    "font": {
+      "family": {
+        "base": "'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif",
+        "primary": "'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif",
+        "mono": "'Fira Code', 'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
+      },
+      "size": {
+        "xs": "0.75rem",
+        "sm": "0.875rem",
+        "base": "1rem",
+        "md": "1.125rem",
+        "lg": "1.25rem",
+        "xl": "1.5rem",
+        "2xl": "1.75rem"
+      },
+      "weight": {
+        "normal": "400",
+        "medium": "500",
+        "semibold": "600",
+        "bold": "700"
+      }
+    },
+    "line": {
+      "height": {
+        "tight": "1.25",
+        "normal": "1.5",
+        "relaxed": "1.75"
+      }
+    },
+    "letter": {
+      "spacing": {
+        "tight": "-0.01em",
+        "normal": "0"
+      }
+    }
+  }
+}

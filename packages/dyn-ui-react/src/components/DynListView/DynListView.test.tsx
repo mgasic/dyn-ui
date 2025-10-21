@@ -58,6 +58,37 @@ describe('DynListView', () => {
       expect(screen.getByText('Item 2')).toBeInTheDocument();
       expect(screen.getByText('Item 3')).toBeInTheDocument();
     });
+
+    it('supports polymorphic rendering with automatic roles for static lists', () => {
+      render(<DynListView as="ul" data={sampleData} />);
+
+      const list = screen.getByRole('list');
+      expect(list.tagName).toBe('UL');
+
+      const items = Array.from(list.children);
+      expect(items).toHaveLength(sampleData.length);
+      items.forEach((item) => {
+        expect(item.tagName).toBe('LI');
+      });
+    });
+
+    it('keeps interactive semantics when selectable using ordered list', () => {
+      render(<DynListView as="ol" data={sampleData} selectable />);
+
+      const listbox = screen.getByRole('listbox');
+      expect(listbox.tagName).toBe('OL');
+      expect(screen.getAllByRole('option')).toHaveLength(sampleData.length);
+    });
+
+    it('applies spacing props to the root element', () => {
+      render(<DynListView data={sampleData} p="lg" mx="sm" gap="xs" />);
+
+      const list = screen.getByTestId('dyn-listview');
+      expect(list.style.padding).toContain('--dyn-spacing-lg');
+      expect(list.style.marginLeft).toContain('--dyn-spacing-sm');
+      expect(list.style.marginRight).toContain('--dyn-spacing-sm');
+      expect(list.style.gap).toContain('--dyn-spacing-xs');
+    });
   });
 
   describe('Selection', () => {

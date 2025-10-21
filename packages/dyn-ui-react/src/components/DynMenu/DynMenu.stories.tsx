@@ -24,6 +24,20 @@ DynMenu also re-exports the \`DynMenuTrigger\` component it uses internally for 
 top-level item. This lets you compose custom trigger UIs while retaining focus and
 keyboard behaviour managed by DynMenu.
 
+### Accessibility
+
+- Focus returns to the last interacted trigger whenever a submenu closes.
+- Submenu focus is roved programmatically so items receive \`tabIndex\` and \`aria-activedescendant\` updates while arrowing.
+- Escape collapses any open submenu and restores focus to the originating trigger.
+
+### Keyboard interactions
+
+- \`ArrowRight\` / \`ArrowLeft\` cycle across top-level triggers when the menu is horizontal.
+- \`ArrowDown\` / \`ArrowUp\` move focus between submenu items.
+- \`Home\` / \`End\` jump to the first or last enabled item.
+- \`Enter\` / \`Space\` toggle the active submenu.
+- \`Escape\` collapses the submenu and returns focus to its trigger.
+
 ## Usage
 
 \`\`\`tsx

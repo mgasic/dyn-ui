@@ -1,10 +1,54 @@
 .root {
+  --dyn-tree-node-padding: 0;
+  --dyn-tree-node-padding-x: var(--dyn-tree-node-padding, 0);
+  --dyn-tree-node-padding-y: var(--dyn-tree-node-padding, 0);
+  --dyn-tree-node-padding-top: var(--dyn-tree-node-padding-y, var(--dyn-tree-node-padding, 0));
+  --dyn-tree-node-padding-right: var(--dyn-tree-node-padding-x, var(--dyn-tree-node-padding, 0));
+  --dyn-tree-node-padding-bottom: var(--dyn-tree-node-padding-y, var(--dyn-tree-node-padding, 0));
+  --dyn-tree-node-padding-left: var(--dyn-tree-node-padding-x, var(--dyn-tree-node-padding, 0));
+
+  --dyn-tree-node-margin: 0;
+  --dyn-tree-node-margin-x: var(--dyn-tree-node-margin, 0);
+  --dyn-tree-node-margin-y: var(--dyn-tree-node-margin, 0);
+  --dyn-tree-node-margin-top: var(--dyn-tree-node-margin-y, var(--dyn-tree-node-margin, 0));
+  --dyn-tree-node-margin-right: var(--dyn-tree-node-margin-x, var(--dyn-tree-node-margin, 0));
+  --dyn-tree-node-margin-bottom: var(--dyn-tree-node-margin-y, var(--dyn-tree-node-margin, 0));
+  --dyn-tree-node-margin-left: var(--dyn-tree-node-margin-x, var(--dyn-tree-node-margin, 0));
+
+  --dyn-tree-node-gap: 0;
+  --dyn-tree-node-row-gap: var(--dyn-tree-node-gap, 0);
+  --dyn-tree-node-column-gap: var(--dyn-tree-node-gap, 0);
+
+  --dyn-tree-node-nested-offset: 0;
+  --dyn-tree-node-nested-padding: 0;
+  --dyn-tree-node-nested-gap: var(--dyn-spacing-xs, var(--spacing-xs, 0.25rem));
+
   display: flex;
   flex-direction: row;
   align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--dyn-tree-node-gap);
+  row-gap: var(--dyn-tree-node-row-gap);
+  column-gap: var(--dyn-tree-node-column-gap);
+  padding-top: var(--dyn-tree-node-padding-top);
+  padding-right: var(--dyn-tree-node-padding-right);
+  padding-bottom: var(--dyn-tree-node-padding-bottom);
+  padding-left: var(--dyn-tree-node-padding-left);
+  margin-top: var(--dyn-tree-node-margin-top);
+  margin-right: var(--dyn-tree-node-margin-right);
+  margin-bottom: var(--dyn-tree-node-margin-bottom);
+  margin-left: var(--dyn-tree-node-margin-left);
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
+}
+
+.root[data-direction='column'] {
+  flex-direction: column;
+}
+
+.root[data-direction='row'] {
+  flex-direction: row;
 }
 
 .directionRow {
@@ -13,4 +57,310 @@
 
 .directionColumn {
   flex-direction: column;
+}
+
+.root[data-dyn-tree-node] > :where([data-dyn-tree-node]) {
+  margin-inline-start: var(--dyn-tree-node-nested-offset);
+  padding-inline-start: var(--dyn-tree-node-nested-padding);
+}
+
+.root[data-dyn-tree-node]
+  > :where([data-dyn-tree-node]:not(:first-child)) {
+  margin-top: var(--dyn-tree-node-nested-gap);
+}
+
+@media (min-width: 40rem) {
+  .root {
+    --dyn-tree-node-padding: var(--dyn-tree-node-padding-sm, var(--dyn-tree-node-padding));
+    --dyn-tree-node-padding-top: var(
+      --dyn-tree-node-padding-top-sm,
+      var(
+        --dyn-tree-node-padding-y-sm,
+        var(--dyn-tree-node-padding-sm, var(--dyn-tree-node-padding-top))
+      )
+    );
+    --dyn-tree-node-padding-right: var(
+      --dyn-tree-node-padding-right-sm,
+      var(
+        --dyn-tree-node-padding-x-sm,
+        var(--dyn-tree-node-padding-sm, var(--dyn-tree-node-padding-right))
+      )
+    );
+    --dyn-tree-node-padding-bottom: var(
+      --dyn-tree-node-padding-bottom-sm,
+      var(
+        --dyn-tree-node-padding-y-sm,
+        var(--dyn-tree-node-padding-sm, var(--dyn-tree-node-padding-bottom))
+      )
+    );
+    --dyn-tree-node-padding-left: var(
+      --dyn-tree-node-padding-left-sm,
+      var(
+        --dyn-tree-node-padding-x-sm,
+        var(--dyn-tree-node-padding-sm, var(--dyn-tree-node-padding-left))
+      )
+    );
+
+    --dyn-tree-node-margin: var(--dyn-tree-node-margin-sm, var(--dyn-tree-node-margin));
+    --dyn-tree-node-margin-top: var(
+      --dyn-tree-node-margin-top-sm,
+      var(
+        --dyn-tree-node-margin-y-sm,
+        var(--dyn-tree-node-margin-sm, var(--dyn-tree-node-margin-top))
+      )
+    );
+    --dyn-tree-node-margin-right: var(
+      --dyn-tree-node-margin-right-sm,
+      var(
+        --dyn-tree-node-margin-x-sm,
+        var(--dyn-tree-node-margin-sm, var(--dyn-tree-node-margin-right))
+      )
+    );
+    --dyn-tree-node-margin-bottom: var(
+      --dyn-tree-node-margin-bottom-sm,
+      var(
+        --dyn-tree-node-margin-y-sm,
+        var(--dyn-tree-node-margin-sm, var(--dyn-tree-node-margin-bottom))
+      )
+    );
+    --dyn-tree-node-margin-left: var(
+      --dyn-tree-node-margin-left-sm,
+      var(
+        --dyn-tree-node-margin-x-sm,
+        var(--dyn-tree-node-margin-sm, var(--dyn-tree-node-margin-left))
+      )
+    );
+
+    --dyn-tree-node-gap: var(--dyn-tree-node-gap-sm, var(--dyn-tree-node-gap));
+    --dyn-tree-node-row-gap: var(
+      --dyn-tree-node-row-gap-sm,
+      var(--dyn-tree-node-gap-sm, var(--dyn-tree-node-row-gap))
+    );
+    --dyn-tree-node-column-gap: var(
+      --dyn-tree-node-column-gap-sm,
+      var(--dyn-tree-node-gap-sm, var(--dyn-tree-node-column-gap))
+    );
+  }
+}
+
+@media (min-width: 48rem) {
+  .root {
+    --dyn-tree-node-padding: var(--dyn-tree-node-padding-md, var(--dyn-tree-node-padding));
+    --dyn-tree-node-padding-top: var(
+      --dyn-tree-node-padding-top-md,
+      var(
+        --dyn-tree-node-padding-y-md,
+        var(--dyn-tree-node-padding-md, var(--dyn-tree-node-padding-top))
+      )
+    );
+    --dyn-tree-node-padding-right: var(
+      --dyn-tree-node-padding-right-md,
+      var(
+        --dyn-tree-node-padding-x-md,
+        var(--dyn-tree-node-padding-md, var(--dyn-tree-node-padding-right))
+      )
+    );
+    --dyn-tree-node-padding-bottom: var(
+      --dyn-tree-node-padding-bottom-md,
+      var(
+        --dyn-tree-node-padding-y-md,
+        var(--dyn-tree-node-padding-md, var(--dyn-tree-node-padding-bottom))
+      )
+    );
+    --dyn-tree-node-padding-left: var(
+      --dyn-tree-node-padding-left-md,
+      var(
+        --dyn-tree-node-padding-x-md,
+        var(--dyn-tree-node-padding-md, var(--dyn-tree-node-padding-left))
+      )
+    );
+
+    --dyn-tree-node-margin: var(--dyn-tree-node-margin-md, var(--dyn-tree-node-margin));
+    --dyn-tree-node-margin-top: var(
+      --dyn-tree-node-margin-top-md,
+      var(
+        --dyn-tree-node-margin-y-md,
+        var(--dyn-tree-node-margin-md, var(--dyn-tree-node-margin-top))
+      )
+    );
+    --dyn-tree-node-margin-right: var(
+      --dyn-tree-node-margin-right-md,
+      var(
+        --dyn-tree-node-margin-x-md,
+        var(--dyn-tree-node-margin-md, var(--dyn-tree-node-margin-right))
+      )
+    );
+    --dyn-tree-node-margin-bottom: var(
+      --dyn-tree-node-margin-bottom-md,
+      var(
+        --dyn-tree-node-margin-y-md,
+        var(--dyn-tree-node-margin-md, var(--dyn-tree-node-margin-bottom))
+      )
+    );
+    --dyn-tree-node-margin-left: var(
+      --dyn-tree-node-margin-left-md,
+      var(
+        --dyn-tree-node-margin-x-md,
+        var(--dyn-tree-node-margin-md, var(--dyn-tree-node-margin-left))
+      )
+    );
+
+    --dyn-tree-node-gap: var(--dyn-tree-node-gap-md, var(--dyn-tree-node-gap));
+    --dyn-tree-node-row-gap: var(
+      --dyn-tree-node-row-gap-md,
+      var(--dyn-tree-node-gap-md, var(--dyn-tree-node-row-gap))
+    );
+    --dyn-tree-node-column-gap: var(
+      --dyn-tree-node-column-gap-md,
+      var(--dyn-tree-node-gap-md, var(--dyn-tree-node-column-gap))
+    );
+  }
+}
+
+@media (min-width: 64rem) {
+  .root {
+    --dyn-tree-node-padding: var(--dyn-tree-node-padding-lg, var(--dyn-tree-node-padding));
+    --dyn-tree-node-padding-top: var(
+      --dyn-tree-node-padding-top-lg,
+      var(
+        --dyn-tree-node-padding-y-lg,
+        var(--dyn-tree-node-padding-lg, var(--dyn-tree-node-padding-top))
+      )
+    );
+    --dyn-tree-node-padding-right: var(
+      --dyn-tree-node-padding-right-lg,
+      var(
+        --dyn-tree-node-padding-x-lg,
+        var(--dyn-tree-node-padding-lg, var(--dyn-tree-node-padding-right))
+      )
+    );
+    --dyn-tree-node-padding-bottom: var(
+      --dyn-tree-node-padding-bottom-lg,
+      var(
+        --dyn-tree-node-padding-y-lg,
+        var(--dyn-tree-node-padding-lg, var(--dyn-tree-node-padding-bottom))
+      )
+    );
+    --dyn-tree-node-padding-left: var(
+      --dyn-tree-node-padding-left-lg,
+      var(
+        --dyn-tree-node-padding-x-lg,
+        var(--dyn-tree-node-padding-lg, var(--dyn-tree-node-padding-left))
+      )
+    );
+
+    --dyn-tree-node-margin: var(--dyn-tree-node-margin-lg, var(--dyn-tree-node-margin));
+    --dyn-tree-node-margin-top: var(
+      --dyn-tree-node-margin-top-lg,
+      var(
+        --dyn-tree-node-margin-y-lg,
+        var(--dyn-tree-node-margin-lg, var(--dyn-tree-node-margin-top))
+      )
+    );
+    --dyn-tree-node-margin-right: var(
+      --dyn-tree-node-margin-right-lg,
+      var(
+        --dyn-tree-node-margin-x-lg,
+        var(--dyn-tree-node-margin-lg, var(--dyn-tree-node-margin-right))
+      )
+    );
+    --dyn-tree-node-margin-bottom: var(
+      --dyn-tree-node-margin-bottom-lg,
+      var(
+        --dyn-tree-node-margin-y-lg,
+        var(--dyn-tree-node-margin-lg, var(--dyn-tree-node-margin-bottom))
+      )
+    );
+    --dyn-tree-node-margin-left: var(
+      --dyn-tree-node-margin-left-lg,
+      var(
+        --dyn-tree-node-margin-x-lg,
+        var(--dyn-tree-node-margin-lg, var(--dyn-tree-node-margin-left))
+      )
+    );
+
+    --dyn-tree-node-gap: var(--dyn-tree-node-gap-lg, var(--dyn-tree-node-gap));
+    --dyn-tree-node-row-gap: var(
+      --dyn-tree-node-row-gap-lg,
+      var(--dyn-tree-node-gap-lg, var(--dyn-tree-node-row-gap))
+    );
+    --dyn-tree-node-column-gap: var(
+      --dyn-tree-node-column-gap-lg,
+      var(--dyn-tree-node-gap-lg, var(--dyn-tree-node-column-gap))
+    );
+  }
+}
+
+@media (min-width: 80rem) {
+  .root {
+    --dyn-tree-node-padding: var(--dyn-tree-node-padding-xl, var(--dyn-tree-node-padding));
+    --dyn-tree-node-padding-top: var(
+      --dyn-tree-node-padding-top-xl,
+      var(
+        --dyn-tree-node-padding-y-xl,
+        var(--dyn-tree-node-padding-xl, var(--dyn-tree-node-padding-top))
+      )
+    );
+    --dyn-tree-node-padding-right: var(
+      --dyn-tree-node-padding-right-xl,
+      var(
+        --dyn-tree-node-padding-x-xl,
+        var(--dyn-tree-node-padding-xl, var(--dyn-tree-node-padding-right))
+      )
+    );
+    --dyn-tree-node-padding-bottom: var(
+      --dyn-tree-node-padding-bottom-xl,
+      var(
+        --dyn-tree-node-padding-y-xl,
+        var(--dyn-tree-node-padding-xl, var(--dyn-tree-node-padding-bottom))
+      )
+    );
+    --dyn-tree-node-padding-left: var(
+      --dyn-tree-node-padding-left-xl,
+      var(
+        --dyn-tree-node-padding-x-xl,
+        var(--dyn-tree-node-padding-xl, var(--dyn-tree-node-padding-left))
+      )
+    );
+
+    --dyn-tree-node-margin: var(--dyn-tree-node-margin-xl, var(--dyn-tree-node-margin));
+    --dyn-tree-node-margin-top: var(
+      --dyn-tree-node-margin-top-xl,
+      var(
+        --dyn-tree-node-margin-y-xl,
+        var(--dyn-tree-node-margin-xl, var(--dyn-tree-node-margin-top))
+      )
+    );
+    --dyn-tree-node-margin-right: var(
+      --dyn-tree-node-margin-right-xl,
+      var(
+        --dyn-tree-node-margin-x-xl,
+        var(--dyn-tree-node-margin-xl, var(--dyn-tree-node-margin-right))
+      )
+    );
+    --dyn-tree-node-margin-bottom: var(
+      --dyn-tree-node-margin-bottom-xl,
+      var(
+        --dyn-tree-node-margin-y-xl,
+        var(--dyn-tree-node-margin-xl, var(--dyn-tree-node-margin-bottom))
+      )
+    );
+    --dyn-tree-node-margin-left: var(
+      --dyn-tree-node-margin-left-xl,
+      var(
+        --dyn-tree-node-margin-x-xl,
+        var(--dyn-tree-node-margin-xl, var(--dyn-tree-node-margin-left))
+      )
+    );
+
+    --dyn-tree-node-gap: var(--dyn-tree-node-gap-xl, var(--dyn-tree-node-gap));
+    --dyn-tree-node-row-gap: var(
+      --dyn-tree-node-row-gap-xl,
+      var(--dyn-tree-node-gap-xl, var(--dyn-tree-node-row-gap))
+    );
+    --dyn-tree-node-column-gap: var(
+      --dyn-tree-node-column-gap-xl,
+      var(--dyn-tree-node-gap-xl, var(--dyn-tree-node-column-gap))
+    );
+  }
 }

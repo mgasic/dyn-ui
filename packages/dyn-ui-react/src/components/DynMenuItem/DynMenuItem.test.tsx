@@ -86,4 +86,34 @@ describe('DynMenuItem', () => {
 
     expect(onPress).toHaveBeenCalledTimes(2);
   });
+
+  describe('Slots', () => {
+    it('renders prefix content when provided', () => {
+      render(
+        <DynMenuItem
+          label="Shortcuts"
+          prefix={<span data-testid="menu-prefix">⌘</span>}
+        />
+      );
+
+      expect(screen.getByTestId('menu-prefix')).toBeInTheDocument();
+      expect(
+        screen.getByRole('menuitem', { name: 'Shortcuts' }).querySelector('[data-testid="menu-prefix"]')
+      ).not.toBeNull();
+    });
+
+    it('renders suffix content when provided', () => {
+      render(
+        <DynMenuItem
+          label="Shortcuts"
+          suffix={<span data-testid="menu-suffix">S</span>}
+        />
+      );
+
+      expect(screen.getByTestId('menu-suffix')).toBeInTheDocument();
+      expect(
+        screen.getByRole('menuitem', { name: 'Shortcuts' }).querySelector('[data-testid="menu-suffix"]')
+      ).not.toBeNull();
+    });
+  });
 });
