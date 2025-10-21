@@ -7,11 +7,12 @@ import type {
 } from 'react';
 import type { AccessibilityProps, BaseComponentProps } from '../../types/theme';
 import type {
-  DynModalPlacementConfig,
-  DynModalHorizontalAlignment,
-  DynModalPlacementStrategy,
-  DynModalVerticalPlacement
-} from '../DynModalPlacement/DynModalPlacement.types';
+  ComponentPropsWithoutRef,
+  ComponentRef,
+  ElementType,
+  ReactNode,
+} from 'react';
+import type { AccessibilityProps, BaseComponentProps } from '../../types';
 
 type PolymorphicComponentProps<E extends ElementType, P> = P &
   Omit<ComponentPropsWithoutRef<E>, keyof P>;

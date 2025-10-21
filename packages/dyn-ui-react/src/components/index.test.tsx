@@ -17,6 +17,7 @@ import {
   // Form Components - SCOPE 6
   DynInput,
   DynSelect,
+  DynSelectOption,
   DynCheckbox,
   DynDatePicker,
   DynFieldContainer,
@@ -26,18 +27,22 @@ import {
   DynDivider,
   DynGrid,
   DynPage,
+  DynUI,
 
   // Data Display Components
   DynChart,
   DynGauge,
+  DynListItem,
   DynListView,
   DynTable,
   DynTreeView,
 
   // Navigation Components
   DynMenu,
+  DynMenuTrigger,
   DynBreadcrumb,
   DynTabs,
+  DynStep,
   DynStepper,
   DynToolbar,
   DynModal,
@@ -83,6 +88,7 @@ describe('Component Exports', () => {
   it('exports all form components - SCOPE 6', () => {
     expect(isComponentExport(DynInput)).toBe(true);
     expect(isComponentExport(DynSelect)).toBe(true);
+    expect(isComponentExport(DynSelectOption)).toBe(true);
     expect(isComponentExport(DynCheckbox)).toBe(true);
     expect(isComponentExport(DynDatePicker)).toBe(true);
     expect(isComponentExport(DynFieldContainer)).toBe(true);
@@ -92,11 +98,13 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynDivider)).toBe(true);
     expect(isComponentExport(DynGrid)).toBe(true);
     expect(isComponentExport(DynPage)).toBe(true);
+    expect(isComponentExport(DynUI)).toBe(true);
   });
 
   it('exports all data display components', () => {
     expect(isComponentExport(DynChart)).toBe(true);
     expect(isComponentExport(DynGauge)).toBe(true);
+    expect(isComponentExport(DynListItem)).toBe(true);
     expect(isComponentExport(DynListView)).toBe(true);
     expect(isComponentExport(DynTable)).toBe(true);
     expect(isComponentExport(DynTreeView)).toBe(true);
@@ -104,12 +112,18 @@ describe('Component Exports', () => {
 
   it('exports all navigation components', () => {
     expect(isComponentExport(DynMenu)).toBe(true);
+    expect(isComponentExport(DynMenuTrigger)).toBe(true);
     expect(isComponentExport(DynBreadcrumb)).toBe(true);
     expect(isComponentExport(DynTabs)).toBe(true);
+    expect(isComponentExport(DynStep)).toBe(true);
     expect(isComponentExport(DynStepper)).toBe(true);
     expect(isComponentExport(DynToolbar)).toBe(true);
     expect(isComponentExport(DynModal)).toBe(true);
     expect(isComponentExport(DynModalPlacement)).toBe(true);
+  });
+
+  it('exports overlay components', () => {
+    expect(isComponentExport(DynModal)).toBe(true);
   });
 
   it('exports theme system', () => {
