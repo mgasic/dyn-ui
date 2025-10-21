@@ -37,7 +37,7 @@ export interface DynBreadcrumbProps
     AccessibilityProps,
     Omit<HTMLAttributes<HTMLElement>, keyof BaseComponentProps | keyof AccessibilityProps> {
   /** Array of breadcrumb items */
-  items: BreadcrumbItem[];
+  items?: BreadcrumbItem[];
 
   /** Size variant */
   size?: ComponentSize;
