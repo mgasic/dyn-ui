@@ -1,4 +1,4 @@
-import { BaseComponentProps } from '../../types';
+import type { AccessibilityProps, BaseComponentProps } from '../../types';
 
 export interface GaugeRange {
   from: number;
@@ -10,7 +10,12 @@ export interface GaugeRange {
 export type GaugeSize = 'small' | 'medium' | 'large';
 export type GaugeType = 'arc' | 'circle' | 'line';
 
-export interface DynGaugeProps extends BaseComponentProps {
+export interface DynGaugeAccessibilityProps extends AccessibilityProps {
+  /** Accessible textual representation of the current value */
+  'aria-valuetext'?: string;
+}
+
+export interface DynGaugeProps extends BaseComponentProps, DynGaugeAccessibilityProps {
   /** Current value to display */
   value: number;
   
@@ -64,6 +69,7 @@ export interface DynGaugeProps extends BaseComponentProps {
   
   /** Custom value formatter */
   format?: (value: number) => string;
+
 }
 
 export type DynGaugeDefaultProps = Required<

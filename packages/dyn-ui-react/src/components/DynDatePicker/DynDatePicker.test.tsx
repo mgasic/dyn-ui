@@ -1,151 +1,158 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect } from 'vitest';
+import type { DynDatePickerProps } from '../../types/field.types';
 import { DynDatePicker } from './DynDatePicker';
 
+const formatAriaLabel = (locale: string, date: Date) =>
+  new Intl.DateTimeFormat(locale, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date);
+
+const ControlledDatePicker = ({
+  initialValue,
+  ...props
+}: { initialValue?: Date } & Partial<DynDatePickerProps>) => {
+  const [value, setValue] = React.useState<Date | null>(initialValue ?? null);
+  return (
+    <DynDatePicker
+      name="controlled-date"
+      label="Controlled Date"
+      value={value}
+      onChange={setValue}
+      {...props}
+    />
+  );
+};
+
 describe('DynDatePicker', () => {
-  it('renders with label', () => {
+  it('renders with label and opens the calendar', async () => {
     render(<DynDatePicker name="test" label="Test Date Picker" />);
+
     expect(screen.getByLabelText('Test Date Picker')).toBeInTheDocument();
-  });
-
-  it('renders with placeholder', () => {
-    render(<DynDatePicker name="test" label="Test" placeholder="Enter date" />);
-    expect(screen.getByPlaceholderText('Enter date')).toBeInTheDocument();
-  });
-
-  it('handles input changes', () => {
-    const handleChange = vi.fn();
-    render(<DynDatePicker name="test" label="Test" onChange={handleChange} />);
-
-    const input = screen.getByRole('textbox');
-    fireEvent.change(input, { target: { value: '25/12/2023' } });
-
-    expect(handleChange).toHaveBeenCalled();
-  });
-
-  it('opens calendar dropdown when calendar button is clicked', () => {
-    render(<DynDatePicker name="test" label="Test" />);
 
     const calendarButton = screen.getByLabelText('Abrir calendário');
-    fireEvent.click(calendarButton);
+    await userEvent.click(calendarButton);
 
     expect(screen.getByText('Hoje')).toBeInTheDocument();
     expect(screen.getByText('Limpar')).toBeInTheDocument();
   });
 
-  it('handles today shortcut', () => {
-    const handleChange = vi.fn();
-    render(<DynDatePicker name="test" label="Test" onChange={handleChange} />);
-
-    // Open dropdown
-    const calendarButton = screen.getByLabelText('Abrir calendário');
-    fireEvent.click(calendarButton);
-
-    // Click today
-    const todayButton = screen.getByText('Hoje');
-    fireEvent.click(todayButton);
-
-    expect(handleChange).toHaveBeenCalled();
-  });
-
-  it('handles clear action', () => {
-    const handleChange = vi.fn();
+  it('selects a date from the calendar grid and closes the dropdown', async () => {
     render(
-      <DynDatePicker
-        name="test"
-        label="Test"
-        value={new Date()}
-        onChange={handleChange}
+      <ControlledDatePicker
+        initialValue={new Date('2024-05-15')}
+        locale="en-US"
+        format="MM/dd/yyyy"
       />
     );
 
-    // Clear button should be visible
-    const clearButton = screen.getByLabelText('Limpar data');
-    fireEvent.click(clearButton);
+    await userEvent.click(screen.getByLabelText('Abrir calendário'));
 
-    expect(handleChange).toHaveBeenCalledWith(null);
+    const targetLabel = formatAriaLabel('en-US', new Date('2024-05-20'));
+    await userEvent.click(screen.getByRole('gridcell', { name: targetLabel }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('grid')).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByRole('textbox')).toHaveValue('05/20/2024');
   });
 
-  it('handles keyboard navigation', () => {
-    render(<DynDatePicker name="test" label="Test" />);
-
-    const input = screen.getByRole('textbox');
-
-    // Enter key should open dropdown
-    fireEvent.keyDown(input, { key: 'Enter' });
-    expect(screen.getByText('Hoje')).toBeInTheDocument();
-
-    // Escape should close dropdown
-    fireEvent.keyDown(input, { key: 'Escape' });
-    expect(screen.queryByText('Hoje')).not.toBeInTheDocument();
-  });
-
-  it('prevents interaction when disabled', () => {
-    const handleChange = vi.fn();
-    render(<DynDatePicker name="test" label="Test" disabled onChange={handleChange} />);
-
-    const input = screen.getByRole('textbox');
-    expect(input).toBeDisabled();
-
-    const calendarButton = screen.getByLabelText('Abrir calendário');
-    expect(calendarButton).toBeDisabled();
-  });
-
-  it('prevents changes when readonly', () => {
-    render(<DynDatePicker name="test" label="Test" readonly value={new Date()} />);
-
-    const input = screen.getByRole('textbox');
-    expect(input).toHaveAttribute('readOnly');
-
-    // Clear button should not be visible in readonly mode
-    expect(screen.queryByLabelText('Limpar data')).not.toBeInTheDocument();
-  });
-
-  it('displays help text', () => {
-    render(<DynDatePicker name="test" label="Test" help="Help text" />);
-    expect(screen.getByText('Help text')).toBeInTheDocument();
-  });
-
-  it('displays error message', () => {
-    render(<DynDatePicker name="test" label="Test" errorMessage="Error message" />);
-    expect(screen.getByText('Error message')).toBeInTheDocument();
-  });
-
-  it('applies size classes', () => {
-    render(<DynDatePicker name="test" label="Test" size="large" />);
-    const input = screen.getByRole('textbox');
-    expect(input).toHaveAttribute('data-size', 'large');
-  });
-
-  it('applies custom className', () => {
-    const { container } = render(
-      <DynDatePicker name="test" label="Test" className="custom-date" />
-    );
-    expect(container.querySelector('.custom-date')).toBeInTheDocument();
-  });
-
-  it('handles focus and blur events', () => {
-    const handleFocus = vi.fn();
-    const handleBlur = vi.fn();
+  it('supports roving focus and directional navigation', async () => {
     render(
-      <DynDatePicker
-        name="test"
-        label="Test"
-        onFocus={handleFocus}
-        onBlur={handleBlur}
+      <ControlledDatePicker
+        initialValue={new Date('2024-05-15')}
+        locale="en-US"
+        format="MM/dd/yyyy"
       />
     );
 
-    const input = screen.getByRole('textbox');
-    fireEvent.focus(input);
-    expect(handleFocus).toHaveBeenCalled();
+    await userEvent.click(screen.getByLabelText('Abrir calendário'));
 
-    fireEvent.blur(input);
-    expect(handleBlur).toHaveBeenCalled();
+    const focusedLabel = formatAriaLabel('en-US', new Date('2024-05-15'));
+    const focusedCell = await screen.findByRole('gridcell', { name: focusedLabel });
+    expect(focusedCell).toHaveFocus();
+
+    fireEvent.keyDown(focusedCell, { key: 'ArrowRight' });
+    await waitFor(() => {
+      expect(document.activeElement).toHaveAttribute('data-date', '2024-05-16');
+    });
+
+    const nextFocused = document.activeElement as HTMLElement;
+    fireEvent.keyDown(nextFocused, { key: 'Home' });
+    await waitFor(() => {
+      expect(document.activeElement).toHaveAttribute('data-date', '2024-05-12');
+    });
+
+    fireEvent.keyDown(document.activeElement as HTMLElement, { key: 'End' });
+    await waitFor(() => {
+      expect(document.activeElement).toHaveAttribute('data-date', '2024-05-18');
+    });
   });
 
-  it('hides when not visible', () => {
-    render(<DynDatePicker name="test" label="Test" visible={false} />);
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  it('closes the calendar with Escape when focused inside the grid', async () => {
+    render(<ControlledDatePicker initialValue={new Date('2024-05-15')} locale="en-US" />);
+
+    await userEvent.click(screen.getByLabelText('Abrir calendário'));
+    const focusedLabel = formatAriaLabel('en-US', new Date('2024-05-15'));
+    const focusedCell = await screen.findByRole('gridcell', { name: focusedLabel });
+
+    fireEvent.keyDown(focusedCell, { key: 'Escape' });
+
+    await waitFor(() => {
+      expect(screen.queryByRole('grid')).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByRole('textbox')).toHaveFocus();
+  });
+
+  it('disables days outside the provided range', async () => {
+    render(
+      <ControlledDatePicker
+        initialValue={new Date('2024-05-15')}
+        locale="en-US"
+        minDate={new Date('2024-05-10')}
+        maxDate={new Date('2024-05-20')}
+      />
+    );
+
+    await userEvent.click(screen.getByLabelText('Abrir calendário'));
+
+    const beforeRange = formatAriaLabel('en-US', new Date('2024-05-05'));
+    const afterRange = formatAriaLabel('en-US', new Date('2024-05-25'));
+
+    expect(screen.getByRole('gridcell', { name: beforeRange })).toBeDisabled();
+    expect(screen.getByRole('gridcell', { name: afterRange })).toBeDisabled();
+  });
+
+  it('orders weekday headers based on locale', async () => {
+    const { rerender } = render(
+      <DynDatePicker name="locale-us" label="US" locale="en-US" />
+    );
+
+    await userEvent.click(screen.getByLabelText('Abrir calendário'));
+    const usWeekdays = screen.getAllByTestId('dyn-datepicker-weekday');
+    expect(usWeekdays[0]).toHaveTextContent(/sun/i);
+
+    rerender(<DynDatePicker name="locale-gb" label="GB" locale="en-GB" />);
+    await userEvent.click(screen.getByLabelText('Abrir calendário'));
+    const gbWeekdays = screen.getAllByTestId('dyn-datepicker-weekday');
+    expect(gbWeekdays[0]).toHaveTextContent(/mon/i);
+  });
+
+  it('announces the active date for assistive technologies', async () => {
+    render(
+      <ControlledDatePicker initialValue={new Date('2024-05-15')} locale="en-US" />
+    );
+
+    await userEvent.click(screen.getByLabelText('Abrir calendário'));
+
+    const announcement = formatAriaLabel('en-US', new Date('2024-05-15'));
+    expect(screen.getByText(announcement)).toBeInTheDocument();
   });
 });

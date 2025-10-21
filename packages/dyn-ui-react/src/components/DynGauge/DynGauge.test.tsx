@@ -81,6 +81,51 @@ describe('DynGauge', () => {
     expect(screen.getByText('42 MB/s')).toBeInTheDocument();
   });
 
+  it('derives aria-valuetext from the formatter and passes through aria-label', () => {
+    render(
+      <DynGauge
+        value={38.7}
+        animated={false}
+        showValue={false}
+        format={val => `${Math.round(val)} MB/s`}
+        aria-label="Network throughput"
+      />
+    );
+
+    const gauge = screen.getByRole('progressbar', { name: 'Network throughput' });
+    expect(gauge).toHaveAttribute('aria-valuetext', '39 MB/s');
+  });
+
+  it('allows overriding aria-valuetext via props', () => {
+    render(
+      <DynGauge
+        value={25}
+        animated={false}
+        aria-label="Battery status"
+        aria-valuetext="Battery quarter charged"
+      />
+    );
+
+    const gauge = screen.getByRole('progressbar', { name: 'Battery status' });
+    expect(gauge).toHaveAttribute('aria-valuetext', 'Battery quarter charged');
+  });
+
+  it('forwards additional aria-* attributes to the root progressbar', () => {
+    render(
+      <DynGauge
+        value={40}
+        animated={false}
+        aria-label="Queue depth"
+        aria-live="polite"
+        aria-errormessage="queue-error"
+      />
+    );
+
+    const gauge = screen.getByRole('progressbar', { name: 'Queue depth' });
+    expect(gauge).toHaveAttribute('aria-live', 'polite');
+    expect(gauge).toHaveAttribute('aria-errormessage', 'queue-error');
+  });
+
   it('omits the value display when showValue is false', () => {
     render(<DynGauge value={70} showValue={false} animated={false} />);
 
