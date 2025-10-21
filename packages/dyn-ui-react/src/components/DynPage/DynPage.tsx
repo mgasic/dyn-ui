@@ -101,19 +101,40 @@ const renderActionButtons = (actions: DynPageAction[], size: LayoutSize | undefi
 
   return (
     <div className={styles.actions}>
-      {actions.map((action) => (
-        <DynButton
-          key={action.key}
-          kind={(action.type ?? 'secondary') as DynButtonKind}
-          size={size === 'large' ? 'large' : 'medium'}
-          disabled={action.disabled}
-          loading={action.loading}
-          onClick={action.onClick}
-          icon={action.icon}
-        >
-          {action.title}
-        </DynButton>
-      ))}
+      {actions.map((action) => {
+        let variant: DynButtonVariant = 'secondary';
+        let danger = false;
+
+        switch (action.type) {
+          case 'primary':
+            variant = 'primary';
+            break;
+          case 'secondary':
+            variant = 'secondary';
+            break;
+          case 'danger':
+            variant = 'primary';
+            danger = true;
+            break;
+          default:
+            variant = 'secondary';
+        }
+
+        return (
+          <DynButton
+            key={action.key}
+            variant={variant}
+            danger={danger}
+            size={size === 'large' ? 'large' : 'medium'}
+            disabled={action.disabled}
+            loading={action.loading}
+            onClick={action.onClick}
+            startIcon={action.icon}
+          >
+            {action.title}
+          </DynButton>
+        );
+      })}
     </div>
   );
 };
@@ -206,35 +227,56 @@ const DynPageComponent = <E extends ElementType = 'main'>(
     return renderBreadcrumbItems(breadcrumbs);
   }, [breadcrumbs]);
 
-    return (
-      <div className={styles.actions}>
-        {actions.map((action) => {
-          const variant: DynButtonVariant =
-            action.type === 'primary'
-              ? 'primary'
-              : action.type === 'secondary'
-                ? 'secondary'
-                : 'primary';
-          const isDanger = action.type === 'danger';
+  const renderActions = useCallback(
+    () => renderActionButtons(actions, size),
+    [actions, size]
+  );
 
-          return (
-            <DynButton
-              key={action.key}
-              variant={variant}
-              danger={isDanger}
-              size={size === 'large' ? 'large' : 'medium'}
-              disabled={action.disabled}
-              loading={action.loading}
-              onClick={action.onClick}
-              startIcon={action.icon}
-            >
-              {action.title}
-            </DynButton>
-          );
-        })}
-      </div>
+  const headerContent = useMemo(() => {
+    if (slots?.header) {
+      return slots.header({
+        title,
+        subtitle,
+        breadcrumbs,
+        actions,
+        titleId,
+        renderBreadcrumbs: memoizedRenderBreadcrumbs,
+        renderActions,
+      });
+    }
+
+    const actionsElement = renderActions();
+    const hasTitle = Boolean(title);
+    const hasSubtitle = Boolean(subtitle);
+
+    return (
+      <>
+        {memoizedRenderBreadcrumbs()}
+        {(hasTitle || hasSubtitle || actionsElement) && (
+          <div className={styles.titleSection}>
+            <div className={styles.titleContent}>
+              {hasTitle ? (
+                <h1 id={titleId} className={styles.title}>
+                  {title}
+                </h1>
+              ) : null}
+              {hasSubtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
+            </div>
+            {actionsElement}
+          </div>
+        )}
+      </>
     );
-  };
+  }, [
+    actions,
+    breadcrumbs,
+    memoizedRenderBreadcrumbs,
+    renderActions,
+    slots,
+    subtitle,
+    title,
+    titleId,
+  ]);
 
   if (loading) {
     return (
