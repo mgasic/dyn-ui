@@ -286,15 +286,60 @@ export const KeyboardNavigation: Story = {
     checkable: true,
     showIcon: true,
   },
-  render: (args) => (
-    <div>
-      <p style={{ marginBottom: 12 }}>
-        Focus the tree and use the Arrow keys, Home/End, and Enter/Space to traverse and interact with
-        nodes.
-      </p>
-      <DynTreeView {...args} />
-    </div>
-  ),
+  render: (args) => {
+    const [expandedKeys, setExpandedKeys] = React.useState<string[]>([]);
+    const [checkedKeys, setCheckedKeys] = React.useState<string[]>([]);
+    const [selectedKeys, setSelectedKeys] = React.useState<string[]>([]);
+
+    return (
+      <div>
+        <p style={{ marginBottom: 12 }}>
+          Focus the tree and use the keyboard to explore nodes without relying on a mouse.
+        </p>
+        <ul style={{ marginBottom: 12 }}>
+          <li>
+            <kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd> — Move focus between visible nodes.
+          </li>
+          <li>
+            <kbd>Arrow Right</kbd> / <kbd>Arrow Left</kbd> — Expand/collapse parents or drill into the
+            next level.
+          </li>
+          <li>
+            <kbd>Home</kbd> / <kbd>End</kbd> — Jump to the first or last visible node.
+          </li>
+          <li>
+            <kbd>Enter</kbd> / <kbd>Space</kbd> — Toggle selection or checking on the focused node.
+          </li>
+        </ul>
+        <DynTreeView
+          {...args}
+          onExpand={(keys) => {
+            setExpandedKeys(keys);
+            args.onExpand?.(keys);
+          }}
+          onCheck={(keys, info) => {
+            setCheckedKeys(keys);
+            args.onCheck?.(keys, info);
+          }}
+          onSelect={(keys, info) => {
+            setSelectedKeys(keys);
+            args.onSelect?.(keys, info);
+          }}
+        />
+        <div style={{ marginTop: 12, fontSize: 14 }}>
+          <div>
+            <strong>Expanded:</strong> {expandedKeys.length ? expandedKeys.join(', ') : 'None'}
+          </div>
+          <div>
+            <strong>Checked:</strong> {checkedKeys.length ? checkedKeys.join(', ') : 'None'}
+          </div>
+          <div>
+            <strong>Selected:</strong> {selectedKeys.length ? selectedKeys.join(', ') : 'None'}
+          </div>
+        </div>
+      </div>
+    );
+  },
 };
 
 // Organization Chart
@@ -391,6 +436,29 @@ export const AllFeatures: Story = {
     },
     onSearch: (value) => {
       console.log('Search:', value);
+    },
+  },
+};
+
+export const WithDynTreeNodeLayout: Story = {
+  args: {
+    treeData: fileSystemData,
+    useDynTreeNodeLayout: true,
+    nodeLayoutProps: {
+      gap: 'sm',
+      p: 'xs',
+      direction: 'row',
+    },
+    showIcon: true,
+    selectable: true,
+    checkable: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Wraps each rendered node with the DynTreeNode layout primitive to align DynTreeView with the new layout semantics.',
+      },
     },
   },
 };

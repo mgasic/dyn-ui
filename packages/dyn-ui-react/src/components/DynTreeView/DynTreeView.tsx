@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import { DynTreeViewProps, DynTreeNode } from './DynTreeView.types';
+import { DynTreeNode as DynTreeNodeLayout } from '../DynTreeNode';
 import styles from './DynTreeView.module.css';
 
 const DynTreeView: React.FC<DynTreeViewProps> = ({
@@ -22,6 +23,8 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
   onSearch,
   height,
   className,
+  useDynTreeNodeLayout = false,
+  nodeLayoutProps,
 }) => {
   const [internalExpandedKeys, setInternalExpandedKeys] = useState<string[]>(
     defaultExpandAll ? getAllKeys(treeData) : expandedKeys
@@ -221,12 +224,11 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
     }
 
     const activeElement = document.activeElement as HTMLElement | null;
-    if (activeElement && !treeElement.contains(activeElement)) {
+    if (!activeElement || !treeElement.contains(activeElement)) {
       return;
     }
 
     if (
-      activeElement &&
       activeElement !== treeElement &&
       activeElement.getAttribute('role') !== 'treeitem'
     ) {
@@ -250,23 +252,77 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
       const isChecked = internalCheckedKeys.includes(node.key);
       const nodeId = `dyn-tree-item-${node.key}`;
 
-      return (
-        <div key={node.key} className={styles['dyn-tree-view__node']}>
+      const layoutConfiguration = nodeLayoutProps ?? {};
+      const { className: layoutClassName, style: layoutStyle, ...layoutRest } = layoutConfiguration;
+      const shouldOverrideIndent = Boolean(layoutStyle && Object.prototype.hasOwnProperty.call(layoutStyle, 'paddingLeft'));
+      const indentStyle = shouldOverrideIndent ? {} : { paddingLeft: (level - 1) * 24 };
+
+      const setNodeRef = (element: HTMLElement | null) => {
+        nodeRefs.current[node.key] = element as HTMLDivElement | null;
+      };
+
+      const nodeProps = {
+        ref: setNodeRef,
+        id: nodeId,
+        role: 'treeitem' as const,
+        'aria-selected': isSelected,
+        'aria-disabled': node.disabled ? true : undefined,
+        'aria-expanded': hasChildren ? isExpanded : undefined,
+        'aria-level': level,
+        'aria-setsize': setSize,
+        'aria-posinset': position,
+        tabIndex: focusedKey === node.key ? 0 : -1,
+        'data-parent-key': parentKey,
+      };
+
+      const sharedContent = (
+        <>
+          {/* Expand/Collapse icon */}
+          {hasChildren ? (
+            <div
+              className={styles['dyn-tree-view__node-switcher']}
+              onClick={() => handleExpand(node.key, !isExpanded)}
+            >
+              <span className={styles['dyn-tree-view__expand-icon']}>
+                {isExpanded ? '▼' : '▶'}
+              </span>
+            </div>
+          ) : (
+            <div className={classNames(styles['dyn-tree-view__node-switcher'], styles['dyn-tree-view__node-switcher--leaf'])}>
+              {showLine && <div className={styles['dyn-tree-view__line']} />}
+            </div>
+          )}
+
+          {/* Checkbox */}
+          {checkable && (
+            <div className={styles['dyn-tree-view__node-checkbox']}>
+              <input
+                type="checkbox"
+                checked={isChecked}
+                disabled={node.disabled}
+                onChange={(e) => handleCheck(node, e.target.checked)}
+              />
+            </div>
+          )}
+
+          {/* Icon: prefer node.icon, fallback to folder icon for parent nodes when showIcon is true */}
+          {showIcon && (node.icon || hasChildren) && (
+            <div className={styles['dyn-tree-view__node-icon']}>
+              <span>{node.icon ?? (hasChildren ? '📁' : '')}</span>
+            </div>
+          )}
+
+          {/* Title */}
           <div
-            ref={element => {
-              nodeRefs.current[node.key] = element;
-            }}
-            id={nodeId}
             className={classNames(
-              styles['dyn-tree-view__node-content'],
+              styles['dyn-tree-view__node-title'],
               {
-                [styles['dyn-tree-view__node-content--selected']]: isSelected,
-                [styles['dyn-tree-view__node-content--disabled']]: node.disabled,
+                [styles['dyn-tree-view__node-title--clickable']]: selectable && !node.disabled,
               }
             )}
             style={{ paddingLeft: (level - 1) * 24 }}
             role="treeitem"
-            aria-selected={isSelected}
+            aria-selected={selectable ? isSelected : undefined}
             aria-disabled={node.disabled ? true : undefined}
             aria-expanded={hasChildren ? isExpanded : undefined}
             aria-level={level}
@@ -275,58 +331,51 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
             tabIndex={focusedKey === node.key ? 0 : -1}
             data-parent-key={parentKey}
           >
-            {/* Expand/Collapse icon */}
-            {hasChildren ? (
-              <div
-                className={styles['dyn-tree-view__node-switcher']}
-                onClick={() => handleExpand(node.key, !isExpanded)}
-              >
-                <span className={styles['dyn-tree-view__expand-icon']}>
-                  {isExpanded ? '▼' : '▶'}
-                </span>
-              </div>
-            ) : (
-              <div className={classNames(styles['dyn-tree-view__node-switcher'], styles['dyn-tree-view__node-switcher--leaf'])}>
-                {showLine && <div className={styles['dyn-tree-view__line']} />}
-              </div>
-            )}
-
-            {/* Checkbox */}
-            {checkable && (
-              <div className={styles['dyn-tree-view__node-checkbox']}>
-                <input
-                  type="checkbox"
-                  checked={isChecked}
-                  disabled={node.disabled}
-                  onChange={(e) => handleCheck(node, e.target.checked)}
-                />
-              </div>
-            )}
-
-            {/* Icon: prefer node.icon, fallback to folder icon for parent nodes when showIcon is true */}
-            {showIcon && (node.icon || hasChildren) && (
-              <div className={styles['dyn-tree-view__node-icon']}>
-                <span>{node.icon ?? (hasChildren ? '📁' : '')}</span>
-              </div>
-            )}
-
-            {/* Title */}
-            <div
-              className={classNames(
-                styles['dyn-tree-view__node-title'],
-                {
-                  [styles['dyn-tree-view__node-title--clickable']]: selectable && !node.disabled,
-                }
-              )}
-              onClick={selectable && !node.disabled ? () => handleSelect(node, !isSelected) : undefined}
-            >
-              {node.title}
-            </div>
+            {node.title}
           </div>
+        </>
+      );
+
+      const mergedClassName = classNames(
+        styles['dyn-tree-view__node-content'],
+        {
+          [styles['dyn-tree-view__node-content--selected']]: isSelected,
+          [styles['dyn-tree-view__node-content--disabled']]: node.disabled,
+        },
+        layoutClassName
+      );
+
+      const mergedStyle = {
+        ...layoutStyle,
+        ...indentStyle,
+      } as React.CSSProperties;
+
+      const contentElement = useDynTreeNodeLayout ? (
+        <DynTreeNodeLayout
+          {...layoutRest}
+          {...nodeProps}
+          className={mergedClassName}
+          style={mergedStyle}
+        >
+          {sharedContent}
+        </DynTreeNodeLayout>
+      ) : (
+        <div
+          {...nodeProps}
+          className={mergedClassName}
+          style={mergedStyle}
+        >
+          {sharedContent}
+        </div>
+      );
+
+      return (
+        <div key={node.key} className={styles['dyn-tree-view__node']}>
+          {contentElement}
 
           {/* Children */}
           {hasChildren && isExpanded && (
-            <div className={styles['dyn-tree-view__node-children']}>
+            <div className={styles['dyn-tree-view__node-children']} role="group">
               {node.children!.map((child, index) =>
                 renderTreeNode(child, level + 1, node.children!.length, index + 1, node.key)
               )}
@@ -347,6 +396,8 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
       showIcon,
       showLine,
       focusedKey,
+      useDynTreeNodeLayout,
+      nodeLayoutProps,
     ]
   );
 
@@ -559,6 +610,8 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
     ]
   );
 
+  const activeDescendantId = focusedKey ? `dyn-tree-item-${focusedKey}` : undefined;
+
   return (
     <div
       ref={treeRef}
@@ -569,6 +622,7 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
       onKeyDown={handleKeyDown}
       onFocus={handleTreeFocus}
       aria-multiselectable={multiple || undefined}
+      aria-activedescendant={activeDescendantId}
     >
       {/* Search */}
       {(showSearch ?? searchable) && (

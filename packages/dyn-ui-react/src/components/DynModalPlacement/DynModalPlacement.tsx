@@ -5,10 +5,11 @@ import type {
   DynModalPlacementProps,
   DynModalVerticalPlacement,
   DynModalHorizontalAlignment,
-  DynModalPlacementStrategy
+  DynModalPlacementStrategy,
+  DynModalSpacingValue
 } from './DynModalPlacement.types';
 
-const resolveSpacingValue = (value?: number | string): string | undefined => {
+const resolveSpacingValue = (value?: DynModalSpacingValue): string | undefined => {
   if (typeof value === 'number') {
     return `${value}px`;
   }

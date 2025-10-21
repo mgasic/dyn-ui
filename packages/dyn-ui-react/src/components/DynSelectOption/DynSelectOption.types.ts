@@ -1,46 +1,32 @@
-import type { ReactNode, MouseEvent as ReactMouseEvent } from 'react';
 import type { SelectOption } from '../../types/field.types';
 
-export interface DynSelectOptionClassNames {
-  /** Additional class applied to the option root element */
-  root?: string;
-  /** Additional class applied when the option is selected */
-  selected?: string;
-  /** Additional class applied when the option is the active (focused) option */
-  active?: string;
-  /** Additional class applied when the option is disabled */
-  disabled?: string;
-  /** Additional class applied to the option text container */
-  text?: string;
-  /** Additional class applied to the checkbox container when in multi-select mode */
-  checkbox?: string;
-  /** Additional class applied to the checkbox when the option is selected */
-  checkboxChecked?: string;
-}
-
 export interface DynSelectOptionProps {
-  /** Unique id for aria-activedescendant wiring */
+  /** DOM id used for aria-activedescendant wiring */
   id: string;
-  /** Option metadata representing the value rendered */
+  /** Zero-based index of the option in the filtered collection */
+  index: number;
+  /** Option metadata provided by DynSelect */
   option: SelectOption;
-  /** Flag to indicate this option is currently selected */
+  /** Indicates if the option represents the current selected value */
   isSelected: boolean;
-  /** Flag to indicate this option is the active option in the list */
+  /** Indicates if the option is the active/focused item within the listbox */
   isActive: boolean;
-  /** Whether the parent select is operating in multi-select mode */
-  multiple?: boolean;
-  /** Callback fired when the option is selected via click */
-  onSelect: (
-    option: SelectOption,
-    event: ReactMouseEvent<HTMLDivElement>
-  ) => void;
-  /** Callback fired when the option becomes the active option through pointer focus */
-  onActivate?: (
-    option: SelectOption,
-    event: ReactMouseEvent<HTMLDivElement>
-  ) => void;
-  /** Optional overrides to append styling hooks */
-  classNames?: DynSelectOptionClassNames;
-  /** Custom label renderer. Defaults to option.label */
-  children?: ReactNode;
+  /** Enables checkbox affordance when the parent select is multiple */
+  isMultiple: boolean;
+  /** Called when the option should become the active item (hover/mouse move) */
+  onActivate: (index: number) => void;
+  /** Called when the option is requested to be selected */
+  onSelect: (option: SelectOption) => void;
+  /** Optional class names applied to the option container */
+  className?: string;
+  /** Optional class name overrides emitted by the parent */
+  classes?: {
+    option?: string;
+    optionSelected?: string;
+    optionDisabled?: string;
+    optionActive?: string;
+    optionText?: string;
+    checkbox?: string;
+    checkboxChecked?: string;
+  };
 }
