@@ -152,8 +152,20 @@ describe('DynPage', () => {
 
     const root = screen.getByRole('main');
     expect(root.className).toMatch(/padding.*lg/i);
-    expect(root.style.getPropertyValue('--dyn-page-content-padding')).toContain(
-      '--dyn-spacing-2xl'
+    expect(root.style.getPropertyValue('--dyn-page-content-padding')).toBe('');
+  });
+
+  it('allows custom padding values without overriding responsive presets', () => {
+    render(
+      <DynPage title="Test" padding="2rem 1rem">
+        <div>Content</div>
+      </DynPage>
+    );
+
+    const root = screen.getByRole('main');
+    expect(root.className).not.toMatch(/padding/i);
+    expect(root.style.getPropertyValue('--dyn-page-content-padding')).toBe(
+      '2rem 1rem'
     );
   });
 

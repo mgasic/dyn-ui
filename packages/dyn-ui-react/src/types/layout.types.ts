@@ -141,7 +141,7 @@ export interface DynPageOwnProps {
   loading?: boolean;
   error?: string | ReactNode;
   size?: LayoutSize;
-  padding?: LayoutSpacing;
+  padding?: LayoutSpacing | CSSProperties['padding'];
   headerPadding?: LayoutSpacing;
   background?: 'none' | 'surface' | 'page';
   style?: CSSProperties;

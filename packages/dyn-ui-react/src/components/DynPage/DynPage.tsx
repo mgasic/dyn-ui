@@ -48,9 +48,15 @@ const HEADER_PADDING_TOKENS: Record<LayoutSpacing, string> = {
   xl: 'calc(var(--dyn-spacing-2xl, var(--spacing-2xl, 2rem)) + var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem))) var(--dyn-spacing-3xl, var(--spacing-3xl, 3rem))',
 };
 
-const resolveContentPadding = (spacing: LayoutSpacing | undefined) => {
-  if (!spacing) return undefined;
-  return CONTENT_PADDING_TOKENS[spacing] ?? CONTENT_PADDING_TOKENS.md;
+const isLayoutSpacing = (value: unknown): value is LayoutSpacing =>
+  typeof value === 'string' &&
+  Object.prototype.hasOwnProperty.call(CONTENT_PADDING_TOKENS, value);
+
+const resolveContentPadding = (
+  spacing: LayoutSpacing | CSSProperties['padding'] | undefined,
+) => {
+  if (!spacing || isLayoutSpacing(spacing)) return undefined;
+  return typeof spacing === 'number' ? `${spacing}px` : spacing;
 };
 
 const resolveHeaderPadding = (spacing: LayoutSpacing | undefined) => {
@@ -164,7 +170,7 @@ const DynPageComponent = <E extends ElementType = 'main'>(
         ? styles.sizeLarge
         : undefined;
 
-  const paddingClass = padding
+  const paddingClass = isLayoutSpacing(padding)
     ? styles[`padding${toPascalCase(padding)}` as keyof typeof styles]
     : undefined;
 
