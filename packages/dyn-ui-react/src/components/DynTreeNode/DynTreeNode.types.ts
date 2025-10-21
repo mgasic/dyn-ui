@@ -1,18 +1,39 @@
 import type React from 'react';
 
-export type DynTreeNodeSpacing =
-  | 'none'
-  | '0'
-  | 'xs'
-  | 'sm'
-  | 'md'
-  | 'lg'
-  | 'xl'
-  | '2xl'
-  | number
-  | string;
+export type DynTreeNodeBreakpoint = 'base' | 'sm' | 'md' | 'lg' | 'xl';
 
-export interface DynTreeNodeBaseProps<E extends React.ElementType = 'div'> {
+export type DynTreeNodeSpacingToken = '0' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'auto';
+
+export type DynTreeNodeSpacingPrimitive = DynTreeNodeSpacingToken | number | string;
+
+export type DynTreeNodeResponsiveSpacingValue =
+  | DynTreeNodeSpacingPrimitive
+  | Partial<Record<DynTreeNodeBreakpoint, DynTreeNodeSpacingPrimitive>>;
+
+export interface DynTreeNodeSpacingProps {
+  padding?: DynTreeNodeResponsiveSpacingValue;
+  p?: DynTreeNodeResponsiveSpacingValue;
+  px?: DynTreeNodeResponsiveSpacingValue;
+  py?: DynTreeNodeResponsiveSpacingValue;
+  pt?: DynTreeNodeResponsiveSpacingValue;
+  pr?: DynTreeNodeResponsiveSpacingValue;
+  pb?: DynTreeNodeResponsiveSpacingValue;
+  pl?: DynTreeNodeResponsiveSpacingValue;
+  margin?: DynTreeNodeResponsiveSpacingValue;
+  m?: DynTreeNodeResponsiveSpacingValue;
+  mx?: DynTreeNodeResponsiveSpacingValue;
+  my?: DynTreeNodeResponsiveSpacingValue;
+  mt?: DynTreeNodeResponsiveSpacingValue;
+  mr?: DynTreeNodeResponsiveSpacingValue;
+  mb?: DynTreeNodeResponsiveSpacingValue;
+  ml?: DynTreeNodeResponsiveSpacingValue;
+  gap?: DynTreeNodeResponsiveSpacingValue;
+  rowGap?: DynTreeNodeResponsiveSpacingValue;
+  columnGap?: DynTreeNodeResponsiveSpacingValue;
+}
+
+export interface DynTreeNodeBaseProps<E extends React.ElementType = 'div'>
+  extends DynTreeNodeSpacingProps {
   /**
    * Polymorphic component element type.
    * Defaults to a `div` so the node behaves as a semantic wrapper by default.
@@ -24,11 +45,6 @@ export interface DynTreeNodeBaseProps<E extends React.ElementType = 'div'> {
   align?: React.CSSProperties['alignItems'];
   justify?: React.CSSProperties['justifyContent'];
   /** Spacing helpers following Dyn UI spacing tokens. */
-  gap?: DynTreeNodeSpacing;
-  p?: DynTreeNodeSpacing;
-  padding?: DynTreeNodeSpacing;
-  m?: DynTreeNodeSpacing;
-  margin?: DynTreeNodeSpacing;
   className?: string;
   style?: React.CSSProperties;
   children?: React.ReactNode;

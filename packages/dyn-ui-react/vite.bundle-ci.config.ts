@@ -1,6 +1,9 @@
 import { mergeConfig, defineConfig } from 'vite';
 import baseConfig from './vite.config';
 import { resolve } from 'path';
+import { performanceBudgetPlugin } from './scripts/performanceBudgetPlugin';
+
+const bundleReportDir = resolve(__dirname, '../../reports/bundle');
 
 export default mergeConfig(
   baseConfig,
@@ -21,6 +24,15 @@ export default mergeConfig(
             'react-dom': 'ReactDOM',
           },
         },
+        plugins: [
+          performanceBudgetPlugin({
+            budgets: [
+              { file: 'dyn-ui-ci.es.js', gzipLimitKb: 30, brotliLimitKb: 25 },
+              { file: 'dyn-ui-ci.cjs.js', gzipLimitKb: 35, brotliLimitKb: 30 },
+            ],
+            reportPath: resolve(bundleReportDir, 'performance-budget.json'),
+          }),
+        ],
       },
     },
   }),

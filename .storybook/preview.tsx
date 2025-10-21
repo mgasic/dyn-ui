@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Preview } from '@storybook/react-vite';
+import DocsTemplate from './DocsTemplate';
 import { ThemeProvider } from '../packages/dyn-ui-react/src/theme/ThemeProvider';
 import '../packages/dyn-ui-react/src/styles/themes.css';
 
@@ -29,6 +30,9 @@ const preview: Preview = {
         color: /(background|color)$/i,
         date: /Date$/,
       },
+    },
+    docs: {
+      page: DocsTemplate,
     },
   },
   decorators: [
