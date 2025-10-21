@@ -21,6 +21,13 @@
   },
   "include": [
     "packages/**/*",
+    "apps/**/*",
+    "tests/**/*",
+    "stories/**/*",
+    "scripts/**/*",
+    ".storybook/**/*",
+    "playwright*.config.ts",
+    "tsconfig.base.json",
     "vitest.setup.ts",
     "env.d.ts"
   ]

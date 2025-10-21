@@ -1,2 +1,7 @@
 export { DynButton } from './DynButton';
-export type { DynButtonProps } from './DynButton.types';
+export type {
+  DynButtonProps,
+  DynButtonRef,
+  DynButtonVariant,
+  DynButtonSize,
+} from './DynButton.types';

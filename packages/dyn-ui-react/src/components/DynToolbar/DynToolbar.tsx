@@ -14,6 +14,8 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 import { DynToolbarProps, ToolbarItem, DynToolbarRef, TOOLBAR_DEFAULTS } from './DynToolbar.types';
+import { focusElement, getFocusableElements } from '../../utils/focus';
+import { activateFocusTrap } from '../../utils/focusTrap';
 import { DynIcon } from '../DynIcon';
 import { DynBadge } from '../DynBadge';
 import styles from './DynToolbar.module.css';
@@ -52,6 +54,12 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const overflowRef = useRef<HTMLDivElement>(null);
+  const overflowButtonRef = useRef<HTMLButtonElement | null>(null);
+  const overflowMenuRef = useRef<HTMLDivElement | null>(null);
+  const overflowTrapCleanupRef = useRef<(() => void) | null>(null);
+  const dropdownRefs = useRef<Record<string, { trigger: HTMLButtonElement | null; menu: HTMLDivElement | null }>>({});
+  const dropdownTrapCleanupRef = useRef<(() => void) | null>(null);
+  const lastDropdownIdRef = useRef<string | null>(null);
 
   // Filter visible items
   const filteredItems = useMemo(() => {
@@ -227,7 +235,11 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
     if (item.type === 'dropdown') {
       event?.preventDefault();
-      setActiveDropdown(prev => prev === item.id ? null : item.id);
+      setActiveDropdown(prev => {
+        const next = prev === item.id ? null : item.id;
+        lastDropdownIdRef.current = next ?? item.id;
+        return next;
+      });
       return;
     }
 
@@ -237,18 +249,88 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
     onItemClick?.(item);
 
+    if (activeDropdown) {
+      lastDropdownIdRef.current = activeDropdown;
+      setActiveDropdown(null);
+    }
+
     // Close overflow menu after action
     if (isOverflowOpen) {
       setIsOverflowOpen(false);
       onOverflowToggle?.(false);
     }
-  }, [isOverflowOpen, onItemClick, onOverflowToggle]);
+  }, [activeDropdown, isOverflowOpen, onItemClick, onOverflowToggle]);
 
   const handleOverflowToggle = () => {
     const newState = !isOverflowOpen;
     setIsOverflowOpen(newState);
     onOverflowToggle?.(newState);
   };
+
+  const handleOverflowMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    setIsOverflowOpen(false);
+    onOverflowToggle?.(false);
+  };
+
+  useEffect(() => {
+    if (!isOverflowOpen) return undefined;
+    const menu = overflowMenuRef.current;
+    if (!menu) return undefined;
+
+    const cleanup = activateFocusTrap(menu, {
+      initialFocus: () => {
+        const [first] = getFocusableElements(menu);
+        return first ?? menu;
+      },
+      returnFocus: () => overflowButtonRef.current
+    });
+
+    overflowTrapCleanupRef.current = cleanup;
+
+    return () => {
+      cleanup();
+      overflowTrapCleanupRef.current = null;
+    };
+  }, [isOverflowOpen]);
+
+  useEffect(() => {
+    dropdownTrapCleanupRef.current?.();
+    dropdownTrapCleanupRef.current = null;
+
+    if (!activeDropdown) {
+      if (lastDropdownIdRef.current) {
+        const trigger = dropdownRefs.current[lastDropdownIdRef.current]?.trigger;
+        focusElement(trigger ?? null);
+        lastDropdownIdRef.current = null;
+      }
+      return;
+    }
+
+    const registry = dropdownRefs.current[activeDropdown];
+    if (!registry?.menu) return;
+
+    const cleanup = activateFocusTrap(registry.menu, {
+      initialFocus: () => {
+        const [first] = getFocusableElements(registry.menu!);
+        return first ?? registry.menu;
+      },
+      returnFocus: () => dropdownRefs.current[activeDropdown]?.trigger ?? null
+    });
+
+    dropdownTrapCleanupRef.current = cleanup;
+
+    return () => {
+      cleanup();
+      dropdownTrapCleanupRef.current = null;
+    };
+  }, [activeDropdown]);
+
+  useEffect(() => () => {
+    overflowTrapCleanupRef.current?.();
+    dropdownTrapCleanupRef.current?.();
+  }, []);
 
   const renderBadge = useCallback((badge: ToolbarItem['badge']) => {
     if (!badge) {
@@ -369,9 +451,21 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
     const iconContent = renderIconContent(item.icon);
 
+    if (item.type === 'dropdown' && !dropdownRefs.current[item.id]) {
+      dropdownRefs.current[item.id] = { trigger: null, menu: null };
+    }
+
     return (
       <div key={item.id} className={styles['toolbar-item-wrapper']}>
         <button
+          ref={(node) => {
+            if (item.type === 'dropdown') {
+              dropdownRefs.current[item.id] = {
+                ...(dropdownRefs.current[item.id] ?? { trigger: null, menu: null }),
+                trigger: node
+              };
+            }
+          }}
           className={itemClasses}
           onClick={(e) => handleItemClick(item, e)}
           disabled={item.disabled}
@@ -432,7 +526,23 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
         {/* Dropdown menu */}
         {item.type === 'dropdown' && item.items && activeDropdown === item.id && (
-          <div className={styles['toolbar-dropdown-menu']} role="menu">
+          <div
+            className={styles['toolbar-dropdown-menu']}
+            role="menu"
+            tabIndex={-1}
+            ref={(node) => {
+              dropdownRefs.current[item.id] = {
+                ...(dropdownRefs.current[item.id] ?? { trigger: null, menu: null }),
+                menu: node
+              };
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== 'Escape') return;
+              event.preventDefault();
+              lastDropdownIdRef.current = item.id;
+              setActiveDropdown(null);
+            }}
+          >
             {item.items.map(subItem => (
               <button
                 key={subItem.id}
@@ -494,6 +604,9 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
         {overflowItems.length > 0 && (
           <div className={styles['toolbar-overflow']} ref={overflowRef}>
             <button
+              ref={(node) => {
+                overflowButtonRef.current = node;
+              }}
               className={classNames(
                 styles['toolbar-overflow-button'],
                 'toolbar-overflow-button',
@@ -513,7 +626,15 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
             </button>
 
             {isOverflowOpen && (
-              <div className={styles['toolbar-overflow-menu']} role="menu">
+              <div
+                className={styles['toolbar-overflow-menu']}
+                role="menu"
+                tabIndex={-1}
+                ref={(node) => {
+                  overflowMenuRef.current = node;
+                }}
+                onKeyDown={handleOverflowMenuKeyDown}
+              >
                 {overflowItems.map(item => renderToolbarItem(item, true))}
               </div>
             )}

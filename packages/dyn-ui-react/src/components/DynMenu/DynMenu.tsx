@@ -8,6 +8,7 @@ import React, {
 import { DynMenuTrigger } from '../DynMenuTrigger';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
+import { focusElement } from '../../utils/focus';
 import { DynMenuItem as DynMenuButton } from '../DynMenuItem';
 import styles from './DynMenu.module.css';
 import type { DynMenuProps, DynMenuItem as DynMenuEntry } from './DynMenu.types';
@@ -38,6 +39,8 @@ const findNextEnabled = (items: DynMenuEntry[], start: number, delta: number) =>
   return start;
 };
 
+const isMenuItemDisabled = (item?: DynMenuEntry) => Boolean(item?.disabled || item?.loading);
+
 type DynMenuComponentType = React.FC<DynMenuProps> & {
   Trigger: typeof DynMenuTrigger;
 };
@@ -66,6 +69,8 @@ const DynMenuComponent: React.FC<DynMenuProps> = ({
   const submenuItemRefs = useRef<Array<Array<HTMLButtonElement | null>>>([]);
   const submenuRefs = useRef<Array<HTMLDivElement | null>>([]);
   const ignoreClickRef = useRef<number | null>(null);
+  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const previousOpenRef = useRef<number | null>(null);
 
   const firstEnabledIndex = useMemo(
     () => findFirstEnabled(resolvedItems),
@@ -176,6 +181,20 @@ const DynMenuComponent: React.FC<DynMenuProps> = ({
     }
   }, [focusSubmenuItem, openIndex, resolvedItems]);
 
+  useEffect(() => {
+    if (openIndex !== null) {
+      previousOpenRef.current = openIndex;
+      lastTriggerRef.current = itemRefs.current[openIndex] ?? lastTriggerRef.current;
+      return;
+    }
+
+    const previousOpen = previousOpenRef.current;
+    if (previousOpen === null) return;
+    previousOpenRef.current = null;
+    const trigger = itemRefs.current[previousOpen] ?? lastTriggerRef.current;
+    focusElement(trigger);
+  }, [openIndex]);
+
   const moveFocus = (delta: number) => {
     if (firstEnabledIndex === -1) return;
     setFocusIndex((prev) => {
@@ -249,6 +268,7 @@ const DynMenuComponent: React.FC<DynMenuProps> = ({
 
   const handleItemClick = (index: number) => {
     if (isMenuItemDisabled(resolvedItems[index])) return;
+    lastTriggerRef.current = itemRefs.current[index] ?? lastTriggerRef.current;
     if (ignoreClickRef.current !== null) {
       if (ignoreClickRef.current === index) {
         ignoreClickRef.current = null;
