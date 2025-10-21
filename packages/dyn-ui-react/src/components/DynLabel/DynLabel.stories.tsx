@@ -9,7 +9,8 @@ const meta: Meta<typeof DynLabel> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Label component for form fields and general text display with semantic styling.',
+        component:
+          'Label component for form fields and general text display with semantic styling. Styling is now provided solely via the CSS module after removing the legacy SCSS asset.',
       },
     },
   },
