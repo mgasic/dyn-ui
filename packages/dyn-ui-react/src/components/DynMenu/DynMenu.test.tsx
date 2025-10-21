@@ -27,6 +27,10 @@ const menuItems: MenuItem[] = [
       {
         label: 'Categories',
         action: 'open-categories'
+      },
+      {
+        label: 'Inventory',
+        loading: true
       }
     ]
   },
@@ -80,6 +84,25 @@ describe('DynMenu', () => {
     expect(screen.queryByRole('menuitem', { name: 'All Products' })).not.toBeInTheDocument();
   });
 
+  it('closes the submenu when clicking outside the component', async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <DynMenu items={menuItems} />
+        <button type="button" data-testid="outside-button">
+          Outside
+        </button>
+      </>
+    );
+
+    await user.click(screen.getByRole('menuitem', { name: 'Products' }));
+    expect(screen.getByRole('menuitem', { name: 'All Products' })).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('outside-button'));
+
+    expect(screen.queryByRole('menuitem', { name: 'All Products' })).not.toBeInTheDocument();
+  });
+
   it('runs an action callback when a submenu item with a function is clicked', async () => {
     const user = userEvent.setup();
     renderMenu();
@@ -115,6 +138,46 @@ describe('DynMenu', () => {
 
     fireEvent.keyDown(menubar, { key: 'ArrowLeft' });
     expect(buttons[0]).toHaveFocus();
+  });
+
+  it('supports roving focus and keyboard selection within an open submenu', async () => {
+    const user = userEvent.setup();
+    const onAction = vi.fn();
+    renderMenu({ onAction });
+
+    const productsButton = screen.getByRole('menuitem', { name: 'Products' });
+    await user.click(productsButton);
+
+    const submenu = screen.getByRole('menu');
+    const allProducts = screen.getByRole('menuitem', { name: 'All Products' });
+    const categories = screen.getByRole('menuitem', { name: 'Categories' });
+
+    await waitFor(() => expect(allProducts).toHaveFocus());
+    expect(submenu).toHaveAttribute('aria-activedescendant', allProducts.id);
+    expect(allProducts).toHaveAttribute('tabindex', '0');
+    expect(categories).toHaveAttribute('tabindex', '-1');
+
+    fireEvent.keyDown(allProducts, { key: 'ArrowDown' });
+
+    expect(categories).toHaveFocus();
+    expect(submenu).toHaveAttribute('aria-activedescendant', categories.id);
+    expect(allProducts).toHaveAttribute('tabindex', '-1');
+    expect(categories).toHaveAttribute('tabindex', '0');
+
+    fireEvent.keyDown(categories, { key: 'ArrowUp' });
+    expect(allProducts).toHaveFocus();
+
+    fireEvent.keyDown(allProducts, { key: 'End' });
+    expect(categories).toHaveFocus();
+
+    fireEvent.keyDown(categories, { key: 'Home' });
+    expect(allProducts).toHaveFocus();
+
+    fireEvent.keyDown(allProducts, { key: 'ArrowDown' });
+    fireEvent.keyDown(categories, { key: 'Enter' });
+
+    expect(onAction).toHaveBeenCalledWith('open-categories');
+    expect(screen.queryByRole('menuitem', { name: 'All Products' })).not.toBeInTheDocument();
   });
 
   it('applies passed in className to the menubar element', () => {
@@ -199,5 +262,21 @@ describe('DynMenu', () => {
     await waitFor(() =>
       expect(screen.queryByRole('menuitem', { name: 'Categories' })).not.toBeInTheDocument()
     );
+  });
+
+  it('prevents activating loading submenu items', async () => {
+    const user = userEvent.setup();
+    const onAction = vi.fn();
+    renderMenu({ onAction });
+
+    await user.click(screen.getByRole('menuitem', { name: 'Products' }));
+
+    const inventoryItem = screen.getByRole('menuitem', { name: 'Inventory' });
+    expect(inventoryItem).toHaveAttribute('data-loading', 'true');
+    expect(inventoryItem).toHaveAttribute('aria-busy', 'true');
+
+    await user.click(inventoryItem);
+    expect(onAction).not.toHaveBeenCalledWith(expect.stringContaining('Inventory'));
+    expect(onAction).not.toHaveBeenCalled();
   });
 });

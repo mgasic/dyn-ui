@@ -50,6 +50,23 @@ describe('DynTreeView', () => {
     });
   });
 
+  describe('Accessibility', () => {
+    it('applies hierarchical aria attributes to each node', () => {
+      render(<DynTreeView treeData={sampleTreeData} defaultExpandAll />);
+
+      const parent = screen.getByRole('treeitem', { name: /parent 1/i });
+      expect(parent).toHaveAttribute('aria-level', '1');
+      expect(parent).toHaveAttribute('aria-setsize', '3');
+      expect(parent).toHaveAttribute('aria-posinset', '1');
+      expect(parent).toHaveAttribute('aria-expanded', 'true');
+
+      const child = screen.getByRole('treeitem', { name: /child 1/i });
+      expect(child).toHaveAttribute('aria-level', '2');
+      expect(child).toHaveAttribute('aria-setsize', '2');
+      expect(child).toHaveAttribute('aria-posinset', '1');
+    });
+  });
+
   describe('Expansion', () => {
     it('calls onExpand callback', () => {
       const onExpand = vi.fn(); // Changed from jest.fn()
@@ -191,6 +208,107 @@ describe('DynTreeView', () => {
       expect(updatedTree).not.toBeNull();
       expect(updatedTree!).toHaveClass('show-line');
       expect(updatedTree!).toHaveClass('dyn-tree-view--show-line');
+    });
+  });
+
+  describe('Keyboard interactions', () => {
+    it('supports roving focus and directional navigation', () => {
+      render(<DynTreeView treeData={sampleTreeData} />);
+
+      const tree = screen.getByRole('tree');
+      tree.focus();
+
+      const firstItem = screen.getByRole('treeitem', { name: /parent 1/i });
+      expect(document.activeElement).toBe(firstItem);
+
+      fireEvent.keyDown(tree, { key: 'ArrowDown' });
+      const secondItem = screen.getByRole('treeitem', { name: /parent 2/i });
+      expect(document.activeElement).toBe(secondItem);
+
+      fireEvent.keyDown(tree, { key: 'Home' });
+      expect(document.activeElement).toBe(firstItem);
+
+      fireEvent.keyDown(tree, { key: 'End' });
+      const lastItem = screen.getByRole('treeitem', { name: /leaf node/i });
+      expect(document.activeElement).toBe(lastItem);
+    });
+
+    it('handles expansion and selection with keyboard keys', () => {
+      const onCheck = vi.fn();
+      const onSelect = vi.fn();
+      render(
+        <DynTreeView
+          treeData={sampleTreeData}
+          checkable
+          selectable
+          onCheck={onCheck}
+          onSelect={onSelect}
+        />
+      );
+
+      const tree = screen.getByRole('tree');
+      tree.focus();
+
+      const parent = screen.getByRole('treeitem', { name: /parent 1/i });
+
+      fireEvent.keyDown(tree, { key: 'ArrowRight' });
+      expect(parent).toHaveAttribute('aria-expanded', 'true');
+
+      fireEvent.keyDown(tree, { key: 'ArrowRight' });
+      const child = screen.getByRole('treeitem', { name: /child 1/i });
+      expect(document.activeElement).toBe(child);
+
+      fireEvent.keyDown(tree, { key: 'ArrowLeft' });
+      expect(document.activeElement).toBe(parent);
+
+      fireEvent.keyDown(tree, { key: ' ' });
+      expect(onCheck).toHaveBeenCalled();
+
+      fireEvent.keyDown(tree, { key: 'Enter' });
+      expect(onSelect).toHaveBeenCalled();
+    });
+  });
+
+  describe('Forms', () => {
+    it('integrates with native forms to submit selected values', () => {
+      const handleSubmit = vi.fn((event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+      });
+
+      let submittedValue: FormDataEntryValue | null = null;
+
+      const FormWrapper = () => {
+        const [selected, setSelected] = React.useState<string[]>([]);
+
+        return (
+          <form
+            onSubmit={(event) => {
+              handleSubmit(event);
+              const formData = new FormData(event.currentTarget);
+              submittedValue = formData.get('selection');
+            }}
+          >
+            <DynTreeView
+              treeData={sampleTreeData}
+              selectable
+              onSelect={(keys) => setSelected(keys)}
+            />
+            <input name="selection" value={selected.join(',')} readOnly />
+            <button type="submit">Submit</button>
+          </form>
+        );
+      };
+
+      render(<FormWrapper />);
+
+      const parent = screen.getByText('Parent 1');
+      fireEvent.click(parent);
+
+      const submitButton = screen.getByRole('button', { name: /submit/i });
+      fireEvent.click(submitButton);
+
+      expect(handleSubmit).toHaveBeenCalled();
+      expect(submittedValue).toBe('1');
     });
   });
 });
