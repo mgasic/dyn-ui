@@ -70,6 +70,33 @@ const itemsWithIcons: BreadcrumbItem[] = [
   { id: 'current', label: 'Components', current: true, icon: '🧩' },
 ];
 
+const actionStateItems: BreadcrumbItem[] = [
+  { id: 'home', label: 'Home', href: '/' },
+  {
+    id: 'filters',
+    label: 'Filters',
+    as: 'div',
+    onClick: () => {},
+    'aria-label': 'Open filters panel',
+  },
+  {
+    id: 'reports',
+    label: 'Reports (loading)',
+    as: 'div',
+    onClick: () => {},
+    'aria-label': 'Loading reports',
+    'data-state': 'loading',
+  },
+  {
+    id: 'disabled',
+    label: 'Disabled link',
+    href: '/disabled',
+    disabled: true,
+    'data-state': 'disabled',
+  },
+  { id: 'current', label: 'Current page', current: true },
+];
+
 export const Default: Story = {
   args: {
     items: basicItems,
@@ -135,6 +162,20 @@ export const Sizes: Story = {
 export const WithIcons: Story = {
   args: {
     items: itemsWithIcons,
+  },
+};
+
+export const ActionStates: Story = {
+  args: {
+    items: actionStateItems,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Demonstrates keyboard focus, disabled, and loading states. Use Tab and Enter/Space to navigate between interactive crumbs.',
+      },
+    },
   },
 };
 
