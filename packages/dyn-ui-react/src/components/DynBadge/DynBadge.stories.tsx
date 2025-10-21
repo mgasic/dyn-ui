@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { DynIcon } from '../DynIcon';
 import { DynBadge } from './DynBadge';
+import { DYN_BADGE_STATES, DYN_BADGE_VARIANTS } from './DynBadge.types';
 
 const meta: Meta<typeof DynBadge> = {
   title: 'Components/DynBadge',
@@ -24,6 +25,11 @@ const meta: Meta<typeof DynBadge> = {
       control: 'select',
       options: ['solid', 'soft', 'outline', 'dot'],
       description: 'Visual variant of the badge'
+    },
+    state: {
+      control: 'select',
+      options: [...DYN_BADGE_STATES],
+      description: 'Semantic state token mapped to design color tokens'
     },
     color: {
       control: 'select',
@@ -76,7 +82,8 @@ const meta: Meta<typeof DynBadge> = {
   args: {
     children: 'New',
     variant: 'solid',
-    color: 'primary',
+    state: 'neutral',
+    color: 'neutral',
     size: 'medium',
     maxCount: 99
   }
@@ -94,10 +101,16 @@ export const Variants: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column', alignItems: 'flex-start' }}>
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-        <DynBadge variant="solid">Solid</DynBadge>
-        <DynBadge variant="soft">Soft</DynBadge>
-        <DynBadge variant="outline">Outline</DynBadge>
-        <DynBadge variant="dot" />
+        <DynBadge variant="solid" state="neutral">
+          Solid
+        </DynBadge>
+        <DynBadge variant="soft" state="success">
+          Soft Success
+        </DynBadge>
+        <DynBadge variant="outline" state="warning">
+          Outline Warning
+        </DynBadge>
+        <DynBadge variant="dot" state="danger" aria-label="Danger status" />
       </div>
     </div>
   ),
@@ -194,11 +207,18 @@ export const StatusIndicators: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
       <div style={{ position: 'relative', width: 64, height: 64, background: '#f0f0f0', borderRadius: 8 }}>
-        <DynBadge variant="dot" color="success" position="topRight" />
+        <DynBadge variant="dot" state="success" position="topRight" aria-label="Online" />
         <span style={{ position: 'absolute', bottom: 4, left: 4, fontSize: '0.75rem' }}>Online</span>
       </div>
       <div style={{ position: 'relative', width: 64, height: 64, background: '#f0f0f0', borderRadius: 8 }}>
-        <DynBadge count={3} color="danger" position="topRight" countDescription="Alerts" />
+        <DynBadge
+          count={3}
+          state="danger"
+          color="danger"
+          position="topRight"
+          countDescription="Alerts"
+          aria-label="3 alerts"
+        />
         <span style={{ position: 'absolute', bottom: 4, left: 4, fontSize: '0.75rem' }}>Alerts</span>
       </div>
     </div>
@@ -239,10 +259,10 @@ export const Animated: Story = {
   render: () => (
     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
       <DynBadge animated>Animated</DynBadge>
-      <DynBadge pulse color="danger">
+      <DynBadge pulse state="danger">
         Pulsing
       </DynBadge>
-      <DynBadge animated pulse count={1} color="info" />
+      <DynBadge animated pulse count={1} state="info" aria-label="Info pulse" />
     </div>
   ),
   parameters: {
@@ -268,14 +288,14 @@ export const DarkTheme: Story = {
     <div data-theme="dark" style={{ padding: '2rem', background: '#1a1a1a' }}>
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <DynBadge color="primary">Primary</DynBadge>
-        <DynBadge variant="soft" color="success">
+        <DynBadge variant="soft" state="success">
           Soft Success
         </DynBadge>
-        <DynBadge variant="outline" color="warning">
+        <DynBadge variant="outline" state="warning">
           Outline Warning
         </DynBadge>
-        <DynBadge variant="dot" color="danger" />
-        <DynBadge count={9} color="info" />
+        <DynBadge variant="dot" state="danger" aria-label="Danger status" />
+        <DynBadge count={9} state="info" />
       </div>
     </div>
   )
@@ -308,6 +328,59 @@ export const Accessibility: Story = {
     docs: {
       description: {
         story: 'Comprehensive accessibility features including ARIA attributes, screen reader announcements, and keyboard navigation.'
+      }
+    }
+  }
+};
+
+export const StateVariantMatrix: Story = {
+  name: 'State & Variant Matrix',
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {DYN_BADGE_STATES.map((state) => (
+        <div key={state} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ width: 80, fontSize: '0.75rem', textTransform: 'capitalize' }}>{state}</span>
+          {DYN_BADGE_VARIANTS.map((variant) => (
+            <DynBadge
+              key={`${state}-${variant}`}
+              variant={variant}
+              state={state}
+              aria-label={variant === 'dot' ? `${state} status` : undefined}
+            >
+              {variant !== 'dot' ? `${state} ${variant}` : undefined}
+            </DynBadge>
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Matrix showcasing every combination of semantic state and visual variant, using design token-driven styling. Dot variants provide aria-labels for accessibility.'
+      }
+    }
+  }
+};
+
+export const IconOnly: Story = {
+  name: 'Icon Only Accessibility',
+  render: () => (
+    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+      <DynBadge
+        state="info"
+        variant="soft"
+        startIcon={<DynIcon icon="info" />}
+        aria-label="Information"
+      />
+      <DynBadge state="danger" variant="dot" aria-label="Critical notification" />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Icon-only examples demonstrating aria-label usage for screen reader support, including dot variants.'
       }
     }
   }

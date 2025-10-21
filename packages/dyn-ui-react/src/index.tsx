@@ -11,6 +11,7 @@ export type {
   DynBadgeColor,
   DynBadgePosition,
   DynBadgeSize,
+  DynBadgeState,
   DynBadgeAccessibilityProps,
   DynAvatarProps,
   DynAvatarRef,
@@ -19,6 +20,12 @@ export type {
   DynAvatarStatus,
   DynLabelProps,
   DynIconProps
+} from './components/DynBadge';
+export {
+  DYN_BADGE_SIZES,
+  DYN_BADGE_VARIANTS,
+  DYN_BADGE_COLORS,
+  DYN_BADGE_STATES
 } from './components/DynBadge';
 export { AVATAR_SIZES } from './components/DynAvatar/DynAvatar.types';
 

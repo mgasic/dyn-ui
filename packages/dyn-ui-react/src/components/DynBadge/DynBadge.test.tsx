@@ -95,6 +95,15 @@ describe('DynBadge', () => {
       render(<DynBadge count={3} countDescription="Messages" />);
       expect(screen.getByTestId('dyn-badge')).toHaveAttribute('aria-label', 'Messages: 3');
     });
+
+    it('supports icon-only usage with aria-label', () => {
+      render(
+        <DynBadge aria-label="3 unread mentions" startIcon={<span data-testid="badge-icon">@</span>} />
+      );
+
+      expect(screen.getByLabelText('3 unread mentions')).toBeInTheDocument();
+      expect(screen.getByTestId('badge-icon')).toBeInTheDocument();
+    });
   });
 
   describe('Interactive Behavior', () => {
@@ -180,6 +189,20 @@ describe('DynBadge', () => {
 
       rerender(<DynBadge color="success">Success</DynBadge>);
       expect(screen.getByTestId('dyn-badge')).toHaveClass(classes['badge--success']!);
+    });
+
+    it('applies state classes including default neutral', () => {
+      const { rerender } = render(<DynBadge>Default</DynBadge>);
+      expect(screen.getByTestId('dyn-badge')).toHaveClass(classes['badge--state-neutral']!);
+
+      rerender(
+        <DynBadge state="success" color="warning">
+          Success State
+        </DynBadge>
+      );
+      const badge = screen.getByTestId('dyn-badge');
+      expect(badge).toHaveClass(classes['badge--state-success']!);
+      expect(badge).toHaveClass(classes['badge--warning']!);
     });
 
     it('applies size classes correctly', () => {

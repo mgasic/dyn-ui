@@ -4,8 +4,12 @@ export type {
   DynBadgeVariant,
   DynBadgeColor,
   DynBadgePosition,
-  ComponentSize as DynBadgeSize,
-  DYN_BADGE_COLORS
+  DynBadgeSize,
+  DynBadgeState,
+  DYN_BADGE_COLORS,
+  DYN_BADGE_SIZES,
+  DYN_BADGE_STATES,
+  DYN_BADGE_VARIANTS
 } from '../components/DynBadge/DynBadge.types';
 
 // AccessibilityProps is declared in the common types; re-export under badge namespace
