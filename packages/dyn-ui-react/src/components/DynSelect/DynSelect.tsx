@@ -62,6 +62,17 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
     const selectRef = useRef<HTMLDivElement>(null);
     const comboboxRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const typeaheadRef = useRef('');
+    const typeaheadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+      return () => {
+        if (typeaheadTimeoutRef.current) {
+          clearTimeout(typeaheadTimeoutRef.current);
+        }
+      };
+    }, []);
     const generatedId = useId();
     const sanitizedGeneratedId = generatedId.replace(/:/g, '');
     const fieldId = idProp ?? name ?? `dyn-select-${sanitizedGeneratedId}`;
@@ -667,6 +678,7 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                     return (
                       <div
                         key={option.value}
+                        id={`${listboxId}-option-${optionIndex}`}
                         className={classNames(getStyleClass('option'), {
                           [getStyleClass('optionSelected')]: isSelected,
                           [getStyleClass('optionDisabled')]: option.disabled,
@@ -683,6 +695,9 @@ export const DynSelect = forwardRef<DynFieldRef, DynSelectProps>(
                           }
                         }}
                         onClick={() => handleOptionSelect(option)}
+                        ref={(element) => {
+                          optionRefs.current[optionIndex] = element;
+                        }}
                       >
                         {multiple && (
                           <span className={classNames(getStyleClass('checkbox'), {

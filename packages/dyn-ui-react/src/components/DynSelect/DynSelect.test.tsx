@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { DynSelect } from './DynSelect';
 import styles from './DynSelect.module.css';
@@ -117,7 +117,40 @@ describe('DynSelect', () => {
   it('navigates options with arrow keys and selects with Enter', () => {
     render(<DynSelectAny name="test" label="Test" options={sampleOptions} />);
 
-    const select = screen.getByRole('combobox');
+    const combobox = screen.getByRole('combobox');
+    fireEvent.focus(combobox);
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'ArrowDown' });
+    });
+    const option1 = screen.getByRole('option', { name: 'Option 1' });
+    expect(option1).toHaveClass(styles.optionActive);
+    const activeId = combobox.getAttribute('aria-activedescendant');
+    expect(activeId).toBe(option1.getAttribute('id'));
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'ArrowDown' });
+    });
+    const option2 = screen.getByRole('option', { name: 'Option 2' });
+    expect(option2).toHaveClass(styles.optionActive);
+    expect(option1).not.toHaveClass(styles.optionActive);
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'End' });
+    });
+    expect(option2).toHaveClass(styles.optionActive);
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'Home' });
+    });
+    expect(option1).toHaveClass(styles.optionActive);
+
+    act(() => {
+      fireEvent.keyDown(combobox, { key: 'Enter' });
+    });
+    expect(handleChange).toHaveBeenCalledWith('option1');
+    expect(combobox).toHaveAttribute('aria-expanded', 'false');
+  });
 
     fireEvent.keyDown(select, { key: 'ArrowDown' });
     const option1 = screen.getByRole('option', { name: 'Option 1' });

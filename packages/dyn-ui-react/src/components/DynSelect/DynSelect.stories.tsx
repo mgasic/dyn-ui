@@ -65,6 +65,14 @@ export const Default: Story = {
     label: 'Select Option',
     options: sampleOptions,
   },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use Arrow keys, Home/End, PageUp/PageDown, or type a character to move the active option. Press Enter or Space to confirm the highlighted choice.',
+      },
+    },
+  },
 };
 
 Default.parameters = {
