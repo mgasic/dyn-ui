@@ -8,6 +8,8 @@ reports/storybook/
 reports/playwright/
 reports/api/
 reports/bundle/
+reports/metrics/
+reports/changelog/
 
 # Test runner artefacts
 playwright-report
