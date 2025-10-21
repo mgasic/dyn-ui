@@ -2,7 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import styles from './DynTable.module.css';
-import type { DynTableProps, TableSortDirection } from './DynTable.types';
+import type {
+  DynTableBodySlotContext,
+  DynTableFooterSlotContext,
+  DynTableHeaderSlotContext,
+  DynTableProps,
+  DynTableSlotRenderer,
+  TableSortDirection,
+  TableVariant
+} from './DynTable.types';
 
 const getStyleClass = (n: string) => (styles as Record<string, string>)[n] || '';
 
@@ -12,6 +20,8 @@ const NON_DOM_PROPS = new Set([
   'actions',
   'loading',
   'size',
+  'variant',
+  'color',
   'bordered',
   'striped',
   'hoverable',
@@ -24,8 +34,25 @@ const NON_DOM_PROPS = new Set([
   'onSort',
   'onSelectionChange',
   'emptyText',
-  'height'
+  'height',
+  'slots'
 ]);
+
+const resolveSlot = <TContext,>(
+  slot: DynTableSlotRenderer<TContext> | undefined,
+  context: TContext,
+  fallback: () => React.ReactNode
+) => {
+  if (typeof slot === 'function') {
+    return (slot as (context: TContext) => React.ReactNode)(context);
+  }
+
+  if (slot !== undefined) {
+    return slot;
+  }
+
+  return fallback();
+};
 
 /**
  * Generates a unique key for table rows
@@ -198,6 +225,8 @@ export const DynTable: React.FC<DynTableProps> = ({
   actions = [],
   loading = false,
   size = 'medium',
+  variant: variantProp,
+  color = 'neutral',
   bordered = true,
   striped = false,
   hoverable = false,
@@ -217,9 +246,15 @@ export const DynTable: React.FC<DynTableProps> = ({
   'aria-labelledby': ariaLabelledBy,
   'aria-describedby': ariaDescribedBy,
   'data-testid': dataTestId,
+  slots,
   ...rest
 }) => {
   const internalId = useStableId(id);
+
+  const variant: TableVariant = useMemo(() => {
+    if (variantProp) return variantProp;
+    return striped ? 'zebra' : 'default';
+  }, [striped, variantProp]);
 
   const selectionMode = selectable === true ? 'multiple' : selectable === false ? undefined : selectable;
   const isSelectable = selectionMode === 'multiple' || selectionMode === 'single';
@@ -264,7 +299,10 @@ export const DynTable: React.FC<DynTableProps> = ({
     getStyleClass('dyn-table'),
     'dyn-table',
     bordered && [getStyleClass('dyn-table--bordered'), 'dyn-table--bordered'],
-    striped && [getStyleClass('dyn-table--striped'), 'dyn-table--striped'],
+    getStyleClass(`dyn-table--variant-${variant}`),
+    `dyn-table--variant-${variant}`,
+    color && getStyleClass(`dyn-table--color-${color}`),
+    color && `dyn-table--color-${color}`,
     hoverable && [getStyleClass('dyn-table--hoverable'), 'dyn-table--hoverable'],
     height !== undefined && [getStyleClass('dyn-table--fixed-height'), 'dyn-table--fixed-height'],
     size === 'small' && [getStyleClass('dyn-table--small'), 'dyn-table--small'],
@@ -324,15 +362,22 @@ export const DynTable: React.FC<DynTableProps> = ({
     onSort?.(columnKey, nextDirection);
   };
 
+  const selectionHeaderId = isSelectable ? `${internalId}-selection-header` : undefined;
+  const actionsHeaderId = actions.length ? `${internalId}-actions-header` : undefined;
+
+  const columnHeaderIds = useMemo(
+    () => new Map(columns.map(column => [column.key, `${internalId}-header-${column.key}`] as const)),
+    [columns, internalId]
+  );
+
   const renderSelectionHeader = () => {
     if (!isSelectable) return null;
-    
-    const headerKey = `${internalId}-selection-header`;
-    
+
     if (!isMultiSelect) {
       return (
         <th
-          key={headerKey}
+          key={selectionHeaderId}
+          id={selectionHeaderId}
           role="columnheader"
           className={cn(
             getStyleClass('dyn-table__cell'),
@@ -340,6 +385,7 @@ export const DynTable: React.FC<DynTableProps> = ({
             getStyleClass('dyn-table__cell--selection'),
             'dyn-table__cell--selection'
           )}
+          scope="col"
         />
       );
     }
@@ -348,7 +394,8 @@ export const DynTable: React.FC<DynTableProps> = ({
 
     return (
       <th
-        key={headerKey}
+        key={selectionHeaderId}
+        id={selectionHeaderId}
         role="columnheader"
         scope="col"
         className={cn(
@@ -372,8 +419,8 @@ export const DynTable: React.FC<DynTableProps> = ({
     const headerLabel = column.title ?? column.header ?? column.key;
     const isSorted = activeSort?.column === column.key;
     const sortableColumn = isColumnSortable(sortable, column.sortable);
-    const headerKey = `${internalId}-header-${column.key}`;
-    
+    const headerKey = columnHeaderIds.get(column.key)!;
+
     const thClasses = cn(
       getStyleClass('dyn-table__cell'),
       'dyn-table__cell',
@@ -396,6 +443,7 @@ export const DynTable: React.FC<DynTableProps> = ({
     return (
       <th
         key={headerKey}
+        id={headerKey}
         role="columnheader"
         scope="col"
         aria-sort={isSorted ? (activeSort?.direction === 'asc' ? 'ascending' : 'descending') : undefined}
@@ -430,12 +478,11 @@ export const DynTable: React.FC<DynTableProps> = ({
 
   const renderActionsHeader = () => {
     if (!actions.length) return null;
-    
-    const actionsHeaderKey = `${internalId}-actions-header`;
-    
+
     return (
       <th
-        key={actionsHeaderKey}
+        key={actionsHeaderId}
+        id={actionsHeaderId}
         role="columnheader"
         scope="col"
         className={cn(
@@ -466,6 +513,7 @@ export const DynTable: React.FC<DynTableProps> = ({
           'dyn-table__cell--selection'
         )}
         role="cell"
+        headers={selectionHeaderId}
       >
         {isMultiSelect ? (
           <input
@@ -491,7 +539,7 @@ export const DynTable: React.FC<DynTableProps> = ({
     if (!actions.length) return null;
     
     const actionsCellKey = getCellKey(rowKey, 'actions');
-    
+
     return (
       <td
         key={actionsCellKey}
@@ -502,6 +550,7 @@ export const DynTable: React.FC<DynTableProps> = ({
           'dyn-table__cell--actions'
         )}
         role="cell"
+        headers={actionsHeaderId}
       >
         <div className={cn(getStyleClass('dyn-table-actions'), 'dyn-table-actions')}>
           {actions
@@ -537,50 +586,50 @@ export const DynTable: React.FC<DynTableProps> = ({
     return formatCellValue(row[column.key]);
   };
 
-  const renderBody = () => (
-    <tbody className={cn(getStyleClass('dyn-table__body'), 'dyn-table__body')}>
-      {data.map((row, rowIndex) => {
-        const rowKey = rowKeysMap.get(rowIndex)!;
-        return (
-          <tr
-            key={rowKey}
-            role="row"
-            aria-selected={isSelectable ? internalSelectedKeys.includes(rowKey) : undefined}
-            className={cn(
-              getStyleClass('dyn-table__row'),
-              'dyn-table__row',
-              isSelectable && internalSelectedKeys.includes(rowKey) && [
-                getStyleClass('dyn-table__row--selected'),
-                'dyn-table__row--selected'
-              ]
-            )}
-          >
-            {renderSelectionCell(rowKey)}
-            {columns.map(column => {
-              const cellKey = getCellKey(rowKey, column.key);
-              return (
-                <td
-                  key={cellKey}
-                  role="cell"
-                  className={cn(
-                    getStyleClass('dyn-table__cell'),
-                    'dyn-table__cell',
-                    column.align && [
-                      getStyleClass(`dyn-table__cell--${column.align}`),
-                      `dyn-table__cell--${column.align}`
-                    ]
-                  )}
-                >
-                  {renderCellContent(column, row, rowIndex)}
-                </td>
-              );
-            })}
-            {renderActionsCell(row, rowIndex, rowKey)}
-          </tr>
-        );
-      })}
-    </tbody>
-  );
+  const renderRow = (row: any, rowIndex: number) => {
+    const rowKey = rowKeysMap.get(rowIndex)!;
+    return (
+      <tr
+        key={rowKey}
+        role="row"
+        aria-selected={isSelectable ? internalSelectedKeys.includes(rowKey) : undefined}
+        className={cn(
+          getStyleClass('dyn-table__row'),
+          'dyn-table__row',
+          isSelectable && internalSelectedKeys.includes(rowKey) && [
+            getStyleClass('dyn-table__row--selected'),
+            'dyn-table__row--selected'
+          ]
+        )}
+      >
+        {renderSelectionCell(rowKey)}
+        {columns.map(column => {
+          const cellKey = getCellKey(rowKey, column.key);
+          const headerId = columnHeaderIds.get(column.key);
+          return (
+            <td
+              key={cellKey}
+              role="cell"
+              headers={headerId}
+              className={cn(
+                getStyleClass('dyn-table__cell'),
+                'dyn-table__cell',
+                column.align && [
+                  getStyleClass(`dyn-table__cell--${column.align}`),
+                  `dyn-table__cell--${column.align}`
+                ]
+              )}
+            >
+              {renderCellContent(column, row, rowIndex)}
+            </td>
+          );
+        })}
+        {renderActionsCell(row, rowIndex, rowKey)}
+      </tr>
+    );
+  };
+
+  const renderBodyRows = () => data.map((row, rowIndex) => renderRow(row, rowIndex));
 
   const renderEmptyState = () => (
     <div className={cn(getStyleClass('dyn-table__empty'), 'dyn-table__empty')} role="note">
@@ -633,12 +682,52 @@ export const DynTable: React.FC<DynTableProps> = ({
     );
   };
 
+  const defaultHeaderRow = () => (
+    <tr
+      role="row"
+      className={cn(getStyleClass('dyn-table__row'), 'dyn-table__row')}
+    >
+      {renderSelectionHeader()}
+      {renderHeaderCells()}
+      {renderActionsHeader()}
+    </tr>
+  );
+
+  const defaultBodyContent = () => <>{renderBodyRows()}</>;
+
+  const headerSlotContext: DynTableHeaderSlotContext<any> = {
+    columns,
+    renderDefault: defaultHeaderRow
+  };
+
+  const bodySlotContext: DynTableBodySlotContext<any> = {
+    rows: data,
+    columns,
+    renderDefault: defaultBodyContent,
+    renderRow
+  };
+
+  const footerSlotContext: DynTableFooterSlotContext<any> = {
+    rows: data,
+    columns,
+    renderDefault: () => null
+  };
+
+  const headerContent = resolveSlot(slots?.header, headerSlotContext, defaultHeaderRow);
+  const bodyContent = resolveSlot(slots?.body, bodySlotContext, defaultBodyContent);
+  const footerContent = slots?.footer
+    ? resolveSlot(slots.footer, footerSlotContext, footerSlotContext.renderDefault)
+    : null;
+
   return (
     <div
       id={internalId}
       className={rootClasses}
       data-testid={dataTestId || 'dyn-table'}
       style={rootStyle}
+      data-variant={variant}
+      data-color={color}
+      data-size={size}
       {...otherDomProps}
     >
       <div className={cn(getStyleClass('dyn-table__wrapper'), 'dyn-table__wrapper')}>
@@ -648,18 +737,30 @@ export const DynTable: React.FC<DynTableProps> = ({
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
           aria-describedby={ariaDescribedBy}
+          data-variant={variant}
+          data-color={color}
+          data-size={size}
         >
-          <thead className={cn(getStyleClass('dyn-table__head'), 'dyn-table__head')}>
-            <tr
-              role="row"
-              className={cn(getStyleClass('dyn-table__row'), 'dyn-table__row')}
-            >
-              {renderSelectionHeader()}
-              {renderHeaderCells()}
-              {renderActionsHeader()}
-            </tr>
+          <thead
+            role="rowgroup"
+            className={cn(getStyleClass('dyn-table__head'), 'dyn-table__head')}
+          >
+            {headerContent}
           </thead>
-          {renderBody()}
+          <tbody
+            role="rowgroup"
+            className={cn(getStyleClass('dyn-table__body'), 'dyn-table__body')}
+          >
+            {bodyContent}
+          </tbody>
+          {footerContent ? (
+            <tfoot
+              role="rowgroup"
+              className={cn(getStyleClass('dyn-table__foot'), 'dyn-table__foot')}
+            >
+              {footerContent}
+            </tfoot>
+          ) : null}
         </table>
       </div>
       {loading ? renderLoadingState() : data.length === 0 ? renderEmptyState() : null}

@@ -186,6 +186,24 @@ A comprehensive, enterprise-grade data table component with advanced features:
         type: { summary: 'small | medium | large' }
       }
     },
+    variant: {
+      control: { type: 'select' },
+      options: ['default', 'zebra', 'minimal'],
+      description: 'Surface treatment variant for the table',
+      table: {
+        defaultValue: { summary: 'default' },
+        type: { summary: 'default | zebra | minimal' }
+      }
+    },
+    color: {
+      control: { type: 'select' },
+      options: ['neutral', 'primary', 'success', 'warning', 'danger'],
+      description: 'Accent color token applied to interactive elements',
+      table: {
+        defaultValue: { summary: 'neutral' },
+        type: { summary: 'neutral | primary | success | warning | danger' }
+      }
+    },
     selectable: {
       control: { type: 'select' },
       options: [false, true, 'single', 'multiple'],
@@ -205,7 +223,7 @@ A comprehensive, enterprise-grade data table component with advanced features:
     },
     striped: {
       control: 'boolean',
-      description: 'Alternating row background colors',
+      description: 'Alternating row background colors (deprecated — use variant="zebra")',
       table: {
         defaultValue: { summary: 'false' },
         type: { summary: 'boolean' }
@@ -248,6 +266,20 @@ A comprehensive, enterprise-grade data table component with advanced features:
       table: {
         defaultValue: { summary: '"No data available"' },
         type: { summary: 'string' }
+      }
+    },
+    'aria-label': {
+      control: 'text',
+      description: 'Accessible label announced to assistive technologies',
+      table: {
+        category: 'Accessibility',
+        type: { summary: 'string' }
+      }
+    },
+    slots: {
+      control: false,
+      table: {
+        disable: true
       }
     }
   },
@@ -403,9 +435,11 @@ export const Default: Story = {
     columns: basicColumns,
     size: 'medium',
     bordered: true,
-    striped: false,
     hoverable: true,
     loading: false,
+    variant: 'default',
+    color: 'neutral',
+    'aria-label': 'Employee directory'
   },
   parameters: {
     docs: {
@@ -523,7 +557,7 @@ export const CompactSize: Story = {
   args: {
     ...Default.args,
     size: 'small',
-    striped: true,
+    variant: 'zebra',
   },
   parameters: {
     docs: {
@@ -553,18 +587,64 @@ export const ComfortableSize: Story = {
 };
 
 /**
- * Striped rows variant
+ * Zebra surface variant
  */
-export const StripedRows: Story = {
+export const ZebraVariant: Story = {
   args: {
     ...Default.args,
-    striped: true,
+    variant: 'zebra',
     bordered: false,
   },
   parameters: {
     docs: {
       description: {
-        story: 'Alternating row colors improve readability for wide tables. Works well without borders for a cleaner look.'
+        story: 'Alternating row colors driven by CSS tokens. Works well without borders for a cleaner look.'
+      }
+    }
+  }
+};
+
+/**
+ * Success accent color demo
+ */
+export const SuccessAccent: Story = {
+  args: {
+    ...Default.args,
+    data: sampleEmployeeData.slice(0, 4),
+    color: 'success',
+    variant: 'zebra',
+    'aria-label': 'Active employees'
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Highlights interactive states using the success design token. Great for positive status tables.'
+      }
+    }
+  }
+};
+
+/**
+ * Table with summary footer slot
+ */
+export const WithSummaryFooter: Story = {
+  args: {
+    ...Default.args,
+    data: sampleEmployeeData,
+    slots: {
+      footer: ({ rows, columns }) => (
+        <tr role="row">
+          <td className="dyn-table__cell" colSpan={columns.length}>
+            Showing {rows.length} employees — last updated {new Date('2023-07-01').toLocaleDateString()}
+          </td>
+        </tr>
+      )
+    }
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Demonstrates how footer slots can add contextual summaries without reimplementing the table body.'
       }
     }
   }
@@ -578,6 +658,7 @@ export const Borderless: Story = {
     ...Default.args,
     bordered: false,
     hoverable: true,
+    variant: 'minimal'
   },
   parameters: {
     docs: {
@@ -733,7 +814,7 @@ export const FullFeatured: Story = {
       total: sampleEmployeeData.length,
     },
     sortBy: { column: 'name', direction: 'asc' },
-    striped: true,
+    variant: 'zebra',
     hoverable: true,
     size: 'medium',
     'aria-label': 'Complete employee management table',
@@ -757,7 +838,7 @@ This story demonstrates all major DynTable features working together:
 - ✅ Multiple row selection with state management
 - 🎯 Conditional row actions based on data
 - 📄 Pagination for large datasets
-- 🎭 Visual enhancements (striped, hoverable)
+- 🎭 Visual enhancements (zebra variant, hoverable)
 - ♿ Full accessibility compliance
 - 📱 Responsive design
 
