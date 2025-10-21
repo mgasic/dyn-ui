@@ -230,7 +230,7 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
       return;
     }
 
-    if (activeElement !== ref) {
+    if (ref !== activeElement) {
       ref.focus();
     }
   }, [focusedKey, visibleNodes]);
@@ -400,12 +400,8 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
 
       const isTreeRoot = target === event.currentTarget;
       const isTreeItem = target.getAttribute('role') === 'treeitem';
-      const activeElement = document.activeElement as HTMLElement | null;
-      const activeRole = activeElement?.getAttribute('role');
-      const isActiveTreeSurface =
-        activeElement === event.currentTarget || activeRole === 'treeitem';
 
-      if (!isTreeRoot && !isTreeItem && !isActiveTreeSurface) {
+      if (!isTreeRoot && !isTreeItem) {
         return;
       }
 
