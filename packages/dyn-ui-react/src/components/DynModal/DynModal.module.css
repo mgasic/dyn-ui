@@ -6,51 +6,46 @@
 .container {
   position: relative;
   width: 100%;
+  min-height: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: var(--dyn-space-xl, 2rem);
+  background-color: var(--dyn-color-overlay, rgba(15, 23, 42, 0.72));
+  backdrop-filter: blur(var(--dyn-overlay-blur, 4px));
+  z-index: var(--dyn-z-index-overlay, 999);
 }
 
-.backdrop {
-  position: absolute;
-  inset: 0;
-  background: var(--dyn-modal-backdrop, rgba(15, 23, 42, 0.54));
-  backdrop-filter: var(--dyn-modal-backdrop-filter, blur(2px));
-  opacity: 1;
-  transition: opacity 150ms ease;
-}
-
-.modal {
+.content {
   position: relative;
-  max-width: var(--dyn-modal-max-width, min(90vw, 640px));
-  width: min(100%, var(--dyn-modal-max-width, min(90vw, 640px)));
-  min-width: var(--dyn-modal-min-width, auto);
-  border-radius: var(--dyn-modal-radius, var(--dyn-radius-lg, 0.75rem));
-  background: var(--dyn-modal-surface, var(--dyn-color-surface, #ffffff));
-  color: var(--dyn-modal-color, var(--dyn-color-on-surface, #111827));
-  box-shadow: var(
-    --dyn-modal-shadow,
-    0 24px 60px rgba(15, 23, 42, 0.18)
-  );
-  padding: var(--dyn-modal-padding, var(--dyn-space-8, 2rem));
-  pointer-events: auto;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: var(--dyn-modal-content-gap, var(--dyn-space-6, 1.5rem));
-  overflow: hidden;
+  gap: var(--dyn-space-md, 1rem);
+  min-width: min(20rem, 100%);
+  max-width: min(40rem, 100%);
+  max-height: calc(100vh - var(--dyn-space-2xl, 4rem));
+  padding: var(--dyn-space-xl, 2rem);
+  border-radius: var(--dyn-radius-lg, 1rem);
+  box-shadow: var(--dyn-shadow-overlay, 0 24px 48px rgba(15, 23, 42, 0.18));
+  background-color: var(--dyn-color-surface, #ffffff);
+  color: var(--dyn-color-text-primary, #0f172a);
+  overflow: auto;
+  outline: none;
 }
 
-.fullscreen {
-  max-width: none;
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-}
+@media (max-width: 48rem) {
+  .overlay {
+    padding: var(--dyn-space-lg, 1.5rem);
+  }
 
-@media (max-width: 640px) {
-  .modal {
-    border-radius: var(--dyn-radius-md, 0.5rem);
-    padding: var(--dyn-modal-padding-mobile, var(--dyn-space-6, 1.5rem));
+  .content {
+    width: 100%;
+    min-width: 0;
+    border-radius: var(--dyn-radius-md, 0.75rem);
   }
 }
+
+.disabled {
+  cursor: not-allowed;
+}
+
