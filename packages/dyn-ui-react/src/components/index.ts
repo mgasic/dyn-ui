@@ -29,6 +29,7 @@ export { DynTable } from './DynTable';
 export { DynTabs } from './DynTabs';
 export { DynToolbar } from './DynToolbar';
 export { DynTreeView } from './DynTreeView';
+export { DynUI } from './DynUI';
 export { ThemeSwitcher } from './ThemeSwitcher';
 
 // Value exports
@@ -69,5 +70,6 @@ export type * from './DynTable';
 export type * from './DynTabs';
 export type * from './DynToolbar';
 export type * from './DynTreeView';
+export type * from './DynUI';
 export type * from './ThemeSwitcher';
 

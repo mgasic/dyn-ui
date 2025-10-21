@@ -1,0 +1,203 @@
+.root {
+  position: relative;
+}
+
+@media (min-width: 40rem) {
+  .root {
+    --dyn-box-padding: var(--dyn-ui-padding-sm, var(--dyn-box-padding));
+    --dyn-box-padding-top: var(
+      --dyn-ui-padding-top-sm,
+      var(--dyn-ui-padding-y-sm, var(--dyn-box-padding-top))
+    );
+    --dyn-box-padding-right: var(
+      --dyn-ui-padding-right-sm,
+      var(--dyn-ui-padding-x-sm, var(--dyn-box-padding-right))
+    );
+    --dyn-box-padding-bottom: var(
+      --dyn-ui-padding-bottom-sm,
+      var(--dyn-ui-padding-y-sm, var(--dyn-box-padding-bottom))
+    );
+    --dyn-box-padding-left: var(
+      --dyn-ui-padding-left-sm,
+      var(--dyn-ui-padding-x-sm, var(--dyn-box-padding-left))
+    );
+
+    --dyn-box-margin: var(--dyn-ui-margin-sm, var(--dyn-box-margin));
+    --dyn-box-margin-top: var(
+      --dyn-ui-margin-top-sm,
+      var(--dyn-ui-margin-y-sm, var(--dyn-box-margin-top))
+    );
+    --dyn-box-margin-right: var(
+      --dyn-ui-margin-right-sm,
+      var(--dyn-ui-margin-x-sm, var(--dyn-box-margin-right))
+    );
+    --dyn-box-margin-bottom: var(
+      --dyn-ui-margin-bottom-sm,
+      var(--dyn-ui-margin-y-sm, var(--dyn-box-margin-bottom))
+    );
+    --dyn-box-margin-left: var(
+      --dyn-ui-margin-left-sm,
+      var(--dyn-ui-margin-x-sm, var(--dyn-box-margin-left))
+    );
+
+    --dyn-box-gap: var(--dyn-ui-gap-sm, var(--dyn-box-gap));
+    --dyn-box-row-gap: var(
+      --dyn-ui-row-gap-sm,
+      var(--dyn-ui-gap-sm, var(--dyn-box-row-gap))
+    );
+    --dyn-box-column-gap: var(
+      --dyn-ui-column-gap-sm,
+      var(--dyn-ui-gap-sm, var(--dyn-box-column-gap))
+    );
+  }
+}
+
+@media (min-width: 48rem) {
+  .root {
+    --dyn-box-padding: var(--dyn-ui-padding-md, var(--dyn-box-padding));
+    --dyn-box-padding-top: var(
+      --dyn-ui-padding-top-md,
+      var(--dyn-ui-padding-y-md, var(--dyn-box-padding-top))
+    );
+    --dyn-box-padding-right: var(
+      --dyn-ui-padding-right-md,
+      var(--dyn-ui-padding-x-md, var(--dyn-box-padding-right))
+    );
+    --dyn-box-padding-bottom: var(
+      --dyn-ui-padding-bottom-md,
+      var(--dyn-ui-padding-y-md, var(--dyn-box-padding-bottom))
+    );
+    --dyn-box-padding-left: var(
+      --dyn-ui-padding-left-md,
+      var(--dyn-ui-padding-x-md, var(--dyn-box-padding-left))
+    );
+
+    --dyn-box-margin: var(--dyn-ui-margin-md, var(--dyn-box-margin));
+    --dyn-box-margin-top: var(
+      --dyn-ui-margin-top-md,
+      var(--dyn-ui-margin-y-md, var(--dyn-box-margin-top))
+    );
+    --dyn-box-margin-right: var(
+      --dyn-ui-margin-right-md,
+      var(--dyn-ui-margin-x-md, var(--dyn-box-margin-right))
+    );
+    --dyn-box-margin-bottom: var(
+      --dyn-ui-margin-bottom-md,
+      var(--dyn-ui-margin-y-md, var(--dyn-box-margin-bottom))
+    );
+    --dyn-box-margin-left: var(
+      --dyn-ui-margin-left-md,
+      var(--dyn-ui-margin-x-md, var(--dyn-box-margin-left))
+    );
+
+    --dyn-box-gap: var(--dyn-ui-gap-md, var(--dyn-box-gap));
+    --dyn-box-row-gap: var(
+      --dyn-ui-row-gap-md,
+      var(--dyn-ui-gap-md, var(--dyn-box-row-gap))
+    );
+    --dyn-box-column-gap: var(
+      --dyn-ui-column-gap-md,
+      var(--dyn-ui-gap-md, var(--dyn-box-column-gap))
+    );
+  }
+}
+
+@media (min-width: 64rem) {
+  .root {
+    --dyn-box-padding: var(--dyn-ui-padding-lg, var(--dyn-box-padding));
+    --dyn-box-padding-top: var(
+      --dyn-ui-padding-top-lg,
+      var(--dyn-ui-padding-y-lg, var(--dyn-box-padding-top))
+    );
+    --dyn-box-padding-right: var(
+      --dyn-ui-padding-right-lg,
+      var(--dyn-ui-padding-x-lg, var(--dyn-box-padding-right))
+    );
+    --dyn-box-padding-bottom: var(
+      --dyn-ui-padding-bottom-lg,
+      var(--dyn-ui-padding-y-lg, var(--dyn-box-padding-bottom))
+    );
+    --dyn-box-padding-left: var(
+      --dyn-ui-padding-left-lg,
+      var(--dyn-ui-padding-x-lg, var(--dyn-box-padding-left))
+    );
+
+    --dyn-box-margin: var(--dyn-ui-margin-lg, var(--dyn-box-margin));
+    --dyn-box-margin-top: var(
+      --dyn-ui-margin-top-lg,
+      var(--dyn-ui-margin-y-lg, var(--dyn-box-margin-top))
+    );
+    --dyn-box-margin-right: var(
+      --dyn-ui-margin-right-lg,
+      var(--dyn-ui-margin-x-lg, var(--dyn-box-margin-right))
+    );
+    --dyn-box-margin-bottom: var(
+      --dyn-ui-margin-bottom-lg,
+      var(--dyn-ui-margin-y-lg, var(--dyn-box-margin-bottom))
+    );
+    --dyn-box-margin-left: var(
+      --dyn-ui-margin-left-lg,
+      var(--dyn-ui-margin-x-lg, var(--dyn-box-margin-left))
+    );
+
+    --dyn-box-gap: var(--dyn-ui-gap-lg, var(--dyn-box-gap));
+    --dyn-box-row-gap: var(
+      --dyn-ui-row-gap-lg,
+      var(--dyn-ui-gap-lg, var(--dyn-box-row-gap))
+    );
+    --dyn-box-column-gap: var(
+      --dyn-ui-column-gap-lg,
+      var(--dyn-ui-gap-lg, var(--dyn-box-column-gap))
+    );
+  }
+}
+
+@media (min-width: 80rem) {
+  .root {
+    --dyn-box-padding: var(--dyn-ui-padding-xl, var(--dyn-box-padding));
+    --dyn-box-padding-top: var(
+      --dyn-ui-padding-top-xl,
+      var(--dyn-ui-padding-y-xl, var(--dyn-box-padding-top))
+    );
+    --dyn-box-padding-right: var(
+      --dyn-ui-padding-right-xl,
+      var(--dyn-ui-padding-x-xl, var(--dyn-box-padding-right))
+    );
+    --dyn-box-padding-bottom: var(
+      --dyn-ui-padding-bottom-xl,
+      var(--dyn-ui-padding-y-xl, var(--dyn-box-padding-bottom))
+    );
+    --dyn-box-padding-left: var(
+      --dyn-ui-padding-left-xl,
+      var(--dyn-ui-padding-x-xl, var(--dyn-box-padding-left))
+    );
+
+    --dyn-box-margin: var(--dyn-ui-margin-xl, var(--dyn-box-margin));
+    --dyn-box-margin-top: var(
+      --dyn-ui-margin-top-xl,
+      var(--dyn-ui-margin-y-xl, var(--dyn-box-margin-top))
+    );
+    --dyn-box-margin-right: var(
+      --dyn-ui-margin-right-xl,
+      var(--dyn-ui-margin-x-xl, var(--dyn-box-margin-right))
+    );
+    --dyn-box-margin-bottom: var(
+      --dyn-ui-margin-bottom-xl,
+      var(--dyn-ui-margin-y-xl, var(--dyn-box-margin-bottom))
+    );
+    --dyn-box-margin-left: var(
+      --dyn-ui-margin-left-xl,
+      var(--dyn-ui-margin-x-xl, var(--dyn-box-margin-left))
+    );
+
+    --dyn-box-gap: var(--dyn-ui-gap-xl, var(--dyn-box-gap));
+    --dyn-box-row-gap: var(
+      --dyn-ui-row-gap-xl,
+      var(--dyn-ui-gap-xl, var(--dyn-box-row-gap))
+    );
+    --dyn-box-column-gap: var(
+      --dyn-ui-column-gap-xl,
+      var(--dyn-ui-gap-xl, var(--dyn-box-column-gap))
+    );
+  }
+}

@@ -26,6 +26,7 @@ import {
   DynDivider,
   DynGrid,
   DynPage,
+  DynUI,
 
   // Data Display Components
   DynChart,
@@ -92,6 +93,7 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynDivider)).toBe(true);
     expect(isComponentExport(DynGrid)).toBe(true);
     expect(isComponentExport(DynPage)).toBe(true);
+    expect(isComponentExport(DynUI)).toBe(true);
   });
 
   it('exports all data display components', () => {
