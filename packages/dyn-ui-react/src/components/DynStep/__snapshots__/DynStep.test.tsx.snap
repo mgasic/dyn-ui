@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DynStep > matches snapshot with spacing props 1`] = `
+<DocumentFragment>
+  <section
+    class="_root_27c983"
+    data-testid="snapshot-step"
+    style="--dyn-step-gap: var(--dyn-spacing-xl, 1.5rem); --dyn-step-padding: var(--dyn-spacing-lg, 1rem);"
+  >
+    <header>
+      <h2>
+        Review & Submit
+      </h2>
+      <p>
+        Confirm your entries before finishing.
+      </p>
+    </header>
+    <div>
+      <p>
+        All fields look good. Click finish to complete the wizard.
+      </p>
+    </div>
+  </section>
+</DocumentFragment>
+`;

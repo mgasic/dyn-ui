@@ -1,2 +1,2 @@
 export { DynTreeView } from './DynTreeView';
-export type { DynTreeViewProps } from './DynTreeView.types';
+export type { DynTreeViewProps, DynTreeViewNodeLayoutProps } from './DynTreeView.types';
