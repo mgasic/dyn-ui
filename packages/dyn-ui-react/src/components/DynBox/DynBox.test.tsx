@@ -72,6 +72,33 @@ describe('DynBox', () => {
       expect(screen.getByTestId('element').tagName).toBe('ASIDE');
     });
 
+    it('renders semantic overrides for section, nav, and list patterns', () => {
+      const { rerender } = render(
+        <DynBox as="section" data-testid="semantic">
+          Section content
+        </DynBox>
+      );
+
+      expect(screen.getByTestId('semantic').tagName).toBe('SECTION');
+
+      rerender(
+        <DynBox as="nav" data-testid="semantic" aria-label="Site navigation">
+          Navigation
+        </DynBox>
+      );
+
+      expect(screen.getByTestId('semantic').tagName).toBe('NAV');
+
+      rerender(
+        <DynBox as="ul" data-testid="semantic">
+          <li>Item 1</li>
+          <li>Item 2</li>
+        </DynBox>
+      );
+
+      expect(screen.getByTestId('semantic').tagName).toBe('UL');
+    });
+
     it('merges cssVars with inline style', () => {
       render(
         <DynBox
@@ -422,6 +449,54 @@ describe('DynBox', () => {
         '--dyn-box-margin-bottom': '0',
         '--dyn-box-margin-left': 'auto',
       });
+    });
+
+    it('maps responsive spacing tokens to breakpoint-aware CSS variables', () => {
+      render(
+        <DynBox
+          data-testid="responsive-spacing"
+          p={{ base: 'sm', lg: 'xl' }}
+          px={{ md: 'lg' }}
+          my={{ base: 'xs', xl: '2xl' }}
+          gap={{ base: 'sm', md: 'lg', xl: '2xl' }}
+        />
+      );
+
+      const element = screen.getByTestId('responsive-spacing');
+      expect(element).toHaveClass(getStyleClass('box--p-sm'));
+      expect(element.style.getPropertyValue('--dyn-box-padding')).toBe(
+        'var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem))'
+      );
+      expect(element.style.getPropertyValue('--dyn-box-padding-lg')).toBe(
+        'var(--dyn-spacing-xl, var(--spacing-xl, 2rem))'
+      );
+      expect(element.style.getPropertyValue('--dyn-box-padding-right-md')).toBe(
+        'var(--dyn-spacing-lg, var(--spacing-lg, 1.5rem))'
+      );
+      expect(element.style.getPropertyValue('--dyn-box-padding-left-md')).toBe(
+        'var(--dyn-spacing-lg, var(--spacing-lg, 1.5rem))'
+      );
+      expect(element.style.getPropertyValue('--dyn-box-margin-top')).toBe(
+        'var(--dyn-spacing-xs, var(--spacing-xs, 0.25rem))'
+      );
+      expect(element.style.getPropertyValue('--dyn-box-margin-bottom')).toBe(
+        'var(--dyn-spacing-xs, var(--spacing-xs, 0.25rem))'
+      );
+      expect(element.style.getPropertyValue('--dyn-box-margin-top-xl')).toBe(
+        'var(--dyn-spacing-2xl, var(--spacing-2xl, 3rem))'
+      );
+      expect(element.style.getPropertyValue('--dyn-box-margin-bottom-xl')).toBe(
+        'var(--dyn-spacing-2xl, var(--spacing-2xl, 3rem))'
+      );
+      expect(element.style.getPropertyValue('--dyn-box-gap')).toBe(
+        'var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem))'
+      );
+      expect(element.style.getPropertyValue('--dyn-box-gap-md')).toBe(
+        'var(--dyn-spacing-lg, var(--spacing-lg, 1.5rem))'
+      );
+      expect(element.style.getPropertyValue('--dyn-box-gap-xl')).toBe(
+        'var(--dyn-spacing-2xl, var(--spacing-2xl, 3rem))'
+      );
     });
 
     it('applies background variant and border utilities', () => {

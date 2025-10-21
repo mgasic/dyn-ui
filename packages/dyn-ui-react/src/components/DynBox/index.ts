@@ -6,6 +6,8 @@ export type {
   BoxDisplay,
   BoxPosition,
   SpacingSize,
+  DynBoxBreakpoint,
+  ResponsiveSpacingValue,
   BackgroundVariant,
   BorderRadius,
   BorderVariant,
