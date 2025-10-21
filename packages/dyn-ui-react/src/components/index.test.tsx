@@ -27,11 +27,12 @@ import {
   DynDivider,
   DynGrid,
   DynPage,
-  DynTreeNode,
+  DynUI,
 
   // Data Display Components
   DynChart,
   DynGauge,
+  DynListItem,
   DynListView,
   DynTable,
   DynTreeView,
@@ -41,6 +42,7 @@ import {
   DynMenuTrigger,
   DynBreadcrumb,
   DynTabs,
+  DynStep,
   DynStepper,
   DynToolbar,
   DynModal,
@@ -96,12 +98,13 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynDivider)).toBe(true);
     expect(isComponentExport(DynGrid)).toBe(true);
     expect(isComponentExport(DynPage)).toBe(true);
-    expect(isComponentExport(DynTreeNode)).toBe(true);
+    expect(isComponentExport(DynUI)).toBe(true);
   });
 
   it('exports all data display components', () => {
     expect(isComponentExport(DynChart)).toBe(true);
     expect(isComponentExport(DynGauge)).toBe(true);
+    expect(isComponentExport(DynListItem)).toBe(true);
     expect(isComponentExport(DynListView)).toBe(true);
     expect(isComponentExport(DynTable)).toBe(true);
     expect(isComponentExport(DynTreeView)).toBe(true);
@@ -112,6 +115,7 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynMenuTrigger)).toBe(true);
     expect(isComponentExport(DynBreadcrumb)).toBe(true);
     expect(isComponentExport(DynTabs)).toBe(true);
+    expect(isComponentExport(DynStep)).toBe(true);
     expect(isComponentExport(DynStepper)).toBe(true);
     expect(isComponentExport(DynToolbar)).toBe(true);
     expect(isComponentExport(DynModal)).toBe(true);

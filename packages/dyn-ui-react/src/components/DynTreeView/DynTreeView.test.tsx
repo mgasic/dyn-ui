@@ -1,6 +1,6 @@
 // packages/dyn-ui-react/src/components/DynTreeView/DynTreeView.test.tsx
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 import DynTreeView from './DynTreeView';
@@ -64,6 +64,31 @@ describe('DynTreeView', () => {
       expect(child).toHaveAttribute('aria-level', '2');
       expect(child).toHaveAttribute('aria-setsize', '2');
       expect(child).toHaveAttribute('aria-posinset', '1');
+    });
+
+    it('keeps the tree root tabbable and updates aria-activedescendant as focus moves', async () => {
+      render(<DynTreeView treeData={sampleTreeData} />);
+
+      const tree = screen.getByRole('tree');
+      expect(tree).toHaveAttribute('tabindex', '0');
+
+      tree.focus();
+
+      const firstItem = screen.getByRole('treeitem', { name: /parent 1/i });
+
+      await waitFor(() => {
+        expect(document.activeElement).toBe(firstItem);
+        expect(tree).toHaveAttribute('aria-activedescendant', firstItem.id);
+      });
+
+      fireEvent.keyDown(tree, { key: 'ArrowDown' });
+
+      const secondItem = screen.getByRole('treeitem', { name: /parent 2/i });
+
+      await waitFor(() => {
+        expect(document.activeElement).toBe(secondItem);
+        expect(tree).toHaveAttribute('aria-activedescendant', secondItem.id);
+      });
     });
   });
 
@@ -242,28 +267,36 @@ describe('DynTreeView', () => {
   });
 
   describe('Keyboard interactions', () => {
-    it('supports roving focus and directional navigation', () => {
+    it('supports roving focus and directional navigation', async () => {
       render(<DynTreeView treeData={sampleTreeData} />);
 
       const tree = screen.getByRole('tree');
       tree.focus();
 
       const firstItem = screen.getByRole('treeitem', { name: /parent 1/i });
-      expect(document.activeElement).toBe(firstItem);
+      await waitFor(() => {
+        expect(document.activeElement).toBe(firstItem);
+      });
 
       fireEvent.keyDown(tree, { key: 'ArrowDown' });
       const secondItem = screen.getByRole('treeitem', { name: /parent 2/i });
-      expect(document.activeElement).toBe(secondItem);
+      await waitFor(() => {
+        expect(document.activeElement).toBe(secondItem);
+      });
 
       fireEvent.keyDown(tree, { key: 'Home' });
-      expect(document.activeElement).toBe(firstItem);
+      await waitFor(() => {
+        expect(document.activeElement).toBe(firstItem);
+      });
 
       fireEvent.keyDown(tree, { key: 'End' });
       const lastItem = screen.getByRole('treeitem', { name: /leaf node/i });
-      expect(document.activeElement).toBe(lastItem);
+      await waitFor(() => {
+        expect(document.activeElement).toBe(lastItem);
+      });
     });
 
-    it('handles expansion and selection with keyboard keys', () => {
+    it('handles expansion and selection with keyboard keys', async () => {
       const onCheck = vi.fn();
       const onSelect = vi.fn();
       render(
@@ -281,21 +314,35 @@ describe('DynTreeView', () => {
 
       const parent = screen.getByRole('treeitem', { name: /parent 1/i });
 
+      await waitFor(() => {
+        expect(document.activeElement).toBe(parent);
+      });
+
       fireEvent.keyDown(tree, { key: 'ArrowRight' });
-      expect(parent).toHaveAttribute('aria-expanded', 'true');
+      await waitFor(() => {
+        expect(parent).toHaveAttribute('aria-expanded', 'true');
+      });
 
       fireEvent.keyDown(tree, { key: 'ArrowRight' });
       const child = screen.getByRole('treeitem', { name: /child 1/i });
-      expect(document.activeElement).toBe(child);
+      await waitFor(() => {
+        expect(document.activeElement).toBe(child);
+      });
 
       fireEvent.keyDown(tree, { key: 'ArrowLeft' });
-      expect(document.activeElement).toBe(parent);
+      await waitFor(() => {
+        expect(document.activeElement).toBe(parent);
+      });
 
       fireEvent.keyDown(tree, { key: ' ' });
-      expect(onCheck).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(onCheck).toHaveBeenCalled();
+      });
 
       fireEvent.keyDown(tree, { key: 'Enter' });
-      expect(onSelect).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(onSelect).toHaveBeenCalled();
+      });
     });
   });
 

@@ -1,18 +1,37 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import React, { useEffect, useRef } from 'react';
 import { DynMenuItem } from './DynMenuItem';
 
 const meta: Meta<typeof DynMenuItem> = {
-  title: 'Navigation/DynMenu/DynMenuItem',
+  title: 'Navigation/DynMenuItem',
   component: DynMenuItem,
-  args: {
-    label: 'Dashboard',
-  },
   parameters: {
     docs: {
       description: {
-        component: `DynMenuItem exposes the low-level building block used by DynMenu. It preserves button semantics even when rendered as a custom element via the \`as\` prop, handles disabled/loading states, and sets accessibility attributes automatically.`,
+        component:
+          'Low-level primitive used by `DynMenu` to render interactive entries with accessible button semantics.',
       },
+    },
+  },
+  argTypes: {
+    label: {
+      control: 'text',
+      description: 'Visible text label rendered inside the menu item.',
+    },
+    disabled: {
+      control: 'boolean',
+      description: 'Disables the menu item preventing pointer and keyboard activation.',
+    },
+    loading: {
+      control: 'boolean',
+      description: 'Marks the menu item as busy. Loading items are rendered inert.',
+    },
+    active: {
+      control: 'boolean',
+      description: 'Applies the active visual state.',
+    },
+    open: {
+      control: 'boolean',
+      description: 'Reflects whether the parent submenu is open. Used for styling hooks.',
     },
   },
 };
@@ -22,41 +41,42 @@ type Story = StoryObj<typeof DynMenuItem>;
 
 export const Default: Story = {
   args: {
-    label: 'Projects',
+    label: 'Dashboard',
   },
 };
 
 export const Focused: Story = {
-  render: (args) => {
-    const ref = useRef<HTMLButtonElement | null>(null);
-
-    useEffect(() => {
-      ref.current?.focus();
-    }, []);
-
-    return <DynMenuItem {...args} ref={ref} label="Focused" />;
+  args: {
+    label: 'Projects',
+    autoFocus: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Demonstrates keyboard focus styles. The `autoFocus` attribute is forwarded to the underlying button.',
+      },
+    },
   },
 };
 
 export const Disabled: Story = {
   args: {
-    label: 'Disabled',
+    label: 'Reports',
     disabled: true,
   },
 };
 
 export const Loading: Story = {
   args: {
-    label: 'Loading',
+    label: 'Syncing…',
     loading: true,
   },
-};
-
-export const PolymorphicLink: Story = {
-  args: {
-    as: 'a',
-    href: '#',
-    label: 'Link item',
-    ariaLabel: 'Link item',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Loading menu items set `aria-busy` and expose a `data-loading` hook for custom indicators.',
+      },
+    },
   },
 };

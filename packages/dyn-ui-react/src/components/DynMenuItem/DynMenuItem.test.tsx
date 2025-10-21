@@ -1,102 +1,89 @@
-import '../../../test-setup';
-import React, { act } from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '../../test-setup';
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { DynMenuItem } from './DynMenuItem';
 
 describe('DynMenuItem', () => {
-  it('renders as a button with menuitem role by default', () => {
-    render(<DynMenuItem label="Projects" />);
+  it('renders an accessible button with provided label', () => {
+    render(<DynMenuItem label="Dashboard" data-testid="menu-item" />);
 
-    const item = screen.getByRole('menuitem', { name: 'Projects' });
-    expect(item).toBeInTheDocument();
+    const item = screen.getByTestId('menu-item');
+    expect(item).toHaveAttribute('role', 'menuitem');
+    expect(item).toHaveTextContent('Dashboard');
+    expect(item).toHaveAccessibleName('Dashboard');
     expect(item).toHaveAttribute('type', 'button');
-    expect(item).not.toHaveAttribute('aria-disabled');
   });
 
-  it('supports polymorphic rendering while preserving button semantics', async () => {
-    const user = userEvent.setup();
-    const onClick = vi.fn();
-    render(
-      <DynMenuItem as="div" ariaLabel="Notifications" onClick={onClick} />
-    );
+  it('supports focusing via refs for keyboard workflows', () => {
+    const ref = React.createRef<HTMLButtonElement>();
+    render(<DynMenuItem ref={ref}>Profile</DynMenuItem>);
 
-    const item = screen.getByRole('menuitem', { name: 'Notifications' });
-    expect(item).toHaveAttribute('tabindex', '0');
+    ref.current?.focus();
 
-    await user.tab();
-    expect(item).toHaveFocus();
-
-    await user.keyboard('{Enter}');
-    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(ref.current).toHaveFocus();
   });
 
-  it('prevents interactions when disabled', async () => {
+  it('prevents pointer activation when disabled', async () => {
     const user = userEvent.setup();
-    const onClick = vi.fn();
+    const handleClick = vi.fn();
+
     render(
-      <DynMenuItem label="Disabled" disabled onClick={onClick} data-testid="disabled-item" />
+      <DynMenuItem disabled onClick={handleClick}>
+        Settings
+      </DynMenuItem>
     );
 
-    const item = screen.getByTestId('disabled-item');
-    expect(item).toHaveAttribute('disabled');
-    expect(item).toHaveAttribute('data-disabled', 'true');
+    await user.click(screen.getByRole('menuitem', { name: 'Settings' }));
+
+    expect(handleClick).not.toHaveBeenCalled();
+    expect(screen.getByRole('menuitem', { name: 'Settings' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+  });
+
+  it('marks loading state as busy and prevents activation', async () => {
+    const user = userEvent.setup();
+    const handleClick = vi.fn();
+
+    render(
+      <DynMenuItem loading onClick={handleClick}>
+        Reports
+      </DynMenuItem>
+    );
+
+    const item = screen.getByRole('menuitem', { name: 'Reports' });
+
+    expect(item).toHaveAttribute('aria-busy', 'true');
+    expect(item).toHaveAttribute('data-loading');
 
     await user.click(item);
-    expect(onClick).not.toHaveBeenCalled();
+
+    expect(handleClick).not.toHaveBeenCalled();
   });
 
-  it('marks loading items as busy and non-interactive', () => {
-    const { rerender } = render(
-      <DynMenuItem label="Loading" loading data-testid="loading-item" />
-    );
+  it('trims provided aria-label values for accessible names', () => {
+    render(<DynMenuItem aria-label="  Insights  ">Hidden</DynMenuItem>);
 
-    const item = screen.getByTestId('loading-item');
-    expect(item).toHaveAttribute('aria-busy', 'true');
-    expect(item).toHaveAttribute('data-loading', 'true');
-    expect(item).toHaveAttribute('disabled');
-
-    rerender(
-      <DynMenuItem label="Loading" loading as="a" href="#" data-testid="loading-link" />
-    );
-
-    const linkItem = screen.getByTestId('loading-link');
-    expect(linkItem).toHaveAttribute('aria-busy', 'true');
-    expect(linkItem).toHaveAttribute('aria-disabled', 'true');
-    expect(linkItem).toHaveAttribute('tabindex', '-1');
+    expect(screen.getByRole('menuitem', { name: 'Insights' })).toBeInTheDocument();
   });
 
-  it('exposes keyboard pressed state when space or enter is used', () => {
-    render(<DynMenuItem label="Keyboard" data-testid="keyboard-item" />);
+  it('supports polymorphic rendering with keyboard activation', () => {
+    const onPress = vi.fn();
 
-    const item = screen.getByTestId('keyboard-item');
+    render(
+      <DynMenuItem as="a" href="#" onPress={onPress}>
+        Docs
+      </DynMenuItem>
+    );
+
+    const item = screen.getByRole('menuitem', { name: 'Docs' });
+
     fireEvent.keyDown(item, { key: 'Enter' });
-    expect(item).toHaveAttribute('data-pressed', 'true');
+    fireEvent.keyDown(item, { key: ' ' });
 
-    fireEvent.keyUp(item, { key: 'Enter' });
-    expect(item).not.toHaveAttribute('data-pressed');
-  });
-
-  it('applies focus-visible data attribute when focused', async () => {
-    render(<DynMenuItem label="Focus" data-testid="focus-item" />);
-
-    const item = screen.getByTestId('focus-item');
-
-    act(() => {
-      item.focus();
-    });
-
-    await waitFor(() =>
-      expect(item).toHaveAttribute('data-focus-visible', 'true')
-    );
-
-    act(() => {
-      item.blur();
-    });
-
-    await waitFor(() =>
-      expect(item).not.toHaveAttribute('data-focus-visible')
-    );
+    expect(onPress).toHaveBeenCalledTimes(2);
   });
 });

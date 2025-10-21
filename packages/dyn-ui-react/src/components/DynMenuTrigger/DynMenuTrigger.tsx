@@ -1,198 +1,176 @@
-import React, { forwardRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { cn } from '../../utils/classNames';
-import type { DynMenuTriggerProps, DynMenuTriggerRef } from './DynMenuTrigger.types';
 import styles from './DynMenuTrigger.module.css';
 
-const getStyleClass = (className: string): string =>
-  (styles as Record<string, string>)[className] || '';
+type ElementProps<T extends React.ElementType> = React.ComponentPropsWithoutRef<T>;
 
-const DynMenuTriggerInner = <E extends React.ElementType = 'button'>(
-  props: DynMenuTriggerProps<E>,
-  ref: DynMenuTriggerRef<E>
+type DynMenuTriggerBaseProps<T extends React.ElementType> = {
+  as?: T;
+  /**
+   * Indicates that the trigger is representing an expanded/open menu state.
+   */
+  active?: boolean;
+  className?: string;
+  disabled?: boolean;
+  onClick?: React.MouseEventHandler<Element>;
+  children?: React.ReactNode;
+};
+
+type DynMenuTriggerProps<T extends React.ElementType = 'button'> = DynMenuTriggerBaseProps<T> &
+  Omit<ElementProps<T>, keyof DynMenuTriggerBaseProps<T>>;
+
+export type { DynMenuTriggerProps };
+
+export type DynMenuTriggerComponent = <T extends React.ElementType = 'button'>(
+  props: DynMenuTriggerProps<T> & { ref?: React.Ref<Element> }
+) => React.ReactElement | null;
+
+const isKeyboardActivation = (event: React.KeyboardEvent<Element>) =>
+  event.key === ' ' || event.key === 'Enter';
+
+const DynMenuTriggerInner = <T extends React.ElementType = 'button'>(
+  props: DynMenuTriggerProps<T>,
+  forwardedRef: React.Ref<Element>
 ) => {
   const {
     as,
-    children,
+    active = false,
     className,
     disabled = false,
-    isOpen = false,
+    children,
     onClick,
-    'data-testid': dataTestId = 'dyn-menu-trigger',
-    ...rest
-  } = props as DynMenuTriggerProps & Record<string, unknown>;
-
-  const [isPressed, setIsPressed] = useState(false);
-
-  const {
     onPointerDown,
     onPointerUp,
     onPointerLeave,
     onPointerCancel,
-    onBlur,
     onKeyDown,
     onKeyUp,
+    onBlur,
     tabIndex,
-    ...restProps
-  } = rest as Record<string, any>;
+    ...rest
+  } = props;
 
-  const Component = (as ?? 'button') as React.ElementType;
-  const isButtonElement = typeof Component === 'string' && Component === 'button';
+  const Component = (as || 'button') as React.ElementType;
+  const [pressed, setPressed] = useState(false);
 
-  const handlePointerDown: React.PointerEventHandler<Element> = (event) => {
-    if (disabled) {
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-    setIsPressed(true);
-    onPointerDown?.(event);
-  };
+  const isButtonElement = useMemo(() => Component === 'button', [Component]);
 
-  const releasePress = (event: React.SyntheticEvent<Element>) => {
-    setIsPressed(false);
-    return event;
-  };
+  const releasePress = useCallback(() => {
+    setPressed(false);
+  }, []);
 
-  const handlePointerUp: React.PointerEventHandler<Element> = (event) => {
-    releasePress(event);
-    onPointerUp?.(event);
-  };
-
-  const handlePointerLeave: React.PointerEventHandler<Element> = (event) => {
-    releasePress(event);
-    onPointerLeave?.(event);
-  };
-
-  const handlePointerCancel: React.PointerEventHandler<Element> = (event) => {
-    releasePress(event);
-    onPointerCancel?.(event);
-  };
-
-  const handleBlur: React.FocusEventHandler<Element> = (event) => {
-    releasePress(event);
-    onBlur?.(event);
-  };
-
-  const isActivationKey = (key: string) => key === ' ' || key === 'Spacebar' || key === 'Enter';
-
-  const handleKeyDown: React.KeyboardEventHandler<Element> = (event) => {
-    if (disabled && isActivationKey(event.key)) {
-      event.preventDefault();
-      return;
-    }
-
-    if (event.key === ' ' || event.key === 'Spacebar') {
-      if (!isButtonElement) {
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<Element>) => {
+      if (disabled) {
         event.preventDefault();
+        return;
       }
-      setIsPressed(true);
-    }
+      setPressed(true);
+      onPointerDown?.(event);
+    },
+    [disabled, onPointerDown]
+  );
 
-    if (!isButtonElement && event.key === 'Enter') {
-      event.preventDefault();
-      setIsPressed(true);
-      const target = event.currentTarget as HTMLElement;
-      const scheduleClick = () => {
-        try {
-          target.click();
-        } catch {
-          /* ignore */
-        }
-      };
-      if (typeof window !== 'undefined' && typeof window.setTimeout === 'function') {
-        window.setTimeout(scheduleClick);
-      } else {
-        scheduleClick();
+  const handlePointerUp = useCallback(
+    (event: React.PointerEvent<Element>) => {
+      releasePress();
+      onPointerUp?.(event);
+    },
+    [onPointerUp, releasePress]
+  );
+
+  const handlePointerLeave = useCallback(
+    (event: React.PointerEvent<Element>) => {
+      releasePress();
+      onPointerLeave?.(event);
+    },
+    [onPointerLeave, releasePress]
+  );
+
+  const handlePointerCancel = useCallback(
+    (event: React.PointerEvent<Element>) => {
+      releasePress();
+      onPointerCancel?.(event);
+    },
+    [onPointerCancel, releasePress]
+  );
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<Element>) => {
+      onKeyDown?.(event);
+      if (event.defaultPrevented || disabled) return;
+      if (isKeyboardActivation(event)) {
+        setPressed(true);
       }
-    }
+    },
+    [disabled, onKeyDown]
+  );
 
-    onKeyDown?.(event);
-  };
+  const handleKeyUp = useCallback(
+    (event: React.KeyboardEvent<Element>) => {
+      releasePress();
+      onKeyUp?.(event);
+    },
+    [onKeyUp, releasePress]
+  );
 
-  const handleKeyUp: React.KeyboardEventHandler<Element> = (event) => {
-    if (event.key === ' ' || event.key === 'Spacebar') {
-      releasePress(event);
-      if (!isButtonElement && !disabled) {
-        const target = event.currentTarget as HTMLElement;
-        const scheduleClick = () => {
-          try {
-            target.click();
-          } catch {
-            /* ignore */
-          }
-        };
-        if (typeof window !== 'undefined' && typeof window.setTimeout === 'function') {
-          window.setTimeout(scheduleClick);
-        } else {
-          scheduleClick();
-        }
+  const handleBlur = useCallback(
+    (event: React.FocusEvent<Element>) => {
+      releasePress();
+      onBlur?.(event);
+    },
+    [onBlur, releasePress]
+  );
+
+  const handleClick = useCallback(
+    (event: React.MouseEvent<Element>) => {
+      if (disabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
       }
-    } else if (event.key === 'Enter') {
-      releasePress(event);
-    }
+      onClick?.(event);
+    },
+    [disabled, onClick]
+  );
 
-    onKeyUp?.(event);
-  };
+  const resolvedTabIndex = useMemo(() => {
+    if (typeof tabIndex === 'number') return tabIndex;
+    if (disabled && !isButtonElement) return -1;
+    return undefined;
+  }, [disabled, isButtonElement, tabIndex]);
 
-  const handleClick: React.MouseEventHandler<Element> = (event) => {
-    if (disabled) {
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-    onClick?.(event as any);
-  };
+  const ariaDisabled = useMemo(() => {
+    if (isButtonElement) return undefined;
+    return disabled ? true : undefined;
+  }, [disabled, isButtonElement]);
 
-  const ariaDisabled = !isButtonElement && disabled ? true : undefined;
-  const computedTabIndex =
-    tabIndex !== undefined ? tabIndex : !isButtonElement && disabled ? -1 : undefined;
-
-  const elementProps = {
-    ...restProps,
-    ref,
-    className: cn(
-      getStyleClass('root'),
-      isOpen && getStyleClass('open'),
-      isPressed && getStyleClass('pressed'),
-      disabled && getStyleClass('disabled'),
-      'dyn-menu-trigger',
-      isOpen && 'dyn-menu-trigger-active',
-      disabled && 'dyn-menu-trigger-disabled',
-      className
-    ),
-    'data-testid': dataTestId,
-    'data-state': isOpen ? 'open' : 'closed',
-    'data-pressed': isPressed ? 'true' : undefined,
+  const componentProps = {
+    ref: forwardedRef,
+    className: cn(styles.trigger, active && styles.triggerActive, className),
     'data-disabled': disabled ? 'true' : undefined,
+    'data-pressed': pressed ? 'true' : undefined,
+    'data-active': active ? 'true' : undefined,
+    ...(isButtonElement ? { disabled } : { 'aria-disabled': ariaDisabled }),
+    tabIndex: resolvedTabIndex,
     onClick: handleClick,
     onPointerDown: handlePointerDown,
     onPointerUp: handlePointerUp,
     onPointerLeave: handlePointerLeave,
     onPointerCancel: handlePointerCancel,
-    onBlur: handleBlur,
     onKeyDown: handleKeyDown,
     onKeyUp: handleKeyUp,
-    tabIndex: computedTabIndex,
-    'aria-disabled': ariaDisabled,
-  } as Record<string, unknown>;
+    onBlur: handleBlur,
+    ...rest
+  } as ElementProps<T> & {
+    ref: React.Ref<Element>;
+  };
 
-  if (isButtonElement) {
-    elementProps.type = (restProps as Record<string, unknown>).type ?? 'button';
-    elementProps.disabled = disabled;
-    if (disabled) {
-      delete elementProps['aria-disabled'];
-    }
+  if (isButtonElement && !(rest as Record<string, unknown>).type) {
+    (componentProps as React.ButtonHTMLAttributes<HTMLButtonElement>).type = 'button';
   }
 
-  return React.createElement(Component as any, elementProps, children);
+  return <Component {...componentProps}>{children}</Component>;
 };
 
-export const DynMenuTrigger = forwardRef(DynMenuTriggerInner) as <
-  E extends React.ElementType = 'button'
->(
-  props: DynMenuTriggerProps<E> & { ref?: DynMenuTriggerRef<E> }
-) => React.ReactElement | null;
-
-(DynMenuTrigger as React.NamedExoticComponent).displayName = 'DynMenuTrigger';
-
-export default DynMenuTrigger;
+export const DynMenuTrigger = React.forwardRef(DynMenuTriggerInner) as DynMenuTriggerComponent;

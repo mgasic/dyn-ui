@@ -213,24 +213,30 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
   }, [visibleNodes, focusedKey, firstFocusableKey]);
 
   useEffect(() => {
-    if (focusedKey) {
-      const treeElement = treeRef.current;
-      const ref = nodeRefs.current[focusedKey];
-      const activeElement = document.activeElement as HTMLElement | null;
-      const activeTreeItem = activeElement?.closest('[role="treeitem"]');
-      const isTreeRootActive = activeElement === treeElement;
-      const isTreeItemActive = activeTreeItem === activeElement;
-
-      if (
-        treeElement &&
-        ref &&
-        activeElement &&
-        treeElement.contains(activeElement) &&
-        (isTreeRootActive || isTreeItemActive)
-      ) {
-        ref.focus();
-      }
+    if (!focusedKey) {
+      return;
     }
+
+    const treeElement = treeRef.current;
+    const ref = nodeRefs.current[focusedKey];
+    if (!treeElement || !ref) {
+      return;
+    }
+
+    const activeElement = document.activeElement as HTMLElement | null;
+    if (activeElement && !treeElement.contains(activeElement)) {
+      return;
+    }
+
+    if (
+      activeElement &&
+      activeElement !== treeElement &&
+      activeElement.getAttribute('role') !== 'treeitem'
+    ) {
+      return;
+    }
+
+    ref.focus();
   }, [focusedKey, visibleNodes]);
 
   const renderTreeNode = useCallback(
@@ -315,7 +321,16 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
                 [styles['dyn-tree-view__node-title--clickable']]: selectable && !node.disabled,
               }
             )}
-            onClick={selectable && !node.disabled ? () => handleSelect(node, !isSelected) : undefined}
+            style={{ paddingLeft: (level - 1) * 24 }}
+            role="treeitem"
+            aria-selected={selectable ? isSelected : undefined}
+            aria-disabled={node.disabled ? true : undefined}
+            aria-expanded={hasChildren ? isExpanded : undefined}
+            aria-level={level}
+            aria-setsize={setSize}
+            aria-posinset={position}
+            tabIndex={focusedKey === node.key ? 0 : -1}
+            data-parent-key={parentKey}
           >
             {node.title}
           </div>
@@ -361,7 +376,7 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
 
           {/* Children */}
           {hasChildren && isExpanded && (
-            <div className={styles['dyn-tree-view__node-children']}>
+            <div className={styles['dyn-tree-view__node-children']} role="group">
               {node.children!.map((child, index) =>
                 renderTreeNode(child, level + 1, node.children!.length, index + 1, node.key)
               )}
@@ -432,11 +447,9 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       const target = event.target as HTMLElement | null;
-      const closestTreeItem = target?.closest('[role="treeitem"]');
-      const isFromTreeRoot = target === event.currentTarget;
-      const isFromTreeItem = closestTreeItem === target;
-
-      if (!isFromTreeRoot && !isFromTreeItem) {
+      const isTreeRoot = target === event.currentTarget;
+      const isTreeItem = target?.getAttribute('role') === 'treeitem';
+      if (!isTreeRoot && !isTreeItem) {
         return;
       }
 
@@ -598,6 +611,8 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
     ]
   );
 
+  const activeDescendantId = focusedKey ? `dyn-tree-item-${focusedKey}` : undefined;
+
   return (
     <div
       ref={treeRef}
@@ -608,6 +623,7 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
       onKeyDown={handleKeyDown}
       onFocus={handleTreeFocus}
       aria-multiselectable={multiple || undefined}
+      aria-activedescendant={activeDescendantId}
     >
       {/* Search */}
       {(showSearch ?? searchable) && (

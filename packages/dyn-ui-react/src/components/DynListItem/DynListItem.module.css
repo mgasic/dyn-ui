@@ -1,0 +1,38 @@
+.root {
+  --dyn-list-item-display: flex;
+  --dyn-list-item-direction: row;
+  --dyn-list-item-align: stretch;
+  --dyn-list-item-justify: flex-start;
+  --dyn-list-item-wrap: nowrap;
+  --dyn-list-item-gap: 0;
+  --dyn-list-item-row-gap: var(--dyn-list-item-gap);
+  --dyn-list-item-column-gap: var(--dyn-list-item-gap);
+  --dyn-list-item-padding: 0;
+  --dyn-list-item-padding-top: var(--dyn-list-item-padding);
+  --dyn-list-item-padding-right: var(--dyn-list-item-padding);
+  --dyn-list-item-padding-bottom: var(--dyn-list-item-padding);
+  --dyn-list-item-padding-left: var(--dyn-list-item-padding);
+  --dyn-list-item-margin: 0;
+  --dyn-list-item-margin-top: var(--dyn-list-item-margin);
+  --dyn-list-item-margin-right: var(--dyn-list-item-margin);
+  --dyn-list-item-margin-bottom: var(--dyn-list-item-margin);
+  --dyn-list-item-margin-left: var(--dyn-list-item-margin);
+
+  display: var(--dyn-list-item-display);
+  flex-direction: var(--dyn-list-item-direction);
+  align-items: var(--dyn-list-item-align);
+  justify-content: var(--dyn-list-item-justify);
+  flex-wrap: var(--dyn-list-item-wrap);
+  gap: var(--dyn-list-item-gap);
+  row-gap: var(--dyn-list-item-row-gap);
+  column-gap: var(--dyn-list-item-column-gap);
+  padding-top: var(--dyn-list-item-padding-top);
+  padding-right: var(--dyn-list-item-padding-right);
+  padding-bottom: var(--dyn-list-item-padding-bottom);
+  padding-left: var(--dyn-list-item-padding-left);
+  margin-top: var(--dyn-list-item-margin-top);
+  margin-right: var(--dyn-list-item-margin-right);
+  margin-bottom: var(--dyn-list-item-margin-bottom);
+  margin-left: var(--dyn-list-item-margin-left);
+  min-width: 0;
+}

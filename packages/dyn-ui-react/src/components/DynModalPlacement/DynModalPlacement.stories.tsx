@@ -21,22 +21,18 @@ const meta: Meta<typeof DynModalPlacement> = {
         component: `
 # DynModalPlacement
 
-Kompaktna utilitarna komponenta koja kontroliše pozicioniranje DynModal sadržaja preko jasno definisanih vertikalnih (\`placement\`) i horizontalnih (\`alignment\`) zona.
+Utility wrapper that controls where a modal appears. Combine a **vertical placement** with a **horizontal alignment** to describe the exact zone for modal content.
 
-## Kombinacije položaja
+## Supported combinations
 
-| Placement | Alignment vrednosti |
-|-----------|---------------------|
+| Placement | Available alignment values |
+|-----------|-----------------------------|
 | \`top\` | \`start\`, \`center\`, \`end\`, \`stretch\` |
 | \`center\` | \`start\`, \`center\`, \`end\`, \`stretch\` |
 | \`bottom\` | \`start\`, \`center\`, \`end\`, \`stretch\` |
-| \`fullscreen\` | uvek popunjava ceo raspoloživi prostor |
+| \`fullscreen\` | always stretches across the viewport |
 
-Koristite \`placement\` da odredite vertikalnu zonu (vrh, centar, dno ili fullscreen), a \`alignment\` da precizirate poravnanje unutar te zone.
-
-## Napomena
-
-Za potrebe dokumentacije možete koristiti strategiju \`"absolute"\` ili \`"relative"\` kako biste prikazali više primera u okviru jedne stranice bez portal renderovanja.
+Use \`strategy\` to choose how the wrapper is positioned. The default \`fixed\` mode is ideal for portals, while \`absolute\` and \`relative\` help when demonstrating multiple examples side-by-side inside docs.
         `
       }
     }
