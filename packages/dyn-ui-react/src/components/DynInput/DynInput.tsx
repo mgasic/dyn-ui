@@ -60,10 +60,16 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
       readonly,
       required = false,
       optional = false,
+      invalid,
+      valid,
       visible = true,
       value: propValue = '',
       showSpinButtons = false,
       errorMessage,
+      warningMessage,
+      successMessage,
+      loadingMessage,
+      state,
       validation,
       validationRules,
       className,
@@ -81,6 +87,9 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
       min,
       max,
       currencyConfig,
+      prefix,
+      suffix,
+      loading = false,
       onChange,
       onBlur,
       onFocus,
@@ -136,6 +145,91 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
       validation: normalizedValidationRules,
       customError: errorMessage
     });
+
+    const resolvedErrorMessage = errorMessage ?? (error || undefined);
+
+    const resolvedValidationState = useMemo<
+      'default' | 'error' | 'warning' | 'success' | 'loading'
+    >(() => {
+      if (!visible) {
+        return 'default';
+      }
+
+      if (state) {
+        return state;
+      }
+
+      if (loading) {
+        return 'loading';
+      }
+
+      if (invalid) {
+        return 'error';
+      }
+
+      if (resolvedErrorMessage) {
+        return 'error';
+      }
+
+      if (warningMessage) {
+        return 'warning';
+      }
+
+      if (valid) {
+        return 'success';
+      }
+
+      if (successMessage) {
+        return 'success';
+      }
+
+      return 'default';
+    }, [
+      invalid,
+      loading,
+      resolvedErrorMessage,
+      state,
+      successMessage,
+      valid,
+      visible,
+      warningMessage
+    ]);
+
+    const resolvedValidationMessage = useMemo<string | undefined>(() => {
+      switch (resolvedValidationState) {
+        case 'error':
+          return resolvedErrorMessage;
+        case 'warning':
+          return warningMessage;
+        case 'success':
+          return successMessage;
+        case 'loading':
+          return loadingMessage ?? 'Carregando...';
+        default:
+          return undefined;
+      }
+    }, [
+      loadingMessage,
+      resolvedErrorMessage,
+      resolvedValidationState,
+      successMessage,
+      warningMessage
+    ]);
+
+    const shouldRenderCurrencySymbol =
+      isCurrencyType &&
+      resolvedCurrencyConfig.showSymbol &&
+      Boolean(resolvedCurrencyConfig.symbol);
+
+    const currencySymbolPosition: 'prefix' | 'suffix' = shouldRenderCurrencySymbol
+      ? resolvedCurrencyConfig.symbolPosition ?? 'prefix'
+      : 'prefix';
+
+    const validationMessageId = resolvedValidationMessage
+      ? `${inputId}-validation`
+      : undefined;
+    const prefixId = prefix ? `${inputId}-prefix` : undefined;
+    const suffixId = suffix ? `${inputId}-suffix` : undefined;
 
     const resolvedMaskPattern = typeof mask === 'string' ? mask : mask?.pattern;
     const resolvedMaskFormatModel =
@@ -411,17 +505,34 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
     if (!visible) return null;
 
     const showSpin = showSpinButtons && (type === 'number' || type === 'currency');
+    const shouldShowClearAction = shouldShowClearButton && inputValue && !isReadOnly && !disabled;
+
+    const hasPrefixAffix =
+      Boolean(prefix) ||
+      Boolean(icon) ||
+      (shouldRenderCurrencySymbol && currencySymbolPosition === 'prefix');
+
+    const hasSuffixAffix =
+      Boolean(suffix) ||
+      (shouldRenderCurrencySymbol && currencySymbolPosition === 'suffix') ||
+      resolvedValidationState === 'loading' ||
+      shouldShowClearAction ||
+      showSpin;
 
     const inputClasses = cn(
       getStyleClass('dyn-input'),
       getStyleClass(`dyn-input--${size}`),
       focused && getStyleClass('dyn-input--focused'),
-      !!error && getStyleClass('dyn-input--error'),
+      resolvedValidationState === 'error' && getStyleClass('dyn-input--error'),
+      resolvedValidationState === 'warning' && getStyleClass('dyn-input--warning'),
+      resolvedValidationState === 'success' && getStyleClass('dyn-input--success'),
+      resolvedValidationState === 'loading' && getStyleClass('dyn-input--loading'),
       disabled && getStyleClass('dyn-input--disabled'),
       isReadOnly && getStyleClass('dyn-input--readonly'),
       !!icon && getStyleClass('dyn-input--with-icon'),
-      !!(shouldShowClearButton && inputValue && !isReadOnly && !disabled) &&
-        getStyleClass('dyn-input--cleanable')
+      shouldShowClearAction && getStyleClass('dyn-input--cleanable'),
+      hasPrefixAffix && getStyleClass('dyn-input--with-prefix'),
+      hasSuffixAffix && getStyleClass('dyn-input--with-suffix')
     );
 
     const displayValue = mask ? maskedValue : inputValue;
@@ -430,15 +541,20 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
       getStyleClass('dyn-input-container'),
       className,
       type === 'currency' && getStyleClass('dyn-input-container--currency'),
-      showSpin && getStyleClass('dyn-input-container--with-spin-buttons')
+      showSpin && getStyleClass('dyn-input-container--with-spin-buttons'),
+      resolvedValidationState === 'error' && getStyleClass('dyn-input-container--error'),
+      resolvedValidationState === 'warning' && getStyleClass('dyn-input-container--warning'),
+      resolvedValidationState === 'success' && getStyleClass('dyn-input-container--success'),
+      resolvedValidationState === 'loading' && getStyleClass('dyn-input-container--loading')
     );
 
-    const errorId = `${inputId}-error`;
     const helpId = `${inputId}-help`;
     const describedBy = [
       ariaDescribedBy,
       help ? helpId : undefined,
-      error ? errorId : undefined
+      validationMessageId,
+      prefix ? prefixId : undefined,
+      suffix ? suffixId : undefined
     ]
       .filter(Boolean)
       .join(' ') || undefined;
@@ -449,22 +565,37 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
         helpText={fieldHelpText}
         required={required}
         optional={optional}
-        errorText={error}
+        errorText={resolvedValidationState === 'error' ? resolvedErrorMessage : undefined}
+        validationState={resolvedValidationState}
+        validationMessage={resolvedValidationMessage}
+        validationMessageId={validationMessageId}
         className={className}
         htmlFor={inputId}
         id={id}
       >
         <div className={containerDivClass}>
-          {type === 'currency' && resolvedCurrencyConfig.symbol && (
+          {shouldRenderCurrencySymbol && currencySymbolPosition === 'prefix' && (
             <span className={getStyleClass('dyn-input-currency-symbol')} aria-hidden="true">
               {resolvedCurrencyConfig.symbol}
             </span>
           )}
 
-          {icon && (
-            <div className={getStyleClass('dyn-input-icon-container')}>
-              <DynIcon icon={icon} />
-            </div>
+          {(icon || prefix) && (
+            <span
+              className={getStyleClass('dyn-input-prefix')}
+              id={prefix ? prefixId : undefined}
+            >
+              {icon && (
+                <span className={getStyleClass('dyn-input-icon-container')} aria-hidden="true">
+                  <DynIcon icon={icon} />
+                </span>
+              )}
+              {prefix ? (
+                <span className={getStyleClass('dyn-input-prefix-content')}>
+                  {prefix}
+                </span>
+              ) : null}
+            </span>
           )}
 
           <input
@@ -490,12 +621,35 @@ export const DynInput = forwardRef<DynInputRef, DynInputProps>(
             onChange={handleChange}
             onBlur={handleBlur}
             onFocus={handleFocus}
-            aria-invalid={!!error}
+            aria-invalid={resolvedValidationState === 'error'}
             aria-describedby={describedBy}
+            aria-busy={resolvedValidationState === 'loading' ? true : undefined}
             {...restProps}
           />
 
-          {shouldShowClearButton && inputValue && !isReadOnly && !disabled && (
+          {suffix && (
+            <span className={getStyleClass('dyn-input-suffix')} id={suffixId}>
+              {suffix}
+            </span>
+          )}
+
+          {shouldRenderCurrencySymbol && currencySymbolPosition === 'suffix' && (
+            <span
+              className={cn(
+                getStyleClass('dyn-input-currency-symbol'),
+                getStyleClass('dyn-input-currency-symbol--suffix')
+              )}
+              aria-hidden="true"
+            >
+              {resolvedCurrencyConfig.symbol}
+            </span>
+          )}
+
+          {resolvedValidationState === 'loading' && (
+            <span className={getStyleClass('dyn-input-loading-indicator')} aria-hidden="true" />
+          )}
+
+          {shouldShowClearAction && (
             <button
               type="button"
               className={getStyleClass('dyn-input-clean-button')}
