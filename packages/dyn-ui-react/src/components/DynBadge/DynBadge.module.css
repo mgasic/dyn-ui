@@ -59,30 +59,35 @@
   --badge-outline-color: var(--dyn-color-secondary, var(--color-theme-secondary, #6c757d));
 }
 
+.badge--state-success,
 .badge--success {
   --badge-accent: var(--dyn-color-feedback-positive, var(--color-feedback-positive, #4caf50));
   --badge-text: var(--dyn-color-base-white, var(--color-base-white, #ffffff));
   --badge-outline-color: var(--dyn-color-feedback-positive, var(--color-feedback-positive, #4caf50));
 }
 
+.badge--state-warning,
 .badge--warning {
   --badge-accent: var(--dyn-color-feedback-warning, var(--color-feedback-warning, #ff9800));
   --badge-text: var(--dyn-color-neutral-90, var(--color-neutral-dark-90, #333333));
   --badge-outline-color: var(--dyn-color-feedback-warning, var(--color-feedback-warning, #ff9800));
 }
 
+.badge--state-danger,
 .badge--danger {
   --badge-accent: var(--dyn-color-feedback-negative, var(--color-feedback-negative-default, #f44336));
   --badge-text: var(--dyn-color-base-white, var(--color-base-white, #ffffff));
   --badge-outline-color: var(--dyn-color-feedback-negative, var(--color-feedback-negative-default, #f44336));
 }
 
+.badge--state-info,
 .badge--info {
   --badge-accent: var(--dyn-color-feedback-info, var(--color-feedback-info, #2196f3));
   --badge-text: var(--dyn-color-base-white, var(--color-base-white, #ffffff));
   --badge-outline-color: var(--dyn-color-feedback-info, var(--color-feedback-info, #2196f3));
 }
 
+.badge--state-neutral,
 .badge--neutral {
   --badge-accent: var(--dyn-color-neutral-60, var(--color-neutral-mid-60, #666666));
   --badge-text: var(--dyn-color-neutral-00, var(--color-neutral-light-00, #ffffff));
@@ -234,6 +239,7 @@
     --badge-soft-fallback: var(--dyn-color-neutral-10, var(--color-neutral-light-10, #f0f0f0));
   }
 
+  .badge--state-neutral,
   .badge--neutral {
     --badge-soft-fallback: var(--dyn-color-neutral-10, var(--color-neutral-light-10, #f0f0f0));
   }

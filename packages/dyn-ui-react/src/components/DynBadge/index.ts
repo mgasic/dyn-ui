@@ -5,6 +5,13 @@ export type {
   DynBadgeVariant,
   DynBadgeColor,
   DynBadgePosition,
+  DynBadgeSize,
+  DynBadgeState
 } from './DynBadge.types';
-export type { ComponentSize as DynBadgeSize } from './DynBadge.types';
+export {
+  DYN_BADGE_SIZES,
+  DYN_BADGE_VARIANTS,
+  DYN_BADGE_COLORS,
+  DYN_BADGE_STATES
+} from './DynBadge.types';
 export type { DynBadgeAccessibilityProps } from '../../types/badge.types';
