@@ -6,6 +6,30 @@ export type DynAvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 export type DynAvatarShape = 'circle' | 'square' | 'rounded';
 export type DynAvatarStatus = 'online' | 'offline' | 'away' | 'busy';
 
+export const DYN_AVATAR_VARIANTS = ['solid', 'subtle', 'outline'] as const;
+export type DynAvatarVariant = (typeof DYN_AVATAR_VARIANTS)[number];
+
+export const DYN_AVATAR_COLORS = [
+  'neutral',
+  'primary',
+  'secondary',
+  'success',
+  'warning',
+  'danger',
+  'info',
+] as const;
+export type DynAvatarColor = (typeof DYN_AVATAR_COLORS)[number];
+
+export const AVATAR_COLOR_TOKENS = {
+  neutral: 'var(--dyn-color-neutral-100, var(--color-surface, #f8fafc))',
+  primary: 'var(--dyn-color-primary, #2563eb)',
+  secondary: 'var(--dyn-color-secondary, #6b7280)',
+  success: 'var(--dyn-color-success, #10b981)',
+  warning: 'var(--dyn-color-warning, #f59e0b)',
+  danger: 'var(--dyn-color-danger, #dc2626)',
+  info: 'var(--dyn-color-info, #0ea5e9)',
+} as const satisfies Record<DynAvatarColor, string>;
+
 /**
  * Token-based avatar size map that mirrors CSS module sizing
  */
@@ -37,6 +61,12 @@ export interface DynAvatarProps extends
 
   /** Avatar shape variant */
   shape?: DynAvatarShape;
+
+  /** Visual variant style */
+  variant?: DynAvatarVariant;
+
+  /** Semantic color token */
+  color?: DynAvatarColor;
 
   /** Manual initials override */
   initials?: string;

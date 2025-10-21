@@ -218,6 +218,32 @@ describe('DynAvatar', () => {
       rerender(<DynAvatar alt="Test" status="busy" />);
       expect(screen.getByRole('img')).toHaveClass(getStyleClass('avatar--busy'));
     });
+
+    it('applies default variant and color classes', () => {
+      render(<DynAvatar alt="Test" />);
+      const avatar = screen.getByRole('img');
+
+      expect(avatar).toHaveClass(getStyleClass('avatar--variant-subtle'));
+      expect(avatar).toHaveClass(getStyleClass('avatar--color-neutral'));
+    });
+
+    it('applies variant classes correctly', () => {
+      const { rerender } = render(<DynAvatar alt="Test" variant="solid" />);
+      const avatar = screen.getByRole('img');
+
+      expect(avatar).toHaveClass(getStyleClass('avatar--variant-solid'));
+
+      rerender(<DynAvatar alt="Test" variant="outline" />);
+      expect(screen.getByRole('img')).toHaveClass(getStyleClass('avatar--variant-outline'));
+    });
+
+    it('applies color classes correctly', () => {
+      const { rerender } = render(<DynAvatar alt="Test" color="primary" />);
+      expect(screen.getByRole('img')).toHaveClass(getStyleClass('avatar--color-primary'));
+
+      rerender(<DynAvatar alt="Test" color="danger" />);
+      expect(screen.getByRole('img')).toHaveClass(getStyleClass('avatar--color-danger'));
+    });
   });
 
   describe('Loading and Error States', () => {
