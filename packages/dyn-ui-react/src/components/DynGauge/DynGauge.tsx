@@ -72,6 +72,11 @@ export const DynGauge = forwardRef<HTMLDivElement, DynGaugeProps>((props, ref) =
     className,
     format,
     id,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': ariaDescribedBy,
+    'aria-valuetext': ariaValueTextProp,
+    role: roleProp,
     'data-testid': dataTestId,
     ...rest
   } = props;
@@ -343,6 +348,9 @@ export const DynGauge = forwardRef<HTMLDivElement, DynGaugeProps>((props, ref) =
     [ranges, safeValue]
   );
 
+  const formattedValue = formatValue(safeValue);
+  const ariaValueText = ariaValueTextProp ?? formattedValue;
+
   const rootClassName = cn(
     styles.root,
     sizeClassNameMap[size] ?? styles.sizeMedium,
@@ -356,12 +364,14 @@ export const DynGauge = forwardRef<HTMLDivElement, DynGaugeProps>((props, ref) =
     <div
       ref={ref}
       id={componentId}
-      role="progressbar"
+      role={roleProp ?? 'progressbar'}
       aria-valuemin={min}
       aria-valuemax={max}
       aria-valuenow={safeValue}
-      aria-labelledby={titleId}
-      aria-describedby={subtitleId}
+      aria-valuetext={ariaValueText}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy ?? titleId}
+      aria-describedby={ariaDescribedBy ?? subtitleId}
       data-testid={dataTestId ?? 'dyn-gauge'}
       data-size={size}
       data-type={type}
@@ -397,7 +407,7 @@ export const DynGauge = forwardRef<HTMLDivElement, DynGaugeProps>((props, ref) =
 
             {showValue ? (
               <div className={styles.value}>
-                <span className={styles.valueText}>{formatValue(safeValue)}</span>
+                <span className={styles.valueText}>{formattedValue}</span>
                 {currentRange?.label ? (
                   <span className={styles.valueLabel}>{currentRange.label}</span>
                 ) : null}
