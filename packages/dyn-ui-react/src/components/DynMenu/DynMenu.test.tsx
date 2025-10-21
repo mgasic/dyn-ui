@@ -28,6 +28,10 @@ const menuItems: MenuItem[] = [
       {
         label: 'Categories',
         action: 'open-categories'
+      },
+      {
+        label: 'Inventory',
+        loading: true
       }
     ]
   },
@@ -64,11 +68,13 @@ describe('DynMenu', () => {
 
     const productsButton = screen.getByRole('menuitem', { name: 'Products' });
     expect(screen.queryByRole('menuitem', { name: 'All Products' })).not.toBeInTheDocument();
+    expect(productsButton).toHaveAttribute('data-state', 'closed');
 
     await user.click(productsButton);
 
     expect(screen.getByRole('menuitem', { name: 'All Products' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Categories' })).toBeInTheDocument();
+    expect(productsButton).toHaveAttribute('data-state', 'open');
   });
 
   it('closes an open submenu when another item is activated', async () => {
@@ -80,9 +86,11 @@ describe('DynMenu', () => {
 
     await user.click(productsButton);
     expect(screen.getByRole('menuitem', { name: 'All Products' })).toBeInTheDocument();
+    expect(productsButton).toHaveAttribute('data-state', 'open');
 
     await user.click(dashboardButton);
     expect(screen.queryByRole('menuitem', { name: 'All Products' })).not.toBeInTheDocument();
+    expect(productsButton).toHaveAttribute('data-state', 'closed');
   });
 
   it('closes the submenu when clicking outside the component', async () => {
@@ -263,5 +271,18 @@ describe('DynMenu', () => {
     await waitFor(() =>
       expect(screen.queryByRole('menuitem', { name: 'Categories' })).not.toBeInTheDocument()
     );
+  });
+
+  it('renders disabled top-level items with aria-disabled when using DynMenuTrigger', () => {
+    renderMenu({
+      items: [
+        { label: 'Enabled' },
+        { label: 'Disabled', disabled: true },
+      ],
+    });
+
+    const disabledTrigger = screen.getByRole('menuitem', { name: 'Disabled' });
+    expect(disabledTrigger).toHaveAttribute('data-disabled', 'true');
+    expect(disabledTrigger).toBeDisabled();
   });
 });
