@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { testA11y } from '../../testing/accessibility';
 import { resetIdCounters } from '../../utils/accessibility';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
@@ -25,15 +25,26 @@ describe('DynButton', () => {
       expect(button).toHaveClass(classes.kindPrimary!);
       expect(button).toHaveClass(classes.sizeMedium!);
       expect(button).toHaveAttribute('type', 'button');
+      expect(button).toHaveAttribute('data-state', 'idle');
     });
 
-    it('renders without label when only icon is provided', () => {
-      render(<DynButton icon="download" />);
+    it('renders without label when only a start icon is provided', () => {
+      render(<DynButton startIcon="download" />);
 
       const button = screen.getByTestId('dyn-button');
       expect(button).toHaveClass(classes.iconOnly!);
       expect(button.querySelector(`.${classes.icon}`)).toBeInTheDocument();
+      expect(button.querySelector(`.${classes.iconStart}`)).toBeInTheDocument();
       expect(button.querySelector(`.${classes.label}`)).not.toBeInTheDocument();
+    });
+
+    it('renders an end icon when provided', () => {
+      render(<DynButton label="Download" endIcon="download" />);
+
+      const button = screen.getByTestId('dyn-button');
+      const endIcon = button.querySelector(`.${classes.iconEnd}`);
+      expect(endIcon).toBeInTheDocument();
+      expect(endIcon).toHaveAttribute('aria-hidden', 'true');
     });
 
     it('renders children content when provided', () => {
@@ -75,17 +86,24 @@ describe('DynButton', () => {
     });
 
     it('provides proper ARIA labels for icon-only buttons', () => {
-      render(<DynButton icon="download" aria-label="Download file" />);
+      render(<DynButton startIcon="download" aria-label="Download file" />);
 
       const button = screen.getByRole('button', { name: 'Download file' });
       expect(button).toHaveAttribute('aria-label', 'Download file');
     });
 
-    it('auto-generates ARIA label from icon name when no label provided', () => {
-      render(<DynButton icon="download" />);
+    it('auto-generates ARIA label from start icon name when no label provided', () => {
+      render(<DynButton startIcon="download" />);
 
       const button = screen.getByTestId('dyn-button');
       expect(button).toHaveAttribute('aria-label', 'download');
+    });
+
+    it('auto-generates ARIA label from end icon name when no label provided', () => {
+      render(<DynButton endIcon="upload" />);
+
+      const button = screen.getByTestId('dyn-button');
+      expect(button).toHaveAttribute('aria-label', 'upload');
     });
 
     it('supports ARIA expanded state for disclosure buttons', () => {
@@ -173,6 +191,40 @@ describe('DynButton', () => {
       expect(onClick).not.toHaveBeenCalled();
     });
 
+    it('prevents duplicate clicks while awaiting an async handler', async () => {
+      let resolveClick: (() => void) | undefined;
+      const onClick = vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveClick = resolve;
+          })
+      );
+
+      render(<DynButton label="Async" onClick={onClick} />);
+
+      const button = screen.getByRole('button', { name: 'Async' });
+
+      await act(async () => {
+        fireEvent.click(button);
+      });
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(button).toHaveAttribute('data-state', 'loading');
+
+      await act(async () => {
+        fireEvent.click(button);
+      });
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        if (!resolveClick) throw new Error('Click resolver missing');
+        resolveClick();
+      });
+
+      expect(button).toHaveAttribute('data-state', 'idle');
+    });
+
     it('activates on Space key press', () => {
       const onClick = vi.fn();
       render(<DynButton label="Space test" onClick={onClick} />);
@@ -188,6 +240,16 @@ describe('DynButton', () => {
 
       const button = screen.getByRole('button', { name: 'Spacebar test' });
       fireEvent.keyDown(button, { key: 'Spacebar' });
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('activates on Enter when rendered as a div', () => {
+      const onClick = vi.fn();
+      render(<DynButton as="div" label="Div button" onClick={onClick} />);
+
+      const button = screen.getByRole('button', { name: 'Div button' });
+      expect(button).toHaveAttribute('tabindex', '0');
+      fireEvent.keyDown(button, { key: 'Enter' });
       expect(onClick).toHaveBeenCalledTimes(1);
     });
 
@@ -237,14 +299,14 @@ describe('DynButton', () => {
     });
 
     it('renders secondary kind correctly', () => {
-      render(<DynButton label="Secondary" kind="secondary" />);
+      render(<DynButton label="Secondary" variant="secondary" />);
 
       const button = screen.getByTestId('dyn-button');
       expect(button).toHaveClass(classes.kindSecondary!);
     });
 
     it('renders tertiary kind correctly', () => {
-      render(<DynButton label="Tertiary" kind="tertiary" />);
+      render(<DynButton label="Tertiary" variant="tertiary" />);
 
       const button = screen.getByTestId('dyn-button');
       expect(button).toHaveClass(classes.kindTertiary!);
@@ -276,6 +338,7 @@ describe('DynButton', () => {
 
       const button = screen.getByTestId('dyn-button');
       expect(button).toHaveClass(classes.danger!);
+      expect(button).toHaveAttribute('data-danger', 'true');
     });
 
     it('renders loading state with spinner', () => {
@@ -283,12 +346,21 @@ describe('DynButton', () => {
 
       const button = screen.getByTestId('dyn-button');
       expect(button).toHaveClass(classes.loading!);
+      expect(button).toHaveAttribute('data-state', 'loading');
       expect(button.querySelector(`.${classes.spinner}`)).toBeInTheDocument();
-      
+
       // Check if content is properly hidden during loading
       const content = button.querySelector(`.${classes.content}`);
       expect(content).toBeInTheDocument();
       // Note: We're removing the opacity check as it depends on CSS implementation
+    });
+
+    it('exposes disabled state through data attributes', () => {
+      render(<DynButton label="Disabled" disabled />);
+
+      const button = screen.getByTestId('dyn-button');
+      expect(button).toHaveAttribute('data-state', 'disabled');
+      expect(button).toHaveAttribute('data-disabled', 'true');
     });
 
     it('renders full width correctly', () => {
@@ -302,7 +374,7 @@ describe('DynButton', () => {
       render(
         <DynButton
           label="Mobile test"
-          icon="settings"
+          startIcon="settings"
           hideOnMobile
           iconOnlyOnMobile
         />
@@ -364,12 +436,14 @@ describe('DynButton', () => {
 
     it('renders ReactNode icon correctly', () => {
       const CustomIcon = () => <span data-testid="custom-icon">🎯</span>;
-      render(<DynButton icon={<CustomIcon />} label="Custom icon" />);
+      render(<DynButton startIcon={<CustomIcon />} label="Custom icon" />);
 
       const button = screen.getByTestId('dyn-button');
       const icon = screen.getByTestId('custom-icon');
       expect(button).toContainElement(icon);
-      expect(button.querySelector(`.${classes.icon}`)).toContainElement(icon);
+      const iconWrapper = button.querySelector(`.${classes.iconStart}`);
+      expect(iconWrapper).toBeInTheDocument();
+      expect(iconWrapper).toContainElement(icon);
     });
 
     it('passes through additional HTML attributes', () => {
@@ -382,7 +456,7 @@ describe('DynButton', () => {
       );
 
       const button = screen.getByTestId('dyn-button');
-      expect(button).toHaveAttribute('tabIndex', '-1');
+      expect(button).toHaveAttribute('tabindex', '-1');
       expect(button).toHaveAttribute('title', 'Button tooltip');
     });
   });
