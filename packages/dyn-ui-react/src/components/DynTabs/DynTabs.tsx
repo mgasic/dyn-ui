@@ -409,7 +409,10 @@ const DynTabsInner = <E extends React.ElementType = 'div'>(
               className={css('tab-add')}
               aria-label="Add tab"
               data-testid={`${dataTestId || 'test-tabs'}-add-button`}
+              disabled={disabled}
+              aria-disabled={disabled || undefined}
               onClick={() => {
+                if (disabled) return;
                 onTabAdd?.();
               }}
             >
@@ -438,7 +441,13 @@ const DynTabsInner = <E extends React.ElementType = 'div'>(
                 className={cn(css('tab__close'), css('tab__close--positioned'))}
                 aria-label={`Close ${item.label}`}
                 data-testid={`${dataTestId || 'test-tabs'}-close-${item.processedValue}`}
-                onClick={(e) => { e.stopPropagation(); onTabClose?.(item.processedValue); }}
+                disabled={disabled}
+                aria-disabled={disabled || undefined}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (disabled) return;
+                  onTabClose?.(item.processedValue);
+                }}
                 style={style}
               >
                 ×
