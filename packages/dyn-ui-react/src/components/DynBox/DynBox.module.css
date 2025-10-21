@@ -157,14 +157,29 @@
 
 @media (min-width: 48rem) {
   .box {
-    padding: var(--dyn-box-padding-md, var(--dyn-box-padding, 0));
+    padding: var(
+      --dyn-box-padding-md,
+      var(--dyn-box-padding-sm, var(--dyn-box-padding, 0))
+    );
     padding-top: var(
       --dyn-box-padding-top-md,
       var(
         --dyn-box-padding-y-md,
         var(
           --dyn-box-padding-md,
-          var(--dyn-box-padding-top, var(--dyn-box-padding-y, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-top-sm,
+            var(
+              --dyn-box-padding-y-sm,
+              var(
+                --dyn-box-padding-sm,
+                var(
+                  --dyn-box-padding-top,
+                  var(--dyn-box-padding-y, var(--dyn-box-padding, 0))
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -174,7 +189,19 @@
         --dyn-box-padding-x-md,
         var(
           --dyn-box-padding-md,
-          var(--dyn-box-padding-right, var(--dyn-box-padding-x, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-right-sm,
+            var(
+              --dyn-box-padding-x-sm,
+              var(
+                --dyn-box-padding-sm,
+                var(
+                  --dyn-box-padding-right,
+                  var(--dyn-box-padding-x, var(--dyn-box-padding, 0))
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -184,7 +211,19 @@
         --dyn-box-padding-y-md,
         var(
           --dyn-box-padding-md,
-          var(--dyn-box-padding-bottom, var(--dyn-box-padding-y, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-bottom-sm,
+            var(
+              --dyn-box-padding-y-sm,
+              var(
+                --dyn-box-padding-sm,
+                var(
+                  --dyn-box-padding-bottom,
+                  var(--dyn-box-padding-y, var(--dyn-box-padding, 0))
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -194,19 +233,46 @@
         --dyn-box-padding-x-md,
         var(
           --dyn-box-padding-md,
-          var(--dyn-box-padding-left, var(--dyn-box-padding-x, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-left-sm,
+            var(
+              --dyn-box-padding-x-sm,
+              var(
+                --dyn-box-padding-sm,
+                var(
+                  --dyn-box-padding-left,
+                  var(--dyn-box-padding-x, var(--dyn-box-padding, 0))
+                )
+              )
+            )
+          )
         )
       )
     );
 
-    margin: var(--dyn-box-margin-md, var(--dyn-box-margin, 0));
+    margin: var(
+      --dyn-box-margin-md,
+      var(--dyn-box-margin-sm, var(--dyn-box-margin, 0))
+    );
     margin-top: var(
       --dyn-box-margin-top-md,
       var(
         --dyn-box-margin-y-md,
         var(
           --dyn-box-margin-md,
-          var(--dyn-box-margin-top, var(--dyn-box-margin-y, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-top-sm,
+            var(
+              --dyn-box-margin-y-sm,
+              var(
+                --dyn-box-margin-sm,
+                var(
+                  --dyn-box-margin-top,
+                  var(--dyn-box-margin-y, var(--dyn-box-margin, 0))
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -216,7 +282,19 @@
         --dyn-box-margin-x-md,
         var(
           --dyn-box-margin-md,
-          var(--dyn-box-margin-right, var(--dyn-box-margin-x, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-right-sm,
+            var(
+              --dyn-box-margin-x-sm,
+              var(
+                --dyn-box-margin-sm,
+                var(
+                  --dyn-box-margin-right,
+                  var(--dyn-box-margin-x, var(--dyn-box-margin, 0))
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -226,7 +304,19 @@
         --dyn-box-margin-y-md,
         var(
           --dyn-box-margin-md,
-          var(--dyn-box-margin-bottom, var(--dyn-box-margin-y, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-bottom-sm,
+            var(
+              --dyn-box-margin-y-sm,
+              var(
+                --dyn-box-margin-sm,
+                var(
+                  --dyn-box-margin-bottom,
+                  var(--dyn-box-margin-y, var(--dyn-box-margin, 0))
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -236,33 +326,87 @@
         --dyn-box-margin-x-md,
         var(
           --dyn-box-margin-md,
-          var(--dyn-box-margin-left, var(--dyn-box-margin-x, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-left-sm,
+            var(
+              --dyn-box-margin-x-sm,
+              var(
+                --dyn-box-margin-sm,
+                var(
+                  --dyn-box-margin-left,
+                  var(--dyn-box-margin-x, var(--dyn-box-margin, 0))
+                )
+              )
+            )
+          )
         )
       )
     );
 
-    gap: var(--dyn-box-gap-md, var(--dyn-box-gap, 0));
+    gap: var(
+      --dyn-box-gap-md,
+      var(--dyn-box-gap-sm, var(--dyn-box-gap, 0))
+    );
     row-gap: var(
       --dyn-box-row-gap-md,
-      var(--dyn-box-gap-md, var(--dyn-box-row-gap, var(--dyn-box-gap, 0)))
+      var(
+        --dyn-box-gap-md,
+        var(
+          --dyn-box-row-gap-sm,
+          var(--dyn-box-gap-sm, var(--dyn-box-row-gap, var(--dyn-box-gap, 0)))
+        )
+      )
     );
     column-gap: var(
       --dyn-box-column-gap-md,
-      var(--dyn-box-gap-md, var(--dyn-box-column-gap, var(--dyn-box-gap, 0)))
+      var(
+        --dyn-box-gap-md,
+        var(
+          --dyn-box-column-gap-sm,
+          var(--dyn-box-gap-sm, var(--dyn-box-column-gap, var(--dyn-box-gap, 0)))
+        )
+      )
     );
   }
 }
 
 @media (min-width: 64rem) {
   .box {
-    padding: var(--dyn-box-padding-lg, var(--dyn-box-padding, 0));
+    padding: var(
+      --dyn-box-padding-lg,
+      var(
+        --dyn-box-padding-md,
+        var(--dyn-box-padding-sm, var(--dyn-box-padding, 0))
+      )
+    );
     padding-top: var(
       --dyn-box-padding-top-lg,
       var(
         --dyn-box-padding-y-lg,
         var(
           --dyn-box-padding-lg,
-          var(--dyn-box-padding-top, var(--dyn-box-padding-y, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-top-md,
+            var(
+              --dyn-box-padding-y-md,
+              var(
+                --dyn-box-padding-md,
+                var(
+                  --dyn-box-padding-top-sm,
+                  var(
+                    --dyn-box-padding-y-sm,
+                    var(
+                      --dyn-box-padding-sm,
+                      var(
+                        --dyn-box-padding-top,
+                        var(--dyn-box-padding-y, var(--dyn-box-padding, 0))
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -272,7 +416,28 @@
         --dyn-box-padding-x-lg,
         var(
           --dyn-box-padding-lg,
-          var(--dyn-box-padding-right, var(--dyn-box-padding-x, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-right-md,
+            var(
+              --dyn-box-padding-x-md,
+              var(
+                --dyn-box-padding-md,
+                var(
+                  --dyn-box-padding-right-sm,
+                  var(
+                    --dyn-box-padding-x-sm,
+                    var(
+                      --dyn-box-padding-sm,
+                      var(
+                        --dyn-box-padding-right,
+                        var(--dyn-box-padding-x, var(--dyn-box-padding, 0))
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -282,7 +447,28 @@
         --dyn-box-padding-y-lg,
         var(
           --dyn-box-padding-lg,
-          var(--dyn-box-padding-bottom, var(--dyn-box-padding-y, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-bottom-md,
+            var(
+              --dyn-box-padding-y-md,
+              var(
+                --dyn-box-padding-md,
+                var(
+                  --dyn-box-padding-bottom-sm,
+                  var(
+                    --dyn-box-padding-y-sm,
+                    var(
+                      --dyn-box-padding-sm,
+                      var(
+                        --dyn-box-padding-bottom,
+                        var(--dyn-box-padding-y, var(--dyn-box-padding, 0))
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -292,19 +478,67 @@
         --dyn-box-padding-x-lg,
         var(
           --dyn-box-padding-lg,
-          var(--dyn-box-padding-left, var(--dyn-box-padding-x, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-left-md,
+            var(
+              --dyn-box-padding-x-md,
+              var(
+                --dyn-box-padding-md,
+                var(
+                  --dyn-box-padding-left-sm,
+                  var(
+                    --dyn-box-padding-x-sm,
+                    var(
+                      --dyn-box-padding-sm,
+                      var(
+                        --dyn-box-padding-left,
+                        var(--dyn-box-padding-x, var(--dyn-box-padding, 0))
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
 
-    margin: var(--dyn-box-margin-lg, var(--dyn-box-margin, 0));
+    margin: var(
+      --dyn-box-margin-lg,
+      var(
+        --dyn-box-margin-md,
+        var(--dyn-box-margin-sm, var(--dyn-box-margin, 0))
+      )
+    );
     margin-top: var(
       --dyn-box-margin-top-lg,
       var(
         --dyn-box-margin-y-lg,
         var(
           --dyn-box-margin-lg,
-          var(--dyn-box-margin-top, var(--dyn-box-margin-y, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-top-md,
+            var(
+              --dyn-box-margin-y-md,
+              var(
+                --dyn-box-margin-md,
+                var(
+                  --dyn-box-margin-top-sm,
+                  var(
+                    --dyn-box-margin-y-sm,
+                    var(
+                      --dyn-box-margin-sm,
+                      var(
+                        --dyn-box-margin-top,
+                        var(--dyn-box-margin-y, var(--dyn-box-margin, 0))
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -314,7 +548,28 @@
         --dyn-box-margin-x-lg,
         var(
           --dyn-box-margin-lg,
-          var(--dyn-box-margin-right, var(--dyn-box-margin-x, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-right-md,
+            var(
+              --dyn-box-margin-x-md,
+              var(
+                --dyn-box-margin-md,
+                var(
+                  --dyn-box-margin-right-sm,
+                  var(
+                    --dyn-box-margin-x-sm,
+                    var(
+                      --dyn-box-margin-sm,
+                      var(
+                        --dyn-box-margin-right,
+                        var(--dyn-box-margin-x, var(--dyn-box-margin, 0))
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -324,7 +579,28 @@
         --dyn-box-margin-y-lg,
         var(
           --dyn-box-margin-lg,
-          var(--dyn-box-margin-bottom, var(--dyn-box-margin-y, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-bottom-md,
+            var(
+              --dyn-box-margin-y-md,
+              var(
+                --dyn-box-margin-md,
+                var(
+                  --dyn-box-margin-bottom-sm,
+                  var(
+                    --dyn-box-margin-y-sm,
+                    var(
+                      --dyn-box-margin-sm,
+                      var(
+                        --dyn-box-margin-bottom,
+                        var(--dyn-box-margin-y, var(--dyn-box-margin, 0))
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -334,33 +610,126 @@
         --dyn-box-margin-x-lg,
         var(
           --dyn-box-margin-lg,
-          var(--dyn-box-margin-left, var(--dyn-box-margin-x, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-left-md,
+            var(
+              --dyn-box-margin-x-md,
+              var(
+                --dyn-box-margin-md,
+                var(
+                  --dyn-box-margin-left-sm,
+                  var(
+                    --dyn-box-margin-x-sm,
+                    var(
+                      --dyn-box-margin-sm,
+                      var(
+                        --dyn-box-margin-left,
+                        var(--dyn-box-margin-x, var(--dyn-box-margin, 0))
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
 
-    gap: var(--dyn-box-gap-lg, var(--dyn-box-gap, 0));
+    gap: var(
+      --dyn-box-gap-lg,
+      var(
+        --dyn-box-gap-md,
+        var(--dyn-box-gap-sm, var(--dyn-box-gap, 0))
+      )
+    );
     row-gap: var(
       --dyn-box-row-gap-lg,
-      var(--dyn-box-gap-lg, var(--dyn-box-row-gap, var(--dyn-box-gap, 0)))
+      var(
+        --dyn-box-gap-lg,
+        var(
+          --dyn-box-row-gap-md,
+          var(
+            --dyn-box-gap-md,
+            var(
+              --dyn-box-row-gap-sm,
+              var(--dyn-box-gap-sm, var(--dyn-box-row-gap, var(--dyn-box-gap, 0)))
+            )
+          )
+        )
+      )
     );
     column-gap: var(
       --dyn-box-column-gap-lg,
-      var(--dyn-box-gap-lg, var(--dyn-box-column-gap, var(--dyn-box-gap, 0)))
+      var(
+        --dyn-box-gap-lg,
+        var(
+          --dyn-box-column-gap-md,
+          var(
+            --dyn-box-gap-md,
+            var(
+              --dyn-box-column-gap-sm,
+              var(--dyn-box-gap-sm, var(--dyn-box-column-gap, var(--dyn-box-gap, 0)))
+            )
+          )
+        )
+      )
     );
   }
 }
 
 @media (min-width: 80rem) {
   .box {
-    padding: var(--dyn-box-padding-xl, var(--dyn-box-padding, 0));
+    padding: var(
+      --dyn-box-padding-xl,
+      var(
+        --dyn-box-padding-lg,
+        var(
+          --dyn-box-padding-md,
+          var(--dyn-box-padding-sm, var(--dyn-box-padding, 0))
+        )
+      )
+    );
     padding-top: var(
       --dyn-box-padding-top-xl,
       var(
         --dyn-box-padding-y-xl,
         var(
           --dyn-box-padding-xl,
-          var(--dyn-box-padding-top, var(--dyn-box-padding-y, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-top-lg,
+            var(
+              --dyn-box-padding-y-lg,
+              var(
+                --dyn-box-padding-lg,
+                var(
+                  --dyn-box-padding-top-md,
+                  var(
+                    --dyn-box-padding-y-md,
+                    var(
+                      --dyn-box-padding-md,
+                      var(
+                        --dyn-box-padding-top-sm,
+                        var(
+                          --dyn-box-padding-y-sm,
+                          var(
+                            --dyn-box-padding-sm,
+                            var(
+                              --dyn-box-padding-top,
+                              var(
+                                --dyn-box-padding-y,
+                                var(--dyn-box-padding, 0)
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -370,7 +739,40 @@
         --dyn-box-padding-x-xl,
         var(
           --dyn-box-padding-xl,
-          var(--dyn-box-padding-right, var(--dyn-box-padding-x, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-right-lg,
+            var(
+              --dyn-box-padding-x-lg,
+              var(
+                --dyn-box-padding-lg,
+                var(
+                  --dyn-box-padding-right-md,
+                  var(
+                    --dyn-box-padding-x-md,
+                    var(
+                      --dyn-box-padding-md,
+                      var(
+                        --dyn-box-padding-right-sm,
+                        var(
+                          --dyn-box-padding-x-sm,
+                          var(
+                            --dyn-box-padding-sm,
+                            var(
+                              --dyn-box-padding-right,
+                              var(
+                                --dyn-box-padding-x,
+                                var(--dyn-box-padding, 0)
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -380,7 +782,40 @@
         --dyn-box-padding-y-xl,
         var(
           --dyn-box-padding-xl,
-          var(--dyn-box-padding-bottom, var(--dyn-box-padding-y, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-bottom-lg,
+            var(
+              --dyn-box-padding-y-lg,
+              var(
+                --dyn-box-padding-lg,
+                var(
+                  --dyn-box-padding-bottom-md,
+                  var(
+                    --dyn-box-padding-y-md,
+                    var(
+                      --dyn-box-padding-md,
+                      var(
+                        --dyn-box-padding-bottom-sm,
+                        var(
+                          --dyn-box-padding-y-sm,
+                          var(
+                            --dyn-box-padding-sm,
+                            var(
+                              --dyn-box-padding-bottom,
+                              var(
+                                --dyn-box-padding-y,
+                                var(--dyn-box-padding, 0)
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -390,19 +825,94 @@
         --dyn-box-padding-x-xl,
         var(
           --dyn-box-padding-xl,
-          var(--dyn-box-padding-left, var(--dyn-box-padding-x, var(--dyn-box-padding, 0)))
+          var(
+            --dyn-box-padding-left-lg,
+            var(
+              --dyn-box-padding-x-lg,
+              var(
+                --dyn-box-padding-lg,
+                var(
+                  --dyn-box-padding-left-md,
+                  var(
+                    --dyn-box-padding-x-md,
+                    var(
+                      --dyn-box-padding-md,
+                      var(
+                        --dyn-box-padding-left-sm,
+                        var(
+                          --dyn-box-padding-x-sm,
+                          var(
+                            --dyn-box-padding-sm,
+                            var(
+                              --dyn-box-padding-left,
+                              var(
+                                --dyn-box-padding-x,
+                                var(--dyn-box-padding, 0)
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
 
-    margin: var(--dyn-box-margin-xl, var(--dyn-box-margin, 0));
+    margin: var(
+      --dyn-box-margin-xl,
+      var(
+        --dyn-box-margin-lg,
+        var(
+          --dyn-box-margin-md,
+          var(--dyn-box-margin-sm, var(--dyn-box-margin, 0))
+        )
+      )
+    );
     margin-top: var(
       --dyn-box-margin-top-xl,
       var(
         --dyn-box-margin-y-xl,
         var(
           --dyn-box-margin-xl,
-          var(--dyn-box-margin-top, var(--dyn-box-margin-y, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-top-lg,
+            var(
+              --dyn-box-margin-y-lg,
+              var(
+                --dyn-box-margin-lg,
+                var(
+                  --dyn-box-margin-top-md,
+                  var(
+                    --dyn-box-margin-y-md,
+                    var(
+                      --dyn-box-margin-md,
+                      var(
+                        --dyn-box-margin-top-sm,
+                        var(
+                          --dyn-box-margin-y-sm,
+                          var(
+                            --dyn-box-margin-sm,
+                            var(
+                              --dyn-box-margin-top,
+                              var(
+                                --dyn-box-margin-y,
+                                var(--dyn-box-margin, 0)
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -412,7 +922,40 @@
         --dyn-box-margin-x-xl,
         var(
           --dyn-box-margin-xl,
-          var(--dyn-box-margin-right, var(--dyn-box-margin-x, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-right-lg,
+            var(
+              --dyn-box-margin-x-lg,
+              var(
+                --dyn-box-margin-lg,
+                var(
+                  --dyn-box-margin-right-md,
+                  var(
+                    --dyn-box-margin-x-md,
+                    var(
+                      --dyn-box-margin-md,
+                      var(
+                        --dyn-box-margin-right-sm,
+                        var(
+                          --dyn-box-margin-x-sm,
+                          var(
+                            --dyn-box-margin-sm,
+                            var(
+                              --dyn-box-margin-right,
+                              var(
+                                --dyn-box-margin-x,
+                                var(--dyn-box-margin, 0)
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -422,7 +965,40 @@
         --dyn-box-margin-y-xl,
         var(
           --dyn-box-margin-xl,
-          var(--dyn-box-margin-bottom, var(--dyn-box-margin-y, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-bottom-lg,
+            var(
+              --dyn-box-margin-y-lg,
+              var(
+                --dyn-box-margin-lg,
+                var(
+                  --dyn-box-margin-bottom-md,
+                  var(
+                    --dyn-box-margin-y-md,
+                    var(
+                      --dyn-box-margin-md,
+                      var(
+                        --dyn-box-margin-bottom-sm,
+                        var(
+                          --dyn-box-margin-y-sm,
+                          var(
+                            --dyn-box-margin-sm,
+                            var(
+                              --dyn-box-margin-bottom,
+                              var(
+                                --dyn-box-margin-y,
+                                var(--dyn-box-margin, 0)
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
@@ -432,19 +1008,97 @@
         --dyn-box-margin-x-xl,
         var(
           --dyn-box-margin-xl,
-          var(--dyn-box-margin-left, var(--dyn-box-margin-x, var(--dyn-box-margin, 0)))
+          var(
+            --dyn-box-margin-left-lg,
+            var(
+              --dyn-box-margin-x-lg,
+              var(
+                --dyn-box-margin-lg,
+                var(
+                  --dyn-box-margin-left-md,
+                  var(
+                    --dyn-box-margin-x-md,
+                    var(
+                      --dyn-box-margin-md,
+                      var(
+                        --dyn-box-margin-left-sm,
+                        var(
+                          --dyn-box-margin-x-sm,
+                          var(
+                            --dyn-box-margin-sm,
+                            var(
+                              --dyn-box-margin-left,
+                              var(
+                                --dyn-box-margin-x,
+                                var(--dyn-box-margin, 0)
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
         )
       )
     );
 
-    gap: var(--dyn-box-gap-xl, var(--dyn-box-gap, 0));
+    gap: var(
+      --dyn-box-gap-xl,
+      var(
+        --dyn-box-gap-lg,
+        var(
+          --dyn-box-gap-md,
+          var(--dyn-box-gap-sm, var(--dyn-box-gap, 0))
+        )
+      )
+    );
     row-gap: var(
       --dyn-box-row-gap-xl,
-      var(--dyn-box-gap-xl, var(--dyn-box-row-gap, var(--dyn-box-gap, 0)))
+      var(
+        --dyn-box-gap-xl,
+        var(
+          --dyn-box-row-gap-lg,
+          var(
+            --dyn-box-gap-lg,
+            var(
+              --dyn-box-row-gap-md,
+              var(
+                --dyn-box-gap-md,
+                var(
+                  --dyn-box-row-gap-sm,
+                  var(--dyn-box-gap-sm, var(--dyn-box-row-gap, var(--dyn-box-gap, 0)))
+                )
+              )
+            )
+          )
+        )
+      )
     );
     column-gap: var(
       --dyn-box-column-gap-xl,
-      var(--dyn-box-gap-xl, var(--dyn-box-column-gap, var(--dyn-box-gap, 0)))
+      var(
+        --dyn-box-gap-xl,
+        var(
+          --dyn-box-column-gap-lg,
+          var(
+            --dyn-box-gap-lg,
+            var(
+              --dyn-box-column-gap-md,
+              var(
+                --dyn-box-gap-md,
+                var(
+                  --dyn-box-column-gap-sm,
+                  var(--dyn-box-gap-sm, var(--dyn-box-column-gap, var(--dyn-box-gap, 0)))
+                )
+              )
+            )
+          )
+        )
+      )
     );
   }
 }
