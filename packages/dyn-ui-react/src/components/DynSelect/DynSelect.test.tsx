@@ -114,6 +114,23 @@ describe('DynSelect', () => {
     expect(handleChange).not.toHaveBeenCalled();
   });
 
+  it('activates options on hover and ignores disabled ones', () => {
+    render(<DynSelectAny name="test" label="Test" options={sampleOptions} />);
+
+    const select = screen.getByRole('combobox');
+    fireEvent.click(select);
+
+    const option2 = screen.getByRole('option', { name: 'Option 2' });
+    const option3 = screen.getByRole('option', { name: 'Option 3' });
+
+    fireEvent.mouseEnter(option2);
+    expect(option2).toHaveClass(styles.optionActive);
+
+    fireEvent.mouseEnter(option3);
+    expect(option3).not.toHaveClass(styles.optionActive);
+    expect(option2).toHaveClass(styles.optionActive);
+  });
+
   it('tracks the active option for keyboard navigation', () => {
     const handleChange = vi.fn();
     render(
