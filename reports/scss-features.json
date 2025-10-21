@@ -42,10 +42,6 @@
     ]
   },
   {
-    "file": "packages\\dyn-ui-react\\src\\components\\DynLabel\\DynLabel.module.scss",
-    "markers": []
-  },
-  {
     "file": "packages\\dyn-ui-react\\src\\styles\\globals.scss",
     "markers": [
       "moduleUse"
