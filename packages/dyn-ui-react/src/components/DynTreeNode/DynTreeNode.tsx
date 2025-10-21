@@ -334,9 +334,13 @@ const DynTreeNodeInner = <E extends React.ElementType = 'div'>({
 
     const slot = PROP_TO_SLOT[propName];
     const { base, responsive } = resolveSpacingValue(value, slot);
+    const hasResponsiveOverrides = Object.keys(responsive).length > 0;
 
     if (base) {
-      assignBaseStyle(slot, base, styleOverrides);
+      if (!hasResponsiveOverrides) {
+        assignBaseStyle(slot, base, styleOverrides);
+      }
+
       assignSpacingVars(slot, base, cssVarOverrides);
     }
 
