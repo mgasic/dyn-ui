@@ -122,7 +122,9 @@ const DynModalComponent = forwardRef(function DynModal<E extends ElementType = '
     };
   }, [isOpen, lockScroll]);
 
-  const handleBackdropMouseDown: React.MouseEventHandler<HTMLDivElement> = (event) => {
+  const handleBackdropActivation = (
+    event: React.MouseEvent<HTMLDivElement> | React.PointerEvent<HTMLDivElement>
+  ) => {
     if (!closeOnBackdropClick || disabled) return;
     if (event.target !== event.currentTarget) return;
     event.stopPropagation();
@@ -182,7 +184,8 @@ const DynModalComponent = forwardRef(function DynModal<E extends ElementType = '
         <div
           className={cn(styles.backdrop, backdropClassName)}
           style={backdropStyle}
-          onMouseDown={handleBackdropMouseDown}
+          onPointerDown={handleBackdropActivation}
+          onClick={handleBackdropActivation}
           data-testid="dyn-modal-backdrop"
         />
         <Component
