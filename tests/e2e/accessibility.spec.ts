@@ -1,7 +1,17 @@
 import { test, expect } from '@playwright/test';
 
-test('Page has accessible title', async ({ page }) => {
-  // NOTE: Adjust the URL to your actual app or Storybook instance
-  await page.goto('http://localhost:3000');
-  await expect(page).toHaveTitle(/dyn ui/i);
+test.describe('Dyn UI demo accessibility smoke', () => {
+  test('page has accessible title', async ({ page }) => {
+    await page.goto('/');
+    await expect(page).toHaveTitle(/dyn ui demo/i);
+  });
+
+  test('hero heading has semantic role', async ({ page }) => {
+    await page.goto('/');
+    const heading = page.getByRole('heading', {
+      level: 1,
+      name: /dyn ui demo/i,
+    });
+    await expect(heading).toBeVisible();
+  });
 });

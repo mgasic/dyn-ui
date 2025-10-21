@@ -14,6 +14,8 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 import { DynToolbarProps, ToolbarItem, DynToolbarRef, TOOLBAR_DEFAULTS } from './DynToolbar.types';
+import { focusElement, getFocusableElements } from '../../utils/focus';
+import { activateFocusTrap } from '../../utils/focusTrap';
 import { DynIcon } from '../DynIcon';
 import { DynBadge } from '../DynBadge';
 import styles from './DynToolbar.module.css';
@@ -286,7 +288,11 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
     if (item.type === 'dropdown') {
       event?.preventDefault();
-      setActiveDropdown(prev => prev === item.id ? null : item.id);
+      setActiveDropdown(prev => {
+        const next = prev === item.id ? null : item.id;
+        lastDropdownIdRef.current = next ?? item.id;
+        return next;
+      });
       return;
     }
 
@@ -296,12 +302,17 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
     onItemClick?.(item);
 
+    if (activeDropdown) {
+      lastDropdownIdRef.current = activeDropdown;
+      setActiveDropdown(null);
+    }
+
     // Close overflow menu after action
     if (isOverflowOpen) {
       setIsOverflowOpen(false);
       onOverflowToggle?.(false);
     }
-  }, [isOverflowOpen, onItemClick, onOverflowToggle]);
+  }, [activeDropdown, isOverflowOpen, onItemClick, onOverflowToggle]);
 
   const handleOverflowToggle = () => {
     const newState = !isOverflowOpen;
@@ -638,9 +649,21 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
         : item.state === 'on'
       : undefined;
 
+    if (item.type === 'dropdown' && !dropdownRefs.current[item.id]) {
+      dropdownRefs.current[item.id] = { trigger: null, menu: null };
+    }
+
     return (
       <div key={item.id} className={styles['toolbar-item-wrapper']}>
         <button
+          ref={(node) => {
+            if (item.type === 'dropdown') {
+              dropdownRefs.current[item.id] = {
+                ...(dropdownRefs.current[item.id] ?? { trigger: null, menu: null }),
+                trigger: node
+              };
+            }
+          }}
           className={itemClasses}
           onClick={(e) => handleItemClick(item, e)}
           disabled={item.disabled}
@@ -697,7 +720,23 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
 
         {/* Dropdown menu */}
         {item.type === 'dropdown' && item.items && activeDropdown === item.id && (
-          <div className={styles['toolbar-dropdown-menu']} role="menu">
+          <div
+            className={styles['toolbar-dropdown-menu']}
+            role="menu"
+            tabIndex={-1}
+            ref={(node) => {
+              dropdownRefs.current[item.id] = {
+                ...(dropdownRefs.current[item.id] ?? { trigger: null, menu: null }),
+                menu: node
+              };
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== 'Escape') return;
+              event.preventDefault();
+              lastDropdownIdRef.current = item.id;
+              setActiveDropdown(null);
+            }}
+          >
             {item.items.map(subItem => (
               <button
                 key={subItem.id}
@@ -769,6 +808,9 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
         {overflowItems.length > 0 && (
           <div className={styles['toolbar-overflow']} ref={overflowRef}>
             <button
+              ref={(node) => {
+                overflowButtonRef.current = node;
+              }}
               className={classNames(
                 styles['toolbar-overflow-button'],
                 'toolbar-overflow-button',
@@ -792,7 +834,15 @@ const DynToolbar = forwardRef<DynToolbarRef, DynToolbarProps>((
             </button>
 
             {isOverflowOpen && (
-              <div className={styles['toolbar-overflow-menu']} role="menu">
+              <div
+                className={styles['toolbar-overflow-menu']}
+                role="menu"
+                tabIndex={-1}
+                ref={(node) => {
+                  overflowMenuRef.current = node;
+                }}
+                onKeyDown={handleOverflowMenuKeyDown}
+              >
                 {overflowItems.map(item => renderToolbarItem(item, true))}
               </div>
             )}

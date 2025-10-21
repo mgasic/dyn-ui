@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import { DynToolbar } from './DynToolbar';
@@ -332,7 +332,7 @@ describe('DynToolbar', () => {
     const user = userEvent.setup();
     render(<DynToolbar items={dropdownItems} />);
 
-    const dropdownButton = screen.getByText('Dropdown');
+    const dropdownButton = screen.getByRole('button', { name: 'Dropdown' });
     expect(dropdownButton).toHaveAttribute('aria-haspopup', 'menu');
     expect(dropdownButton).toHaveAttribute('aria-expanded', 'false');
 
@@ -349,7 +349,7 @@ describe('DynToolbar', () => {
     render(<DynToolbar items={dropdownItems} />);
 
     // Open dropdown
-    const dropdownButton = screen.getByText('Dropdown');
+    const dropdownButton = screen.getByRole('button', { name: 'Dropdown' });
     await user.click(dropdownButton);
 
     // Click sub-item
@@ -528,12 +528,47 @@ describe('DynToolbar', () => {
     expect(onOverflowToggle).toHaveBeenCalledWith(false);
   });
 
+  it('returns focus to the overflow toggle when the menu closes with Escape', async () => {
+    const user = userEvent.setup();
+    const manyItems: ToolbarItem[] = Array.from({ length: 8 }, (_, i) => ({
+      id: `action-${i}`,
+      label: `Action ${i}`,
+      action: jest.fn()
+    }));
+
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 320
+    });
+
+    render(
+      <DynToolbar
+        items={manyItems}
+        responsive={true}
+        overflowMenu={true}
+        overflowThreshold={3}
+      />
+    );
+
+    const overflowButton = await screen.findByLabelText('More actions');
+    await user.click(overflowButton);
+
+    const overflowMenu = await screen.findByRole('menu');
+    const firstOverflowItem = within(overflowMenu).getAllByRole('button')[0];
+    firstOverflowItem.focus();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    expect(overflowButton).toHaveFocus();
+  });
+
   it('closes dropdown and overflow menus when clicking outside', async () => {
     const user = userEvent.setup();
     render(<DynToolbar items={dropdownItems} />);
 
     // Open dropdown
-    const dropdownButton = screen.getByText('Dropdown');
+    const dropdownButton = screen.getByRole('button', { name: 'Dropdown' });
     await user.click(dropdownButton);
 
     expect(screen.getByRole('menu')).toBeInTheDocument();
@@ -544,6 +579,23 @@ describe('DynToolbar', () => {
     await waitFor(() => {
       expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     });
+  });
+
+  it('returns focus to the dropdown trigger when closing with Escape', async () => {
+    const user = userEvent.setup();
+    render(<DynToolbar items={dropdownItems} />);
+
+    const dropdownButton = screen.getByRole('button', { name: 'Dropdown' });
+    await user.click(dropdownButton);
+
+    const dropdownMenu = await screen.findByRole('menu');
+    const firstSubItem = within(dropdownMenu).getByRole('menuitem', { name: 'Sub Item 1' });
+    firstSubItem.focus();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    expect(dropdownButton).toHaveFocus();
   });
 
   it('handles keyboard navigation', async () => {
