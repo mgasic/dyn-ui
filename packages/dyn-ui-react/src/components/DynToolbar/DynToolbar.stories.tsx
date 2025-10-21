@@ -27,6 +27,19 @@ The DynToolbar component provides a flexible toolbar system with:
 - **Overflow Management** - Smart responsive overflow with threshold control
 - **Theming** - Complete CSS custom properties support
 
+### Accessibility
+
+- Overflow and dropdown menus lock focus while open and return it to the originating toggle when they close.
+- Escape dismisses the active overflow or dropdown menu and restores focus to the trigger.
+- Buttons expose \`aria-haspopup\`/\`aria-expanded\` metadata for assistive technologies.
+
+### Keyboard interactions
+
+- Tab/Shift+Tab move through toolbar buttons and focusable custom content.
+- Enter/Space activate toolbar actions or toggle dropdown menus.
+- Escape closes overflow and dropdown menus and returns focus to their toggle buttons.
+- Arrow keys navigate within dropdown menus rendered with \`role="menu"\` semantics.
+
 ## Usage
 
 \`\`\`tsx

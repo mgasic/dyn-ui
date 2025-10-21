@@ -12,8 +12,20 @@ const meta: Meta<typeof DynModal> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'Enterprise modal component with built-in focus trapping, scroll locking and accessible dismissal controls.'
+        component: `Enterprise modal component with built-in focus trapping, scroll locking and accessible dismissal controls.
+
+### Accessibility
+
+- Opening the modal captures focus on the first focusable element (or the dialog itself) and prevents tabbing outside.
+- Dismissing the modal restores focus to the trigger element or a custom \`returnFocusElement\`.
+- Escape and backdrop clicks call \`onClose\` when enabled, while disabled modals announce \`aria-disabled\`.
+
+### Keyboard interactions
+
+- Tab/Shift+Tab cycle through focusable elements within the modal.
+- Escape invokes \`onClose\` (unless \`closeOnEsc\` is \`false\`).
+- Focus is restored to the opener once the modal unmounts.
+`
       }
     }
   }
