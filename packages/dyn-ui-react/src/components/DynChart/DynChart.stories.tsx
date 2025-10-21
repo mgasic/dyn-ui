@@ -67,6 +67,27 @@ const meta = {
       control: 'text',
       description: 'Descriptive text exposed to assistive technologies via figcaption.',
     },
+    'aria-label': {
+      control: 'text',
+      name: 'aria-label',
+      description: 'Accessible label applied directly to the chart canvas element.',
+    },
+    'aria-labelledby': {
+      control: 'text',
+      name: 'aria-labelledby',
+      description:
+        'ID reference list used to provide an accessible name for the chart when external headings are preferred.',
+    },
+    'aria-describedby': {
+      control: 'text',
+      name: 'aria-describedby',
+      description:
+        'ID reference list merged with subtitle and ariaDescription to describe the chart for assistive tech.',
+    },
+    role: {
+      control: 'text',
+      description: 'Overrides the default "img" role applied to the canvas element.',
+    },
     width: {
       control: { type: 'number', min: 200, max: 1000 },
       description: 'Canvas width in pixels.',
