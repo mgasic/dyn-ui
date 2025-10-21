@@ -32,10 +32,16 @@ export type DynFieldContainerSpacingProps = Pick<
 type PolymorphicComponentProps<E extends ElementType, P> = P &
   Omit<ComponentPropsWithoutRef<E>, keyof P>;
 
+type DynFieldContainerSurfaceProps = Pick<
+  DynBoxProps<'div'>,
+  'background' | 'border' | 'radius'
+>;
+
 export interface DynFieldContainerBaseProps
   extends Omit<BaseComponentProps, 'children'>,
     AccessibilityProps,
-    DynFieldContainerSpacingProps {
+    DynFieldContainerSpacingProps,
+    DynFieldContainerSurfaceProps {
   /** Form field element that should be wrapped */
   children: ReactNode;
   /** Optional label to display above the field */
