@@ -31,6 +31,26 @@ const meta: Meta<typeof DynGrid> = {
     },
     emptyText: {
       control: 'text'
+    },
+    role: {
+      control: 'select',
+      options: [undefined, 'grid', 'table', 'region'],
+      description:
+        'Sets an explicit role for assistive technologies (e.g., "grid" or "region").'
+    },
+    'aria-label': {
+      control: 'text',
+      description: 'Provides an accessible name for screen reader users.'
+    },
+    'aria-labelledby': {
+      control: 'text',
+      description:
+        'References the id of another element whose text should be used as the grid label.'
+    },
+    'aria-describedby': {
+      control: 'text',
+      description:
+        'References the id of an element that gives additional descriptive context.'
     }
   }
 };
@@ -244,5 +264,63 @@ export const Interactive: Story = {
     hoverable: true,
     onSort: (column, direction) => console.log('Sort:', column, direction),
     onSelectionChange: (keys, rows) => console.log('Selection:', keys, rows)
+  }
+};
+
+export const AccessibleLabel: Story = {
+  args: {
+    columns,
+    data,
+    role: 'grid',
+    'aria-label': 'Team member directory',
+    bordered: true,
+    hoverable: true
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Demonstrates how to provide an accessible name for assistive technologies using `aria-label`.'
+      }
+    }
+  }
+};
+
+export const LabelledByElements: Story = {
+  args: {
+    columns,
+    data,
+    bordered: true,
+    hoverable: true
+  },
+  render: ({
+    role,
+    'aria-labelledby': ariaLabelledby,
+    'aria-describedby': ariaDescribedBy,
+    ...storyArgs
+  }) => {
+    const headingId = ariaLabelledby ?? 'team-grid-heading';
+    const descriptionId = ariaDescribedBy ?? 'team-grid-description';
+
+    return (
+      <div>
+        <h2 id={headingId}>Team member directory</h2>
+        <p id={descriptionId}>Overview of each team member’s role and status.</p>
+        <DynGrid
+          {...storyArgs}
+          role={role ?? 'grid'}
+          aria-labelledby={headingId}
+          aria-describedby={descriptionId}
+        />
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Shows how to associate the grid with visible headings and descriptions using `aria-labelledby` and `aria-describedby`.'
+      }
+    }
   }
 };

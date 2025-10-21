@@ -140,6 +140,7 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const calendarGridRef = useRef<HTMLDivElement>(null);
 
   const [value, setValue] = useState<Date | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -149,6 +150,55 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
   const [liveMessage, setLiveMessage] = useState('');
 
   const activeDayRef = useRef<HTMLButtonElement | null>(null);
+
+  const today = useMemo(() => normalizeDate(new Date()), []);
+
+  const normalizedMinDate = useMemo(() => (minDate ? normalizeDate(minDate) : null), [minDate]);
+  const normalizedMaxDate = useMemo(() => (maxDate ? normalizeDate(maxDate) : null), [maxDate]);
+
+  const clampToRange = useCallback(
+    (date: Date): Date => {
+      let next = normalizeDate(date);
+      if (normalizedMinDate && next < normalizedMinDate) {
+        next = new Date(normalizedMinDate);
+      }
+      if (normalizedMaxDate && next > normalizedMaxDate) {
+        next = new Date(normalizedMaxDate);
+      }
+      return next;
+    },
+    [normalizedMinDate, normalizedMaxDate]
+  );
+
+  const [focusedDate, setFocusedDate] = useState<Date>(() => clampToRange(today));
+  const [visibleMonth, setVisibleMonth] = useState<Date>(() => startOfMonth(clampToRange(today)));
+
+  const isDateDisabled = useCallback(
+    (date: Date): boolean => {
+      const normalized = normalizeDate(date);
+      if (normalizedMinDate && normalized < normalizedMinDate) {
+        return true;
+      }
+      if (normalizedMaxDate && normalized > normalizedMaxDate) {
+        return true;
+      }
+      return false;
+    },
+    [normalizedMinDate, normalizedMaxDate]
+  );
+
+  const clampMonthToRange = useCallback(
+    (month: Date): Date => {
+      if (normalizedMinDate && isBeforeMonth(month, normalizedMinDate)) {
+        return startOfMonth(normalizedMinDate);
+      }
+      if (normalizedMaxDate && isAfterMonth(month, normalizedMaxDate)) {
+        return startOfMonth(normalizedMaxDate);
+      }
+      return month;
+    },
+    [normalizedMinDate, normalizedMaxDate]
+  );
 
   const { error, validate, clearError } = useDynFieldValidation({
     value,
@@ -240,7 +290,7 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
       }
 
       const candidate = input instanceof Date ? input : new Date(input);
-      return isValidDate(candidate) ? candidate : null;
+      return isValidDate(candidate) ? normalizeDate(candidate) : null;
     },
     [isValidDate]
   );
@@ -438,6 +488,8 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
     [formatDate, onChange, setDisplayValue]
   );
 
+  const normalizedValue = useMemo(() => (value ? normalizeDate(value) : null), [value]);
+
   const handleInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const inputValue = event.target.value;
@@ -445,21 +497,29 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
 
       const parsedDate = parseDate(inputValue);
       if (parsedDate && isValidDate(parsedDate)) {
-        if (minDate && parsedDate < minDate) {
+        const normalizedParsed = normalizeDate(parsedDate);
+        if (normalizedMinDate && normalizedParsed < normalizedMinDate) {
           return;
         }
-        if (maxDate && parsedDate > maxDate) {
+        if (normalizedMaxDate && normalizedParsed > normalizedMaxDate) {
           return;
         }
 
-        emitChange(parsedDate);
+        emitChange(normalizedParsed);
         clearError();
       } else if (!inputValue) {
         emitChange(null);
         clearError();
       }
     },
-    [parseDate, isValidDate, minDate, maxDate, emitChange, clearError]
+    [
+      parseDate,
+      isValidDate,
+      normalizedMinDate,
+      normalizedMaxDate,
+      emitChange,
+      clearError,
+    ]
   );
 
   const focusDate = useCallback(
@@ -635,6 +695,216 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
     [isOpen]
   );
 
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    const base = clampToRange(normalizedValue ?? today);
+    setFocusedDate(base);
+    setVisibleMonth(startOfMonth(base));
+  }, [clampToRange, isOpen, normalizedValue, today]);
+
+  useEffect(() => {
+    if (!isOpen || !calendarGridRef.current) {
+      return;
+    }
+    const target = calendarGridRef.current.querySelector<HTMLButtonElement>(
+      `[data-date="${formatISODate(focusedDate)}"]`
+    );
+    target?.focus();
+  }, [focusedDate, isOpen]);
+
+  const weekStartsOn = useMemo(() => getWeekStartsOn(locale), [locale]);
+
+  const moveFocusBy = useCallback(
+    (amount: number) => {
+      setFocusedDate(prev => {
+        const reference = prev ?? clampToRange(today);
+        let next = addDays(reference, amount);
+        next = clampToRange(next);
+        const direction = amount >= 0 ? 1 : -1;
+        let guard = 0;
+        while (isDateDisabled(next) && guard < 31) {
+          const boundary = direction > 0 ? normalizedMaxDate : normalizedMinDate;
+          if (boundary && next.getTime() === boundary.getTime()) {
+            return prev ?? reference;
+          }
+          next = addDays(next, direction);
+          guard += 1;
+        }
+        setVisibleMonth(startOfMonth(next));
+        return next;
+      });
+    },
+    [clampToRange, isDateDisabled, normalizedMaxDate, normalizedMinDate, today]
+  );
+
+  const focusStartOfWeek = useCallback(() => {
+    setFocusedDate(prev => {
+      const reference = prev ?? clampToRange(today);
+      const currentDay = reference.getDay();
+      const diff = (currentDay - weekStartsOn + 7) % 7;
+      const next = clampToRange(addDays(reference, -diff));
+      if (!isDateDisabled(next)) {
+        setVisibleMonth(startOfMonth(next));
+        return next;
+      }
+      return prev ?? reference;
+    });
+  }, [clampToRange, isDateDisabled, today, weekStartsOn]);
+
+  const focusEndOfWeek = useCallback(() => {
+    setFocusedDate(prev => {
+      const reference = prev ?? clampToRange(today);
+      const currentDay = reference.getDay();
+      const diff = 6 - ((currentDay - weekStartsOn + 7) % 7);
+      const next = clampToRange(addDays(reference, diff));
+      if (!isDateDisabled(next)) {
+        setVisibleMonth(startOfMonth(next));
+        return next;
+      }
+      return prev ?? reference;
+    });
+  }, [clampToRange, isDateDisabled, today, weekStartsOn]);
+
+  const handleDayKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLButtonElement>, day: { date: Date; isDisabled: boolean }) => {
+      switch (event.key) {
+        case 'ArrowUp':
+          moveFocusBy(-7);
+          event.preventDefault();
+          break;
+        case 'ArrowDown':
+          moveFocusBy(7);
+          event.preventDefault();
+          break;
+        case 'ArrowLeft':
+          moveFocusBy(-1);
+          event.preventDefault();
+          break;
+        case 'ArrowRight':
+          moveFocusBy(1);
+          event.preventDefault();
+          break;
+        case 'Home':
+          focusStartOfWeek();
+          event.preventDefault();
+          break;
+        case 'End':
+          focusEndOfWeek();
+          event.preventDefault();
+          break;
+        case 'Enter':
+        case ' ': {
+          if (!day.isDisabled) {
+            handleDaySelection(day.date);
+          }
+          event.preventDefault();
+          break;
+        }
+        case 'Escape':
+          setIsOpen(false);
+          inputRef.current?.focus();
+          event.preventDefault();
+          break;
+        default:
+          break;
+      }
+    },
+    [focusEndOfWeek, focusStartOfWeek, handleDaySelection, moveFocusBy]
+  );
+
+  const weekDayOrder = useMemo(
+    () => Array.from({ length: 7 }, (_, index) => (weekStartsOn + index) % 7),
+    [weekStartsOn]
+  );
+
+  const weekdayFormatter = useMemo(
+    () => new Intl.DateTimeFormat(locale, { weekday: 'short' }),
+    [locale]
+  );
+
+  const weekDays = useMemo(
+    () =>
+      weekDayOrder.map(dayIndex => {
+        const baseDate = new Date(2021, 7, 1);
+        const baseDay = baseDate.getDay();
+        baseDate.setDate(baseDate.getDate() - baseDay + dayIndex);
+        return weekdayFormatter.format(baseDate);
+      }),
+    [weekDayOrder, weekdayFormatter]
+  );
+
+  const calendarStart = useMemo(() => {
+    const firstOfMonth = startOfMonth(visibleMonth);
+    const offset = (firstOfMonth.getDay() - weekStartsOn + 7) % 7;
+    return addDays(firstOfMonth, -offset);
+  }, [visibleMonth, weekStartsOn]);
+
+  const calendarDays = useMemo(() => {
+    return Array.from({ length: 42 }, (_, index) => {
+      const date = addDays(calendarStart, index);
+      const iso = formatISODate(date);
+      const isCurrentMonth = date.getMonth() === visibleMonth.getMonth();
+      const isSelected = normalizedValue ? date.getTime() === normalizedValue.getTime() : false;
+      const isFocused = date.getTime() === focusedDate.getTime();
+      const isToday = date.getTime() === today.getTime();
+      const disabledDate = isDateDisabled(date);
+
+      return {
+        date,
+        iso,
+        label: date.getDate(),
+        isCurrentMonth,
+        isSelected,
+        isFocused,
+        isToday,
+        isDisabled: disabledDate,
+      };
+    });
+  }, [calendarStart, focusedDate, isDateDisabled, normalizedValue, today, visibleMonth]);
+
+  const monthFormatter = useMemo(
+    () => new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }),
+    [locale]
+  );
+
+  const ariaLabelFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    [locale]
+  );
+
+  const monthLabel = useMemo(() => monthFormatter.format(visibleMonth), [monthFormatter, visibleMonth]);
+
+  const activeDateAnnouncement = useMemo(
+    () => (isOpen ? ariaLabelFormatter.format(focusedDate) : ''),
+    [ariaLabelFormatter, focusedDate, isOpen]
+  );
+
+  const prevMonthDisabled = useMemo(() => {
+    if (!normalizedMinDate) {
+      return false;
+    }
+    const prevMonth = addMonths(visibleMonth, -1);
+    return isBeforeMonth(prevMonth, normalizedMinDate);
+  }, [normalizedMinDate, visibleMonth]);
+
+  const nextMonthDisabled = useMemo(() => {
+    if (!normalizedMaxDate) {
+      return false;
+    }
+    const nextMonth = addMonths(visibleMonth, 1);
+    return isAfterMonth(nextMonth, normalizedMaxDate);
+  }, [normalizedMaxDate, visibleMonth]);
+
+  const todayDisabled = isDateDisabled(today);
+
   if (!visible) {
     return null;
   }
@@ -737,7 +1007,12 @@ export const DynDatePicker = forwardRef<DynFieldRef, DynDatePickerProps>((props,
             </div>
 
             <div className={styles.shortcuts}>
-              <button type="button" className={styles.shortcut} onClick={handleTodayClick}>
+              <button
+                type="button"
+                className={styles.shortcut}
+                onClick={handleTodayClick}
+                disabled={todayDisabled}
+              >
                 Hoje
               </button>
               <button type="button" className={styles.shortcut} onClick={handleClearClick}>

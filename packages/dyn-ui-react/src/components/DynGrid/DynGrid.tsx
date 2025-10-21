@@ -217,9 +217,16 @@ const DynGrid = forwardRef<HTMLDivElement, DynGridProps>((props, ref) => {
     className
   );
 
+  const containerProps = {
+    className: gridClassName,
+    id,
+    'data-testid': dataTestId,
+    ...rest,
+  };
+
   if (loading) {
     return (
-      <div ref={ref} className={gridClassName} id={id} data-testid={dataTestId} {...rest}>
+      <div ref={ref} {...containerProps}>
         <div className={styles.loadingState} role="status" aria-live="polite">
           <div className={styles.spinner} aria-hidden="true" />
           <span>Loading data…</span>
@@ -230,7 +237,7 @@ const DynGrid = forwardRef<HTMLDivElement, DynGridProps>((props, ref) => {
 
   if (data.length === 0) {
     return (
-      <div ref={ref} className={gridClassName} id={id} data-testid={dataTestId} {...rest}>
+      <div ref={ref} {...containerProps}>
         <div className={styles.emptyState}>
           {typeof emptyText === 'string' ? (
             <span>{emptyText}</span>
@@ -243,7 +250,7 @@ const DynGrid = forwardRef<HTMLDivElement, DynGridProps>((props, ref) => {
   }
 
   return (
-    <div ref={ref} className={gridClassName} id={id} data-testid={dataTestId} {...rest}>
+    <div ref={ref} {...containerProps}>
       <div className={styles.wrapper}>
         <table className={styles.table} role="table">
           <thead className={styles.header}>

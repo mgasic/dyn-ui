@@ -1,5 +1,5 @@
-import type { HTMLAttributes, ReactNode } from 'react';
-import type { BaseComponentProps } from '../../types';
+import type { AriaAttributes, HTMLAttributes, ReactNode } from 'react';
+import type { AccessibilityProps, BaseComponentProps } from '../../types';
 import type { LayoutSize } from '../../types/layout.types';
 
 export type DynGridSortDirection = 'asc' | 'desc';
@@ -32,7 +32,15 @@ export type DynGridSelectable = boolean | 'single' | 'multiple';
 
 export interface DynGridProps
   extends BaseComponentProps,
-    Omit<HTMLAttributes<HTMLDivElement>, keyof BaseComponentProps | 'children'> {
+    AccessibilityProps,
+    AriaAttributes,
+    Omit<
+      HTMLAttributes<HTMLDivElement>,
+      | keyof BaseComponentProps
+      | keyof AccessibilityProps
+      | keyof AriaAttributes
+      | 'children'
+    > {
   columns: DynGridColumn[];
   data: Record<string, unknown>[];
   loading?: boolean;

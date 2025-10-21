@@ -62,6 +62,30 @@ describe('DynGrid', () => {
     // expect(screen.getByRole('progressbar', { hidden: true })).toBeInTheDocument();
   });
 
+  it('passes accessibility attributes to the container', () => {
+    const labelId = 'grid-label';
+    const descriptionId = 'grid-description';
+
+    render(
+      <div>
+        <h2 id={labelId}>User directory</h2>
+        <p id={descriptionId}>Contains all active user accounts.</p>
+        <DynGrid
+          columns={mockColumns}
+          data={mockData}
+          role="grid"
+          aria-labelledby={labelId}
+          aria-describedby={descriptionId}
+        />
+      </div>
+    );
+
+    const grid = screen.getByRole('grid', { name: 'User directory' });
+
+    expect(grid).toHaveAttribute('aria-labelledby', labelId);
+    expect(grid).toHaveAttribute('aria-describedby', descriptionId);
+  });
+
   it('shows empty state', () => {
     render(<DynGrid columns={mockColumns} data={[]} emptyText="No data found" />);
 
