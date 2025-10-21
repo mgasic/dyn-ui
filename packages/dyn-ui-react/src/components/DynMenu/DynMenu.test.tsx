@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { act } from 'react';
 import { DynMenu } from './DynMenu';
+import { DynMenuTrigger } from '../DynMenuTrigger';
 import type { MenuItem } from './DynMenu.types';
 
 const menuItems: MenuItem[] = [
@@ -41,6 +42,10 @@ const renderMenu = (override: Partial<React.ComponentProps<typeof DynMenu>> = {}
 describe('DynMenu', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('exposes DynMenuTrigger as a static export', () => {
+    expect(DynMenu.Trigger).toBe(DynMenuTrigger);
   });
 
   it('renders a menubar with all top level items', () => {

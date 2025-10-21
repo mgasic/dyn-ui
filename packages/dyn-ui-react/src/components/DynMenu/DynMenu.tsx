@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState
 } from 'react';
+import { DynMenuTrigger } from '../DynMenuTrigger';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import styles from './DynMenu.module.css';
@@ -12,7 +13,11 @@ import type { DynMenuProps, DynMenuItem } from './DynMenu.types';
 
 const getStyleClass = (n: string) => (styles as Record<string, string>)[n] || '';
 
-export const DynMenu: React.FC<DynMenuProps> = ({
+type DynMenuComponentType = React.FC<DynMenuProps> & {
+  Trigger: typeof DynMenuTrigger;
+};
+
+const DynMenuComponent: React.FC<DynMenuProps> = ({
   items,
   menus,
   orientation = 'horizontal',
@@ -48,8 +53,10 @@ export const DynMenu: React.FC<DynMenuProps> = ({
   const [subFocusIndex, setSubFocusIndex] = useState<Record<number, number>>({});
 
   const menubarRef = useRef<HTMLDivElement | null>(null);
-  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const itemRefs = useRef<Array<HTMLElement | null>>([]);
   const submenuItemRefs = useRef<Array<Array<HTMLButtonElement | null>>>([]);
+  const submenuRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const ignoreClickRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (focusIndex >= 0 && openIndex !== focusIndex) {
@@ -62,10 +69,6 @@ export const DynMenu: React.FC<DynMenuProps> = ({
       setFocusIndex(firstEnabledIndex);
     }
   }, [firstEnabledIndex, focusIndex]);
-
-  const closeAll = useCallback(() => {
-    setOpenIndex(null);
-  }, []);
 
   useEffect(() => {
     if (openIndex === null) {
@@ -92,32 +95,6 @@ export const DynMenu: React.FC<DynMenuProps> = ({
     }
   }, [openIndex, resolvedItems]);
 
-  useEffect(() => {
-    const handlePointer = (event: MouseEvent | TouchEvent) => {
-      if (openIndex === null) return;
-      const target = event.target as Node | null;
-      if (target && menubarRef.current?.contains(target)) return;
-      closeAll();
-    };
-
-    const handleFocusIn = (event: FocusEvent) => {
-      if (openIndex === null) return;
-      const target = event.target as Node | null;
-      if (target && menubarRef.current?.contains(target)) return;
-      closeAll();
-    };
-
-    document.addEventListener('mousedown', handlePointer);
-    document.addEventListener('touchstart', handlePointer);
-    document.addEventListener('focusin', handleFocusIn);
-
-    return () => {
-      document.removeEventListener('mousedown', handlePointer);
-      document.removeEventListener('touchstart', handlePointer);
-      document.removeEventListener('focusin', handleFocusIn);
-    };
-  }, [closeAll, openIndex]);
-
   const visibleMenuCount = useMemo(() => resolvedItems.length, [resolvedItems]);
 
   const moveFocus = (delta: number) => {
@@ -138,6 +115,8 @@ export const DynMenu: React.FC<DynMenuProps> = ({
   const closeAll = useCallback(() => {
     setOpenIndex(null);
     setSubmenuFocusIndex({});
+    setSubFocusIndex({});
+    ignoreClickRef.current = null;
   }, []);
 
   useEffect(() => {
@@ -505,11 +484,15 @@ export const DynMenu: React.FC<DynMenuProps> = ({
           }
         };
         return (
-          <div key={buttonId} className={cn(getStyleClass('menubar__item'), 'dyn-menu-item-container')}>
-            <button
-              ref={(el) => { itemRefs.current[idx] = el; }}
+          <div
+            key={buttonId}
+            className={cn(getStyleClass('menubar__item'), 'dyn-menu-item-container')}
+          >
+            <DynMenuTrigger
+              ref={(el) => {
+                itemRefs.current[idx] = (el as HTMLElement | null) ?? null;
+              }}
               id={buttonId}
-              type="button"
               role="menuitem"
               className={cn(
                 getStyleClass('menubar__button'),
@@ -522,10 +505,11 @@ export const DynMenu: React.FC<DynMenuProps> = ({
               aria-expanded={childItems.length ? isOpen : undefined}
               aria-controls={childItems.length ? menuId : undefined}
               disabled={item.disabled}
+              active={isOpen}
               onClick={() => handleItemClick(idx)}
             >
               {item.label}
-            </button>
+            </DynMenuTrigger>
             {childItems.length > 0 && isOpen && (
               <div
                 id={menuId}
@@ -538,6 +522,9 @@ export const DynMenu: React.FC<DynMenuProps> = ({
                 }
                 className={cn(getStyleClass('menu'), 'dyn-menu-subitems')}
                 tabIndex={-1}
+                ref={(el) => {
+                  submenuRefs.current[idx] = el;
+                }}
                 onKeyDown={onSubmenuKeyDown(idx, childItems)}
               >
                 {childItems.map((sub, sidx) => (
@@ -551,7 +538,6 @@ export const DynMenu: React.FC<DynMenuProps> = ({
                       'dyn-menu-item',
                       currentSubIndex === sidx && 'dyn-menu-item-active'
                     )}
-                    tabIndex={-1}
                     data-active={currentSubIndex === sidx ? 'true' : undefined}
                     disabled={sub.disabled}
                     tabIndex={submenuFocusIndex[idx] === sidx ? 0 : -1}
@@ -577,5 +563,9 @@ export const DynMenu: React.FC<DynMenuProps> = ({
     </div>
   );
 };
+
+export const DynMenu = Object.assign(DynMenuComponent, {
+  Trigger: DynMenuTrigger
+}) as DynMenuComponentType;
 
 export default DynMenu;
