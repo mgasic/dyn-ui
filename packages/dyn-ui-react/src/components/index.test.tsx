@@ -40,6 +40,8 @@ import {
   DynTabs,
   DynStepper,
   DynToolbar,
+  DynModal,
+  DynModalPlacement,
 
   // Theme system
   ThemeProvider,
@@ -106,6 +108,8 @@ describe('Component Exports', () => {
     expect(isComponentExport(DynTabs)).toBe(true);
     expect(isComponentExport(DynStepper)).toBe(true);
     expect(isComponentExport(DynToolbar)).toBe(true);
+    expect(isComponentExport(DynModal)).toBe(true);
+    expect(isComponentExport(DynModalPlacement)).toBe(true);
   });
 
   it('exports theme system', () => {
