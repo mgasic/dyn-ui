@@ -11,11 +11,32 @@ import { DynModalPlacement } from '../DynModalPlacement';
 import type { DynModalPlacementProps } from '../DynModalPlacement';
 import styles from './DynModal.module.css';
 import type { DynModalProps, DynModalRef } from './DynModal.types';
+import { DYN_MODAL_DEFAULT_PROPS } from './DynModal.types';
+import styles from './DynModal.module.css';
 
-const toCssValue = (value?: number | string): string | undefined => {
-  if (value === undefined) return undefined;
-  if (typeof value === 'number') return `${value}px`;
-  return value;
+const getStyleClass = (className: string) => (styles as Record<string, string>)[className] || '';
+
+const FOCUSABLE_SELECTORS = [
+  'a[href]',
+  'area[href]',
+  'button:not([disabled])',
+  'input:not([disabled]):not([type="hidden"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  'iframe',
+  'audio[controls]',
+  'video[controls]',
+  '[contenteditable="true"]',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+const focusElement = (element: HTMLElement | null) => {
+  if (!element) return;
+  try {
+    element.focus();
+  } catch (error) {
+    // Intentionally swallow errors that occur when the element cannot be focused.
+  }
 };
 
 const FOCUSABLE_SELECTORS =
@@ -123,7 +144,22 @@ export const DynModal = forwardRef(
           event.stopPropagation();
           requestClose();
         }
-      };
+        focusElement(contentRef.current as HTMLElement);
+      }
+    };
+
+    if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(focusTask);
+    } else {
+      setTimeout(focusTask, 0);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !contentRef.current) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!contentRef.current) return;
 
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
@@ -203,29 +239,45 @@ export const DynModal = forwardRef(
       )
     };
 
-    const contentStyle = useMemo(() => {
-      const computed: Record<string, unknown> = { ...style };
-      const maxWidthValue = toCssValue(maxWidth);
-      const minWidthValue = toCssValue(minWidth);
+      const focusable = getFocusableElements();
 
-      if (maxWidthValue !== undefined) {
-        computed['--dyn-modal-max-width'] = maxWidthValue;
-      }
-      if (minWidthValue !== undefined) {
-        computed['--dyn-modal-min-width'] = minWidthValue;
+      if (focusable.length === 0) {
+        event.preventDefault();
+        focusElement(contentRef.current);
+        return;
       }
 
-      return computed as CSSProperties;
-    }, [style, maxWidth, minWidth]);
+      const current = document.activeElement as HTMLElement | null;
+      const currentIndex = current ? focusable.indexOf(current) : -1;
 
-    if (!isOpen) {
-      return null;
-    }
+      if (event.shiftKey) {
+        if (currentIndex <= 0) {
+          event.preventDefault();
+          focusElement(focusable[focusable.length - 1]);
+        }
+        return;
+      }
+
+      if (currentIndex === -1 || currentIndex === focusable.length - 1) {
+        event.preventDefault();
+        focusElement(focusable[0]);
+      }
+    };
+
+    const handleFocusIn = (event: FocusEvent) => {
+      if (!contentRef.current) return;
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      if (contentRef.current.contains(target)) return;
+      const [firstFocusable] = getFocusableElements();
+      focusElement(firstFocusable ?? contentRef.current);
+    };
 
     const handleBackdropClick = () => {
       if (!closeOnBackdropClick) return;
       requestClose();
     };
+  }, [open, closeOnEscape, disabled, onClose]);
 
     const isFullscreen = effectivePlacement === 'fullscreen';
     const Component = (as ?? 'div') as ElementType;
@@ -292,6 +344,66 @@ export const DynModal = forwardRef(
   ) as DynModalComponent
 );
 
-DynModal.displayName = 'DynModal';
+  const handleOverlayMouseDown: React.MouseEventHandler<HTMLDivElement> = (event) => {
+    if (!closeOnOverlayClick || disabled) return;
+    if (event.target !== event.currentTarget) return;
+    event.stopPropagation();
+    onClose?.();
+  };
 
-export type { DynModalProps, DynModalRef } from './DynModal.types';
+  const handleKeyDown: React.KeyboardEventHandler = (event) => {
+    userOnKeyDown?.(event);
+    if (event.defaultPrevented) return;
+
+    if (event.key === 'Escape' && closeOnEscape && !disabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      onClose?.();
+    }
+  };
+
+  const overlayClasses = cn(getStyleClass('overlay'), overlayClassName, {
+    [getStyleClass('disabled')]: disabled,
+  });
+
+  const contentClasses = cn(getStyleClass('content'), className);
+
+  return (
+    <div
+      ref={overlayRef}
+      className={overlayClasses}
+      onMouseDown={handleOverlayMouseDown}
+      data-testid={`${dataTestId}-overlay`}
+      role="presentation"
+    >
+      <Component
+        {...(rest as Record<string, unknown>)}
+        ref={setContentRef}
+        id={id}
+        role={role}
+        className={contentClasses}
+        aria-modal="true"
+        aria-disabled={disabled || undefined}
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
+        aria-describedby={ariaDescribedBy}
+        data-testid={dataTestId}
+        tabIndex={tabIndex ?? -1}
+        onKeyDown={handleKeyDown}
+      >
+        {children}
+      </Component>
+    </div>
+  );
+}
+
+const DynModalComponent = forwardRef(DynModalInner) as unknown as <
+  E extends React.ElementType = 'div'
+>(
+  props: DynModalProps<E> & { ref?: React.Ref<DynModalRef<E>> }
+) => React.ReactElement | null;
+
+DynModalComponent.displayName = 'DynModal';
+
+export const DynModal = DynModalComponent;
+
