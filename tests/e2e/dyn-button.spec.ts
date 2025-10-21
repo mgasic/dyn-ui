@@ -1,10 +1,22 @@
 import { test, expect } from '@playwright/test';
 
-test('DynButton loads and is clickable', async ({ page }) => {
-  // NOTE: Adjust the URL to point to your local or deployed Storybook/demo page
-  await page.goto('http://localhost:3000');
-  const button = page.getByRole('button').first();
-  await expect(button).toBeVisible();
-  await button.click();
-  // Additional assertions can be added here once application context is available
+test.describe('DynButton demo interactions', () => {
+  test('primary button is visible and clickable', async ({ page }) => {
+    await page.goto('/');
+    const button = page
+      .getByRole('button', { name: /primary button/i })
+      .first();
+    await expect(button).toBeVisible();
+    await button.click();
+  });
+
+  test('loading state toggles via interaction', async ({ page }) => {
+    await page.goto('/');
+    const loadingTrigger = page.getByRole('button', {
+      name: /click to test loading/i,
+    });
+    await expect(loadingTrigger).toBeEnabled();
+    await loadingTrigger.click();
+    await expect(loadingTrigger).toHaveAttribute('aria-busy', 'true');
+  });
 });

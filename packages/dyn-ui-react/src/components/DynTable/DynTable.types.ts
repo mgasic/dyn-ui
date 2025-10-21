@@ -31,6 +31,51 @@ export type TableSelectionType = boolean | 'single' | 'multiple';
 export type TableSize = 'small' | 'medium' | 'large';
 
 /**
+ * Visual variants for the table surface treatment
+ */
+export type TableVariant = 'default' | 'zebra' | 'minimal';
+
+/**
+ * Accent color used for interactive states and highlights
+ */
+export type TableColor = 'neutral' | 'primary' | 'success' | 'warning' | 'danger';
+
+/**
+ * Slot renderer definition allowing static React nodes or contextual renderers
+ */
+export type DynTableSlotRenderer<TContext> = ReactNode | ((context: TContext) => ReactNode);
+
+/** Context passed to the header slot renderer */
+export interface DynTableHeaderSlotContext<T> {
+  columns: DynTableColumn<T>[];
+  renderDefault: () => ReactNode;
+}
+
+/** Context passed to the body slot renderer */
+export interface DynTableBodySlotContext<T> {
+  rows: T[];
+  columns: DynTableColumn<T>[];
+  renderDefault: () => ReactNode;
+  renderRow: (row: T, rowIndex: number) => ReactNode;
+}
+
+/** Context passed to the footer slot renderer */
+export interface DynTableFooterSlotContext<T> {
+  rows: T[];
+  columns: DynTableColumn<T>[];
+  renderDefault: () => ReactNode;
+}
+
+/**
+ * Slot configuration for injecting custom table sections
+ */
+export interface DynTableSlots<T> {
+  header?: DynTableSlotRenderer<DynTableHeaderSlotContext<T>>;
+  body?: DynTableSlotRenderer<DynTableBodySlotContext<T>>;
+  footer?: DynTableSlotRenderer<DynTableFooterSlotContext<T>>;
+}
+
+/**
  * Column definition interface with comprehensive configuration options
  * 
  * @template T - Type of the row data object
@@ -199,11 +244,23 @@ export interface DynTableProps<T = any> extends BaseComponentProps, Accessibilit
    */
   loading?: boolean;
   
-  /** 
+  /**
    * Visual size variant affecting padding and typography
    * @default 'medium'
    */
   size?: TableSize;
+
+  /**
+   * Surface treatment variant for the table
+   * @default 'default'
+   */
+  variant?: TableVariant;
+
+  /**
+   * Accent color token applied to interactive elements
+   * @default 'neutral'
+   */
+  color?: TableColor;
   
   /** 
    * Show table borders around cells
@@ -280,17 +337,22 @@ export interface DynTableProps<T = any> extends BaseComponentProps, Accessibilit
    */
   onSelectionChange?: (keys: string[], rows: T[]) => void;
   
-  /** 
+  /**
    * Text to display when data array is empty
    * @default 'No data available'
    */
   emptyText?: string;
-  
-  /** 
+
+  /**
    * Fixed height for scrollable table
    * Creates vertical scroll when content exceeds height
    */
   height?: number | string;
+
+  /**
+   * Slots for customizing table header, body, and footer content
+   */
+  slots?: DynTableSlots<T>;
   
   /** 
    * ARIA label for the table element

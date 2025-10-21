@@ -6,8 +6,6 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--dyn-spacing-xs, 4px);
-  margin-bottom: var(--dyn-spacing-md, 16px);
 }
 
 .containerError .label {

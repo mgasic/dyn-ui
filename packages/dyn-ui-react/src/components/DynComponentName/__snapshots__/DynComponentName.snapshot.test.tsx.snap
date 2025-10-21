@@ -1,0 +1,35 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`DynComponentName > matches snapshot with default settings 1`] = `
+<div>
+  <div
+    class="_root_754333"
+    data-testid="dyn-component-name"
+    style="--dyn-component-name-gap: var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem)); --dyn-component-name-padding: var(--dyn-spacing-md, var(--spacing-md, 1rem));"
+  >
+    <span>
+      Snapshot content
+    </span>
+    <span>
+      Secondary line
+    </span>
+  </div>
+</div>
+`;
+
+exports[`DynComponentName > supports polymorphic rendering and responsive spacing 1`] = `
+<div>
+  <section
+    class="_root_754333"
+    data-testid="dyn-component-name"
+    style="--dyn-component-name-gap: var(--dyn-spacing-xs, var(--spacing-xs, 0.25rem)); --dyn-component-name-gap-md: var(--dyn-spacing-lg, var(--spacing-lg, 1.5rem)); --dyn-component-name-padding: var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem)); --dyn-component-name-padding-lg: var(--dyn-spacing-xl, var(--spacing-xl, 2rem)); --dyn-component-name-margin: 0; --dyn-component-name-margin-md: var(--dyn-spacing-lg, var(--spacing-lg, 1.5rem));"
+  >
+    <h2>
+      Section title
+    </h2>
+    <p>
+      Supporting copy for the section.
+    </p>
+  </section>
+</div>
+`;

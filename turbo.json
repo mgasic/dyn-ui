@@ -1,5 +1,59 @@
 {
   "pipeline": {
+    "lint": {
+      "outputs": []
+    },
+    "typecheck": {
+      "outputs": []
+    },
+    "format:check": {
+      "outputs": []
+    },
+    "test:unit": {
+      "outputs": ["reports/coverage/**"]
+    },
+    "test:interaction": {
+      "outputs": ["reports/storybook/**"]
+    },
+    "test:e2e": {
+      "outputs": ["reports/playwright/e2e/**"]
+    },
+    "test:axe": {
+      "outputs": ["reports/playwright/a11y/**"]
+    },
+    "test:visual": {
+      "outputs": ["reports/playwright/visual/**"]
+    },
+    "test:api": {
+      "outputs": ["reports/api/**"]
+    },
+    "bundle:check": {
+      "outputs": ["reports/bundle/**"]
+    },
+    "gate:a": {
+      "dependsOn": ["lint", "typecheck", "format:check"],
+      "outputs": []
+    },
+    "gate:b": {
+      "dependsOn": ["test:unit", "test:interaction", "test:e2e"],
+      "outputs": []
+    },
+    "gate:c": {
+      "dependsOn": ["test:axe"],
+      "outputs": []
+    },
+    "gate:d": {
+      "dependsOn": ["test:visual"],
+      "outputs": []
+    },
+    "gate:e": {
+      "dependsOn": ["test:api"],
+      "outputs": []
+    },
+    "gate:f": {
+      "dependsOn": ["bundle:check"],
+      "outputs": []
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**"]
