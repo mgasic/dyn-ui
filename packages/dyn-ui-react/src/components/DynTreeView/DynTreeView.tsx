@@ -392,9 +392,18 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       const target = event.target as HTMLElement | null;
+      if (!target) {
+        return;
+      }
+
       const isTreeRoot = target === event.currentTarget;
-      const isTreeItem = target?.getAttribute('role') === 'treeitem';
-      if (!isTreeRoot && !isTreeItem) {
+      const isTreeItem = target.getAttribute('role') === 'treeitem';
+      const activeElement = document.activeElement as HTMLElement | null;
+      const activeRole = activeElement?.getAttribute('role');
+      const isActiveTreeSurface =
+        activeElement === event.currentTarget || activeRole === 'treeitem';
+
+      if (!isTreeRoot && !isTreeItem && !isActiveTreeSurface) {
         return;
       }
 
