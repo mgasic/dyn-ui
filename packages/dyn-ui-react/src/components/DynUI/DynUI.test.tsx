@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { DynUI } from './DynUI';
+import { DynTreeNode } from '../DynTreeNode';
 import { DYN_UI_DEFAULT_PROPS } from './DynUI.types';
 
 const spacingVar = (token: string) => `var(--dyn-spacing-${token}, var(--spacing-${token}, ${
@@ -93,5 +94,26 @@ describe('DynUI', () => {
 
     expect(element.style.getPropertyValue('--dyn-box-bg')).toBe('');
     expect(element.style.getPropertyValue('--dyn-box-shadow')).toBe('');
+  });
+
+  it('acts as a root layout container for hierarchical content', () => {
+    render(
+      <DynUI as="main" gap="md" data-testid="root-layout" tone="muted">
+        <DynTreeNode data-testid="tree-root" direction="column" gap="sm">
+          <DynTreeNode data-testid="tree-child-a">First</DynTreeNode>
+          <DynTreeNode data-testid="tree-child-b">Second</DynTreeNode>
+        </DynTreeNode>
+      </DynUI>
+    );
+
+    const root = screen.getByTestId('root-layout');
+    expect(root.tagName).toBe('MAIN');
+    expect(root.style.getPropertyValue('--dyn-box-gap')).toBe(
+      'var(--dyn-spacing-md, var(--spacing-md, 1rem))'
+    );
+
+    const treeRoot = screen.getByTestId('tree-root');
+    expect(treeRoot).toHaveAttribute('data-dyn-tree-node', '');
+    expect(treeRoot).toHaveStyle({ flexDirection: 'column' });
   });
 });

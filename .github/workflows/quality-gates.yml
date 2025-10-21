@@ -173,3 +173,37 @@ jobs:
           name: gate-f-bundle
           path: reports/bundle
           if-no-files-found: warn
+
+  collect_release_metrics:
+    name: Metrics · Aggregation
+    runs-on: ubuntu-latest
+    needs:
+      - gate_f_bundle
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download QA artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gate-*
+          path: reports
+          merge-multiple: true
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Collect QA metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm run metrics:collect
+      - name: Upload metrics artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-metrics
+          path: reports/metrics
+          if-no-files-found: error

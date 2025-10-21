@@ -1,22 +1,188 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`DynButton > matches snapshot 1`] = `
+exports[`DynButton snapshots > matches visual states snapshot 1`] = `
 <div>
-  <button
-    class="_root_46da8a _kindPrimary_46da8a _sizeMedium_46da8a"
-    data-testid="dyn-button"
-    id="button-1"
-    type="button"
+  <div
+    style="display: grid; gap: 0.5rem;"
   >
-    <span
-      class="_content_46da8a"
+    <button
+      class="_root_c4f507 _kindPrimary_c4f507 _sizeMedium_c4f507"
+      data-size="medium"
+      data-state="idle"
+      data-testid="dyn-button"
+      data-variant="primary"
+      id="button-1"
+      type="button"
     >
       <span
-        class="_label_46da8a"
+        class="_content_c4f507"
       >
-        Snapshot
+        <span
+          class="_label_c4f507"
+        >
+          Default
+        </span>
       </span>
+    </button>
+    <button
+      class="_root_c4f507 _kindSecondary_c4f507 _sizeMedium_c4f507"
+      data-size="medium"
+      data-state="idle"
+      data-testid="dyn-button"
+      data-variant="secondary"
+      id="button-2"
+      type="button"
+    >
+      <span
+        class="_content_c4f507"
+      >
+        <span
+          class="_label_c4f507"
+        >
+          Secondary
+        </span>
+      </span>
+    </button>
+    <button
+      class="_root_c4f507 _kindPrimary_c4f507 _sizeMedium_c4f507 _danger_c4f507"
+      data-danger="true"
+      data-size="medium"
+      data-state="idle"
+      data-testid="dyn-button"
+      data-variant="primary"
+      id="button-3"
+      type="button"
+    >
+      <span
+        class="_content_c4f507"
+      >
+        <span
+          class="_label_c4f507"
+        >
+          Danger
+        </span>
+      </span>
+    </button>
+    <button
+      aria-busy="true"
+      aria-disabled="true"
+      class="_root_c4f507 _kindPrimary_c4f507 _sizeMedium_c4f507 _loading_c4f507"
+      data-disabled="true"
+      data-size="medium"
+      data-state="loading"
+      data-testid="dyn-button"
+      data-variant="primary"
+      disabled=""
+      id="button-4"
+      type="button"
+    >
+      <span
+        class="_content_c4f507"
+      >
+        <span
+          class="_label_c4f507"
+        >
+          Loading
+        </span>
+      </span>
+      <span
+        aria-hidden="true"
+        class="_spinner_c4f507"
+        data-state="visible"
+      />
+      <span
+        aria-atomic="true"
+        aria-hidden="true"
+        aria-live="polite"
+        class="dyn-sr-only"
+        role="status"
+      >
+        Loading…
+      </span>
+    </button>
+    <span
+      aria-atomic="true"
+      aria-live="polite"
+      class="dyn-sr-only"
+      role="status"
+    >
+      Loading…
     </span>
-  </button>
+    <button
+      aria-label="Download"
+      class="_root_c4f507 _kindPrimary_c4f507 _sizeMedium_c4f507 _iconOnly_c4f507"
+      data-size="medium"
+      data-state="idle"
+      data-testid="dyn-button"
+      data-variant="primary"
+      id="button-5"
+      type="button"
+    >
+      <span
+        class="_content_c4f507"
+      >
+        <span
+          aria-hidden="true"
+          class="_dynIcon_760c34 _dyn-icon-size-medium_760c34 _icon_c4f507 _iconStart_c4f507"
+          role="img"
+        >
+          <span
+            aria-hidden="true"
+            class="_dynIconSvg_760c34"
+          >
+            <svg
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <polyline
+                points="7,10 12,15 17,10"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <line
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                x1="12"
+                x2="12"
+                y1="15"
+                y2="3"
+              />
+            </svg>
+          </span>
+        </span>
+      </span>
+    </button>
+    <button
+      class="_root_c4f507 _kindPrimary_c4f507 _sizeMedium_c4f507"
+      data-size="medium"
+      data-state="idle"
+      data-testid="dyn-button"
+      data-variant="primary"
+      id="button-6"
+      type="button"
+    >
+      <span
+        class="_content_c4f507"
+      >
+        <span
+          class="_label_c4f507"
+        >
+          End
+        </span>
+        <span
+          aria-hidden="true"
+          class="_dynIcon_760c34 _dyn-icon-size-medium_760c34 dyn-icon dyn-icon-arrow-right _icon_c4f507 _iconEnd_c4f507"
+          role="img"
+        />
+      </span>
+    </button>
+  </div>
 </div>
 `;

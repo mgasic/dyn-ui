@@ -39,6 +39,34 @@ describe('DynTreeNode', () => {
     });
   });
 
+  it('supports responsive spacing props and exposes CSS variables for breakpoints', () => {
+    render(
+      <DynTreeNode
+        data-testid="responsive"
+        px={{ base: 'sm', md: 'lg' }}
+        gap={{ lg: 'xl' }}
+        margin={{ base: 'xs', xl: '2xl' }}
+      />
+    );
+
+    const node = screen.getByTestId('responsive');
+    expect(node).toHaveStyle({
+      paddingLeft: 'var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem))',
+      paddingRight: 'var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem))',
+      margin: 'var(--dyn-spacing-xs, var(--spacing-xs, 0.25rem))',
+    });
+
+    expect(node.style.getPropertyValue('--dyn-tree-node-padding-left-md')).toBe(
+      'var(--dyn-spacing-lg, var(--spacing-lg, 1.5rem))'
+    );
+    expect(node.style.getPropertyValue('--dyn-tree-node-gap-lg')).toBe(
+      'var(--dyn-spacing-xl, var(--spacing-xl, 2rem))'
+    );
+    expect(node.style.getPropertyValue('--dyn-tree-node-margin-xl')).toBe(
+      'var(--dyn-spacing-2xl, var(--spacing-2xl, 3rem))'
+    );
+  });
+
   it('forwards refs to the underlying element', () => {
     const ref = React.createRef<HTMLElement>();
     render(
@@ -64,7 +92,11 @@ describe('DynTreeNode', () => {
 
     const node = screen.getByTestId('column');
     expect(node).toHaveClass('dyn-tree-node', 'dyn-tree-node--column', 'custom-node');
-    expect(node).toHaveStyle({ alignItems: 'center', justifyContent: 'space-between' });
+    expect(node).toHaveStyle({
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      flexDirection: 'column',
+    });
   });
 
   it('supports nested composition without losing semantics', () => {
@@ -77,5 +109,34 @@ describe('DynTreeNode', () => {
 
     expect(screen.getByTestId('outer')).toContainElement(screen.getByTestId('inner-a'));
     expect(screen.getByTestId('outer')).toContainElement(screen.getByTestId('inner-b'));
+  });
+
+  it('enables hierarchical offsets through CSS variables for nested layouts', () => {
+    const style = {
+      '--dyn-tree-node-nested-offset': '1rem',
+      '--dyn-tree-node-nested-padding': '0.5rem',
+      '--dyn-tree-node-nested-gap': '2rem',
+    } as React.CSSProperties;
+
+    render(
+      <DynTreeNode data-testid="root" direction="column" style={style}>
+        <DynTreeNode data-testid="child-a">Child A</DynTreeNode>
+        <DynTreeNode data-testid="child-b">Child B</DynTreeNode>
+      </DynTreeNode>
+    );
+
+    const childA = screen.getByTestId('child-a');
+    const childB = screen.getByTestId('child-b');
+
+    expect(childA).toHaveStyle({
+      marginInlineStart: '1rem',
+      paddingInlineStart: '0.5rem',
+      marginTop: '0px',
+    });
+    expect(childB).toHaveStyle({
+      marginInlineStart: '1rem',
+      paddingInlineStart: '0.5rem',
+      marginTop: '2rem',
+    });
   });
 });

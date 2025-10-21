@@ -3,13 +3,13 @@
  * Following DynAvatar Vitest pattern exactly
  */
 
-import { describe, it, test, expect, beforeEach, vi } from 'vitest';
-import React, { createRef } from 'react';
+import { describe, test, expect, beforeEach, vi } from 'vitest';
+import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { testA11y } from '../../testing/accessibility';
 import { DynTabs } from './DynTabs';
-import { DynTabsRef, DynTabItem } from './DynTabs.types';
+import { DynTabItem } from './DynTabs.types';
 import styles from './DynTabs.module.css';
 
 // Helper function for safe CSS class access (following DynAvatar pattern)
@@ -93,7 +93,15 @@ describe('DynTabs', () => {
       const secondTab = screen.getByRole('tab', { name: /second tab/i });
       await user.click(secondTab);
 
-      expect(onChange).toHaveBeenCalledWith('tab-2');
+      expect(onChange).toHaveBeenCalledWith(
+        'tab-2',
+        expect.objectContaining({
+          activeTab: 'tab-2',
+          previousTab: 'tab-1',
+          trigger: 'click',
+          tabData: expect.objectContaining({ id: 'tab-2' }),
+        })
+      );
       expect(secondTab).toHaveAttribute('aria-selected', 'true');
     });
 
@@ -106,7 +114,7 @@ describe('DynTabs', () => {
       const disabledTab = screen.getByRole('tab', { name: /disabled tab/i });
       await user.click(disabledTab);
 
-      expect(onChange).not.toHaveBeenCalledWith('tab-3');
+      expect(onChange).not.toHaveBeenCalled();
       expect(disabledTab).toHaveAttribute('aria-selected', 'false');
     });
 
@@ -213,20 +221,47 @@ describe('DynTabs', () => {
       const secondTab = screen.getByRole('tab', { name: /second tab/i });
       await user.click(secondTab);
 
-      expect(onChange).toHaveBeenCalledWith('tab-2');
+      expect(onChange).toHaveBeenCalledWith(
+        'tab-2',
+        expect.objectContaining({
+          activeTab: 'tab-2',
+          previousTab: 'tab-1',
+          trigger: 'click',
+        })
+      );
     });
 
-    test('handles keyboard navigation', async () => {
+    test('handles keyboard navigation with ArrowLeft and ArrowRight', async () => {
       const user = userEvent.setup();
       const onChange = vi.fn();
 
       render(<DynTabs {...defaultProps} onChange={onChange} />);
 
       const firstTab = screen.getByRole('tab', { name: /first tab/i });
+      const lastTab = screen.getByRole('tab', { name: /closable tab/i });
       firstTab.focus();
 
+      await user.keyboard('{ArrowLeft}');
+      expect(onChange).toHaveBeenLastCalledWith(
+        'tab-4',
+        expect.objectContaining({
+          activeTab: 'tab-4',
+          previousTab: 'tab-1',
+          trigger: 'keyboard',
+        })
+      );
+      expect(document.activeElement).toBe(lastTab);
+
       await user.keyboard('{ArrowRight}');
-      expect(onChange).toHaveBeenCalledWith('tab-2');
+      expect(onChange).toHaveBeenLastCalledWith(
+        'tab-1',
+        expect.objectContaining({
+          activeTab: 'tab-1',
+          previousTab: 'tab-4',
+          trigger: 'keyboard',
+        })
+      );
+      expect(document.activeElement).toBe(firstTab);
     });
 
     test('supports Home and End keys', async () => {
@@ -239,10 +274,24 @@ describe('DynTabs', () => {
       secondTab.focus();
 
       await user.keyboard('{Home}');
-      expect(onChange).toHaveBeenCalledWith('tab-1');
+      expect(onChange).toHaveBeenLastCalledWith(
+        'tab-1',
+        expect.objectContaining({
+          activeTab: 'tab-1',
+          previousTab: 'tab-2',
+          trigger: 'keyboard',
+        })
+      );
 
       await user.keyboard('{End}');
-      expect(onChange).toHaveBeenCalledWith('tab-4');
+      expect(onChange).toHaveBeenLastCalledWith(
+        'tab-4',
+        expect.objectContaining({
+          activeTab: 'tab-4',
+          previousTab: 'tab-1',
+          trigger: 'keyboard',
+        })
+      );
     });
 
     test('handles tab closing', async () => {
@@ -255,6 +304,25 @@ describe('DynTabs', () => {
       await user.click(closeButton);
 
       expect(onTabClose).toHaveBeenCalledWith('tab-4');
+    });
+
+    test('disables all interactions when disabled prop is set', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(<DynTabs {...defaultProps} disabled onChange={onChange} />);
+
+      const tablist = screen.getByRole('tablist');
+      expect(tablist).toHaveAttribute('aria-disabled', 'true');
+
+      const tabs = screen.getAllByRole('tab');
+      tabs.forEach(tab => {
+        expect(tab).toHaveAttribute('aria-disabled', 'true');
+        expect(tab).toBeDisabled();
+      });
+
+      await user.click(screen.getByRole('tab', { name: /second tab/i }));
+      expect(onChange).not.toHaveBeenCalled();
     });
 
     test('renders add button when addable and triggers onTabAdd', async () => {
@@ -337,9 +405,29 @@ describe('DynTabs', () => {
         expect(screen.getByText('Second tab content')).toBeInTheDocument();
       });
     });
+
+    test('mounts tab panels lazily when lazyMount is enabled', async () => {
+      const user = userEvent.setup();
+
+      render(<DynTabs {...defaultProps} lazyMount />);
+
+      expect(screen.queryByText('Second tab content')).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole('tab', { name: /second tab/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText('Second tab content')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Props and Customization', () => {
+    test('supports polymorphic rendering via as prop', () => {
+      const { container } = render(<DynTabs {...defaultProps} as="section" />);
+
+      expect(container.firstElementChild?.tagName).toBe('SECTION');
+    });
+
     test('applies custom className', () => {
       const { container } = render(
         <DynTabs {...defaultProps} className="custom-tabs" />

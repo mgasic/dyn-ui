@@ -121,7 +121,7 @@ export const Default: Story = {
     children: (
       <div>
         <p>This is the default container with standard styling, borders, and padding.</p>
-        <DynButton label="Sample Button" kind="primary" />
+        <DynButton label="Sample Button" variant="primary" />
       </div>
     ),
   },
@@ -149,7 +149,7 @@ export const NoBorder: Story = {
     children: (
       <div>
         <p>This container has no border or shadow for a lightweight appearance.</p>
-        <DynButton label="Action Button" kind="secondary" />
+        <DynButton label="Action Button" variant="secondary" />
       </div>
     ),
   },
@@ -163,7 +163,7 @@ export const CardBackground: Story = {
     children: (
       <div>
         <p>Use the card background variant to mimic elevated surfaces.</p>
-        <DynButton label="Primary" kind="primary" />
+        <DynButton label="Primary" variant="primary" />
       </div>
     ),
   },
@@ -182,7 +182,7 @@ export const HorizontalLayout: Story = {
           <strong>Left Column</strong>
           <p>Content aligns center vertically and spreads across.</p>
         </div>
-        <DynButton label="Primary Action" kind="primary" />
+        <DynButton label="Primary Action" variant="primary" />
       </>
     ),
   },
@@ -215,7 +215,7 @@ export const SemanticMain: Story = {
           DynContainer can render as semantic HTML elements to better match the structure of your page.
           This example renders using a <code>&lt;main&gt;</code> tag.
         </p>
-        <DynButton label="Learn more" kind="secondary" />
+        <DynButton label="Learn more" variant="secondary" />
       </>
     ),
   },
@@ -250,7 +250,7 @@ export const FixedLayout: Story = {
           Fixed layout keeps content centered while respecting responsive max-width tokens. Resize the viewport to
           observe adaptive behavior.
         </p>
-        <DynButton label="Learn more" kind="secondary" />
+        <DynButton label="Learn more" variant="secondary" />
       </div>
     ),
   },
@@ -270,7 +270,7 @@ export const CustomSpacing: Story = {
           Use spacing tokens to coordinate internal padding, external margin, and child spacing while staying aligned with
           the design system scale.
         </p>
-        <DynButton label="Primary Action" kind="primary" />
+        <DynButton label="Primary Action" variant="primary" />
       </>
     ),
   },
@@ -295,8 +295,8 @@ export const CustomCombination: Story = {
           <li>Custom CSS class</li>
         </ul>
         <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
-          <DynButton label="Primary" kind="primary" />
-          <DynButton label="Secondary" kind="secondary" />
+          <DynButton label="Primary" variant="primary" />
+          <DynButton label="Secondary" variant="secondary" />
         </div>
       </div>
     ),
@@ -314,7 +314,7 @@ export const NestedContainers: Story = {
         </DynContainer>
         <DynContainer title="Child Container 2" bordered={false} background="none">
           <p>Second nested container content.</p>
-          <DynButton label="Nested Action" kind="tertiary" />
+          <DynButton label="Nested Action" variant="tertiary" />
         </DynContainer>
       </div>
     ),
@@ -339,25 +339,25 @@ export const Showcase: Story = {
     >
       <DynContainer title="Default Container">
         <p>Standard container with all default settings.</p>
-        <DynButton label="Default" kind="primary" />
+        <DynButton label="Default" variant="primary" />
       </DynContainer>
 
       <DynContainer bordered={false} background="none" title="No Border">
         <p>Container without borders or shadow.</p>
-        <DynButton label="No Border" kind="secondary" />
+        <DynButton label="No Border" variant="secondary" />
       </DynContainer>
 
       <DynContainer noPadding title="No Padding">
         <div style={{ padding: '16px', backgroundColor: '#f5f5f5' }}>
           <p>Container with custom content padding.</p>
-          <DynButton label="Custom" kind="tertiary" />
+          <DynButton label="Custom" variant="tertiary" />
         </div>
       </DynContainer>
 
       <DynContainer height={200} title="Fixed Height" spacing="sm">
         <p>Container with fixed height constraint.</p>
         <p>Content will be constrained to the specified height.</p>
-        <DynButton label="Fixed" kind="primary" />
+        <DynButton label="Fixed" variant="primary" />
       </DynContainer>
     </div>
   ),
