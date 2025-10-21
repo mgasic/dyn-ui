@@ -136,7 +136,7 @@ export const DynModal = forwardRef(
     }, [isOpen]);
 
     useEffect(() => {
-      if (!isOpen || !closeOnEsc || disabled) return;
+      if (!isOpen || !closeOnEsc) return;
       if (typeof document === 'undefined') return;
 
       const handleKeyDown = (event: KeyboardEvent) => {
