@@ -2,11 +2,13 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { DynBreadcrumb } from './DynBreadcrumb';
+import { DynBreadcrumbItem } from '../DynBreadcrumbItem';
 import type { BreadcrumbItem } from './DynBreadcrumb.types';
 
 const meta = {
   title: 'Components/DynBreadcrumb',
   component: DynBreadcrumb,
+  subcomponents: { DynBreadcrumbItem },
   parameters: {
     layout: 'centered',
     docs: {
@@ -198,6 +200,31 @@ export const ResponsiveBehavior: Story = {
     docs: {
       description: {
         story: 'Automatically collapses on smaller screens and maintains comfortable touch targets.',
+      },
+    },
+  },
+};
+
+export const ItemChildrenWithSeparator: Story = {
+  render: () => (
+    <DynBreadcrumb separator="custom" customSeparator={<span aria-hidden="true">|</span>}>
+      <DynBreadcrumb.Item href="/" icon="🏠" aria-label="Go to home">
+        Home
+      </DynBreadcrumb.Item>
+      <DynBreadcrumb.Item href="/products" aria-label="Browse products">
+        Products
+      </DynBreadcrumb.Item>
+      <DynBreadcrumb.Item as="button" onClick={() => {}} disabled aria-label="Disabled action">
+        Disabled
+      </DynBreadcrumb.Item>
+      <DynBreadcrumb.Item current>Current View</DynBreadcrumb.Item>
+    </DynBreadcrumb>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'DynBreadcrumb items can be composed manually with `DynBreadcrumb.Item`, supporting custom separators, disabled states, and polymorphic rendering.',
       },
     },
   },
