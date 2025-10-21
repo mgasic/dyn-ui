@@ -20,10 +20,14 @@ items (or the legacy \`menus\` prop) and optionally change the orientation betwe
 horizontal and vertical layouts. Sub-items appear in a fly-out menu and can trigger the
 \`onAction\` callback when they expose string-based actions.
 
+DynMenu also re-exports the \`DynMenuTrigger\` component it uses internally for each
+top-level item. This lets you compose custom trigger UIs while retaining focus and
+keyboard behaviour managed by DynMenu.
+
 ## Usage
 
 \`\`\`tsx
-import { DynMenu } from '@dyn-ui/react';
+import { DynMenu, DynMenuTrigger } from '@dyn-ui/react';
 
 const menuItems = [
   {
@@ -37,6 +41,8 @@ const menuItems = [
 ];
 
 <DynMenu items={menuItems} orientation="horizontal" />
+
+<DynMenuTrigger aria-haspopup="menu">Open resources</DynMenuTrigger>
 \`\`\`
         `
       }

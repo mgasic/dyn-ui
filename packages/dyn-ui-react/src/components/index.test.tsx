@@ -36,7 +36,7 @@ import {
 
   // Navigation Components
   DynMenu,
-  DynModal,
+  DynMenuTrigger,
   DynBreadcrumb,
   DynTabs,
   DynStepper,
@@ -105,7 +105,7 @@ describe('Component Exports', () => {
 
   it('exports all navigation components', () => {
     expect(isComponentExport(DynMenu)).toBe(true);
-    expect(isComponentExport(DynMenuItem)).toBe(true);
+    expect(isComponentExport(DynMenuTrigger)).toBe(true);
     expect(isComponentExport(DynBreadcrumb)).toBe(true);
     expect(isComponentExport(DynTabs)).toBe(true);
     expect(isComponentExport(DynStepper)).toBe(true);
