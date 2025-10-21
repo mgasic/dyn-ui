@@ -1,6 +1,6 @@
 ﻿// Standardized exports for ALL DYN-UI components
 // Ovaj fajl pokriva sve komponente - ne menjaj ručno!
-// Generated on: 2025-10-14 17:37:11
+// Generated on: 2025-10-21 06:43:00
 export { DynAvatar } from './DynAvatar';
 export { DynBadge } from './DynBadge';
 export { DynBox } from './DynBox';
@@ -63,7 +63,7 @@ export type * from './DynMenu';
 export type * from './DynMenuTrigger';
 export type * from './DynPage';
 export type * from './DynSelect';
-export type * from './DynSelectOption';
+export type { DynSelectOptionProps, DynSelectOptionClassNames } from './DynSelectOption';
 export type * from './DynStepper';
 export type * from './DynTable';
 export type * from './DynTabs';
