@@ -49,6 +49,8 @@ export const DynAvatar = forwardRef<DynAvatarRef, DynAvatarProps>(
       alt,
       size = 'md',
       shape = 'circle',
+      variant = 'subtle',
+      color = 'neutral',
       initials,
       status,
       loading = false,
@@ -115,6 +117,8 @@ export const DynAvatar = forwardRef<DynAvatarRef, DynAvatarProps>(
     const sizeClass = getStyleClass(`avatar--${size}`);
     const shapeClass = getStyleClass(`avatar--${shape}`);
     const statusClass = status ? getStyleClass(`avatar--${status}`) : '';
+    const variantClass = getStyleClass(`avatar--variant-${variant}`);
+    const colorClass = getStyleClass(`avatar--color-${color}`);
     const clickableClass = getStyleClass('avatar--clickable');
     const loadingClass = getStyleClass('avatar--loading');
     const errorClass = getStyleClass('avatar--error');
@@ -131,6 +135,8 @@ export const DynAvatar = forwardRef<DynAvatarRef, DynAvatarProps>(
       sizeClass,
       shapeClass,
       statusClass,
+      variantClass,
+      colorClass,
       {
         [clickableClass]: isInteractive && clickableClass,
         [loadingClass]: isLoadingState && loadingClass,
@@ -164,6 +170,8 @@ export const DynAvatar = forwardRef<DynAvatarRef, DynAvatarProps>(
         aria-labelledby={ariaLabelledBy}
         aria-busy={isLoadingState ? 'true' : undefined}
         data-status={status}
+        data-variant={variant}
+        data-color={color}
         data-testid={dataTestId || 'dyn-avatar'}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
