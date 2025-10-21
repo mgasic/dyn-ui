@@ -285,3 +285,42 @@ export const AccessibleLabel: Story = {
     }
   }
 };
+
+export const LabelledByElements: Story = {
+  args: {
+    columns,
+    data,
+    bordered: true,
+    hoverable: true
+  },
+  render: ({
+    role,
+    'aria-labelledby': ariaLabelledby,
+    'aria-describedby': ariaDescribedBy,
+    ...storyArgs
+  }) => {
+    const headingId = ariaLabelledby ?? 'team-grid-heading';
+    const descriptionId = ariaDescribedBy ?? 'team-grid-description';
+
+    return (
+      <div>
+        <h2 id={headingId}>Team member directory</h2>
+        <p id={descriptionId}>Overview of each team member’s role and status.</p>
+        <DynGrid
+          {...storyArgs}
+          role={role ?? 'grid'}
+          aria-labelledby={headingId}
+          aria-describedby={descriptionId}
+        />
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Shows how to associate the grid with visible headings and descriptions using `aria-labelledby` and `aria-describedby`.'
+      }
+    }
+  }
+};
