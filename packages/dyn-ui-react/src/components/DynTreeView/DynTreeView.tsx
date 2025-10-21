@@ -218,13 +218,15 @@ const DynTreeView: React.FC<DynTreeViewProps> = ({
     const ref = nodeRefs.current[focusedKey];
     const activeElement = document.activeElement as HTMLElement | null;
 
-    if (!treeElement || !ref || !activeElement || !treeElement.contains(activeElement)) {
+    if (!treeElement || !ref || !activeElement) {
       return;
     }
 
     const isTreeRoot = activeElement === treeElement;
     const isTreeItem = activeElement.getAttribute('role') === 'treeitem';
-    if (!isTreeRoot && !isTreeItem) {
+    const isWithinTree = treeElement.contains(activeElement);
+
+    if (!isWithinTree || (!isTreeRoot && !isTreeItem)) {
       return;
     }
 
