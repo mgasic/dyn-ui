@@ -24,6 +24,8 @@ export interface DynCheckboxProps extends BaseComponentProps {
   checked?: boolean;
   /** Shows the indeterminate state */
   indeterminate?: boolean;
+  /** Displays loading spinner and disables interactions */
+  loading?: boolean;
   /** Custom validation error message */
   errorMessage?: string;
   /** Validation rules */
@@ -38,7 +40,10 @@ export interface DynCheckboxProps extends BaseComponentProps {
   onFocus?: () => void;
 }
 
-export type DynCheckboxRef = DynFieldRef;
+export interface DynCheckboxRef extends DynFieldRef {
+  /** Direct reference to the underlying input element */
+  element: HTMLInputElement | null;
+}
 
 export interface DynCheckboxDefaultProps
   extends Required<
@@ -51,6 +56,7 @@ export interface DynCheckboxDefaultProps
         | 'visible'
         | 'checked'
         | 'indeterminate'
+        | 'loading'
         | 'size'
       >
     > {
@@ -65,6 +71,7 @@ export const DYN_CHECKBOX_DEFAULT_PROPS: DynCheckboxDefaultProps = {
   visible: true,
   checked: false,
   indeterminate: false,
+  loading: false,
   size: 'medium',
   'data-testid': 'dyn-checkbox',
 };
