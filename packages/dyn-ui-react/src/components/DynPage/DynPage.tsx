@@ -113,12 +113,7 @@ const renderActionButtons = (actions: DynPageAction[], size: LayoutSize | undefi
   return (
     <div className={styles.actions}>
       {actions.map((action) => {
-        const variant: DynButtonVariant =
-          action.type === 'primary'
-            ? 'primary'
-            : action.type === 'secondary'
-              ? 'secondary'
-              : 'primary';
+        const variant: DynButtonVariant = resolveActionVariant(action.type);
         const isDanger = action.type === 'danger';
 
         return (
