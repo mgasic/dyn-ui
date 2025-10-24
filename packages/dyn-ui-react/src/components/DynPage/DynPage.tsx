@@ -228,10 +228,13 @@ const DynPageComponent = <E extends ElementType = 'main'>(
     return renderBreadcrumbItems(breadcrumbs);
   }, [breadcrumbs]);
 
-  const computedActions = useMemo(
-    () => renderActionButtons(actions, size),
-    [actions, size]
-  );
+  const headerActions = useMemo(() => {
+    if (actions.length === 0) {
+      return null;
+    }
+
+    return renderActionButtons(actions, size);
+  }, [actions, size]);
 
   const headerContent = useMemo(() => {
     if (slots?.header) {
@@ -242,12 +245,12 @@ const DynPageComponent = <E extends ElementType = 'main'>(
         actions,
         titleId,
         renderBreadcrumbs: memoizedRenderBreadcrumbs,
-        renderActions: () => computedActions,
+        renderActions: () => headerActions,
       });
     }
 
     const breadcrumbsElement = memoizedRenderBreadcrumbs();
-    const hasTitleContent = Boolean(title || subtitle || computedActions);
+    const hasTitleContent = Boolean(title || subtitle || headerActions);
 
     if (!breadcrumbsElement && !hasTitleContent) {
       return null;
@@ -266,7 +269,7 @@ const DynPageComponent = <E extends ElementType = 'main'>(
               ) : null}
               {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
             </div>
-            {computedActions}
+            {headerActions}
           </div>
         )}
       </>
@@ -274,7 +277,7 @@ const DynPageComponent = <E extends ElementType = 'main'>(
   }, [
     actions,
     breadcrumbs,
-    computedActions,
+    headerActions,
     memoizedRenderBreadcrumbs,
     slots,
     subtitle,
