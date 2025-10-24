@@ -245,24 +245,27 @@ const DynPageComponent = <E extends ElementType = 'main'>(
     }
 
     const breadcrumbsElement = memoizedRenderBreadcrumbs();
-    const hasTitleContent = Boolean(title || subtitle || headerActions);
+    const hasTitle = Boolean(title);
+    const hasSubtitle = Boolean(subtitle);
+    const hasActions = Boolean(computedActions);
+    const shouldRenderTitleSection = hasTitle || hasSubtitle || hasActions;
 
-    if (!breadcrumbsElement && !hasTitleContent) {
+    if (!breadcrumbsElement && !shouldRenderTitleSection) {
       return null;
     }
 
     return (
       <>
         {breadcrumbsElement}
-        {hasTitleContent && (
+        {shouldRenderTitleSection && (
           <div className={styles.titleSection}>
             <div className={styles.titleContent}>
-              {title ? (
+              {hasTitle ? (
                 <h1 id={titleId} className={styles.title}>
                   {title}
                 </h1>
               ) : null}
-              {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
+              {hasSubtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
             </div>
             {headerActions}
           </div>
