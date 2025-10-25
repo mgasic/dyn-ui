@@ -29,6 +29,11 @@ export type DynFieldContainerSpacingProps = Pick<
   | 'columnGap'
 >;
 
+export type DynFieldContainerSurfaceProps = Pick<
+  DynBoxProps<'div'>,
+  'background' | 'border' | 'radius'
+>;
+
 type PolymorphicComponentProps<E extends ElementType, P> = P &
   Omit<ComponentPropsWithoutRef<E>, keyof P>;
 

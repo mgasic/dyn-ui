@@ -1,7 +1,7 @@
 import { Children, cloneElement, forwardRef, isValidElement, useId } from 'react';
 import type { ElementType, ForwardedRef, ReactElement } from 'react';
 import { DynBox } from '../DynBox';
-import type { DynBoxProps, DynBoxRef } from '../DynBox';
+import type { DynBoxRef } from '../DynBox';
 import { cn } from '../../utils/classNames';
 import {
   DYN_FIELD_CONTAINER_DEFAULT_PROPS,
@@ -82,8 +82,7 @@ export const DynFieldContainer = forwardRef(
       'aria-describedby': ariaDescribedByProp,
       'aria-labelledby': ariaLabelledByProp,
       ...rest
-    } = props as DynFieldContainerProps<E> &
-      Partial<Pick<DynBoxProps, 'background' | 'border' | 'radius'>>;
+    } = props;
 
     const { t } = useI18n();
     const translate = (value?: string) => {
