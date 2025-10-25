@@ -1,2 +1,2 @@
 export { DynListView } from './DynListView';
-export type { DynListViewProps } from './DynListView.types';
+export type { DynListViewProps, DynListViewRef } from './DynListView.types';

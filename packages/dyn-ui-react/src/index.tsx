@@ -1,6 +1,6 @@
 // Core Components
 export { DynButton } from './components/DynButton';
-export type { DynButtonProps } from './components/DynButton';
+export type { DynButtonProps, DynButtonRef, DynButtonVariant, DynButtonSize } from './components/DynButton';
 
 // Display Components - SCOPE 5
 export { DynBadge, DynAvatar, DynLabel, DynIcon } from './components';
@@ -82,6 +82,10 @@ export { DYN_GRID_DEFAULT_PROPS } from './components/DynGrid/DynGrid.types';
 // Theme System
 export { ThemeProvider, useTheme } from './theme/ThemeProvider';
 export type { ThemeProviderProps, ThemeContextValue, Theme } from './theme/ThemeProvider';
+
+// Internationalization
+export { I18nProvider, useI18n } from './i18n';
+export type { I18nProviderProps, I18nContextValue, MessageDescriptor } from './i18n';
 
 // Providers
 export { IconDictionaryProvider } from './providers';

@@ -1,0 +1,22 @@
+{
+  "motion": {
+    "duration": {
+      "instant": "80ms",
+      "fast": "120ms",
+      "normal": "200ms",
+      "slow": "320ms",
+      "deliberate": "480ms"
+    },
+    "timing": {
+      "standard": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "entrance": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "exit": "cubic-bezier(0.4, 0, 0.6, 1)"
+    },
+    "transition": {
+      "base": "all 0.2s ease-in-out",
+      "fast": "0.15s ease",
+      "normal": "0.2s ease-in-out",
+      "slow": "0.3s ease-in-out"
+    }
+  }
+}

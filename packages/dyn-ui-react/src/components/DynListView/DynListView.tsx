@@ -1,13 +1,63 @@
-import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
 import styles from './DynListView.module.css';
 import type {
   DynListViewProps,
+  DynListViewRef,
+  DynListViewSpacingValue,
   ListViewItem,
   ListAction,
   DynListViewItemRenderContext,
 } from './DynListView.types';
+
+const SPACING_TOKEN_VALUES: Record<string, string> = {
+  '0': '0',
+  xs: 'var(--dyn-spacing-xs, var(--spacing-xs, 0.25rem))',
+  sm: 'var(--dyn-spacing-sm, var(--spacing-sm, 0.5rem))',
+  md: 'var(--dyn-spacing-md, var(--spacing-md, 0.75rem))',
+  lg: 'var(--dyn-spacing-lg, var(--spacing-lg, 1rem))',
+  xl: 'var(--dyn-spacing-xl, var(--spacing-xl, 1.5rem))',
+  '2xl': 'var(--dyn-spacing-2xl, var(--spacing-2xl, 2rem))',
+};
+
+type SpacingToken = keyof typeof SPACING_TOKEN_VALUES;
+
+const resolveSpacingValue = (
+  value: DynListViewSpacingValue | undefined,
+  { allowAuto = false }: { allowAuto?: boolean } = {}
+): string | undefined => {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (typeof value === 'number' && !Number.isNaN(value)) {
+    return `${value}px`;
+  }
+
+  const stringValue = String(value).trim();
+
+  if (stringValue === '') {
+    return undefined;
+  }
+
+  if (stringValue === 'auto') {
+    return allowAuto ? 'auto' : undefined;
+  }
+
+  if (stringValue in SPACING_TOKEN_VALUES) {
+    return SPACING_TOKEN_VALUES[stringValue as SpacingToken];
+  }
+
+  return stringValue;
+};
 
 const getStyleClass = (n: string) => (styles as Record<string, string>)[n] || '';
 
@@ -209,8 +259,9 @@ const useSelectionManager = ({
   } as const;
 };
 
-export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function DynListView(
+const DynListViewInner = <E extends React.ElementType = 'div'>(
   {
+    as,
     items = [],
     data = [], // legacy alias
     value,
@@ -234,14 +285,39 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
     'data-testid': dataTestId,
+    style: styleProp,
+    role: roleProp,
+    padding,
+    p,
+    px,
+    py,
+    pt,
+    pr,
+    pb,
+    pl,
+    m,
+    mx,
+    my,
+    mt,
+    mr,
+    mb,
+    ml,
+    gap,
+    rowGap,
+    columnGap,
     ...rest
-  }, ref) {
-  
+  }: DynListViewProps<E>,
+  ref: React.ForwardedRef<DynListViewRef<E>>
+) => {
+  const Component = (as ?? 'div') as React.ElementType;
+  const isSemanticList = Component === 'ul' || Component === 'ol';
+  const interactive = multiSelect || selectable;
+
   // Use items prop, fallback to data for backward compatibility
   const listItems = items.length > 0 ? items : data;
 
   const [internalId] = useState(() => id || generateId('listview'));
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<HTMLElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
@@ -285,7 +361,7 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
   const { selectAll: selectAllKeys, clearSelection } = selection;
   const allKeys = uniqueItemKeys;
 
-  useImperativeHandle<DynListViewRef | null>(
+  useImperativeHandle<DynListViewRef<E> | null>(
     ref,
     () => {
       const node = rootRef.current;
@@ -294,7 +370,7 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
         return null;
       }
 
-      const handle = node as DynListViewRef;
+      const handle = node as DynListViewRef<E>;
 
       handle.selectAll = () => {
         if (!allKeys.length) return;
@@ -346,32 +422,110 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
     className
   );
 
-  const rootStyle = height ? { 
-    height: typeof height === 'number' ? `${height}px` : String(height) 
-  } : undefined;
+  const spacingStyles: React.CSSProperties = {};
+
+  const setSpacingStyle = (
+    property: keyof React.CSSProperties,
+    value: DynListViewSpacingValue | undefined,
+    options?: { allowAuto?: boolean }
+  ) => {
+    const resolved = resolveSpacingValue(value, options);
+    if (resolved !== undefined) {
+      (spacingStyles as Record<string, string>)[property as string] = resolved;
+    }
+  };
+
+  const basePadding = p ?? padding;
+  setSpacingStyle('padding', basePadding);
+
+  if (px !== undefined) {
+    const resolved = resolveSpacingValue(px);
+    if (resolved !== undefined) {
+      (spacingStyles as Record<string, string>).paddingLeft = resolved;
+      (spacingStyles as Record<string, string>).paddingRight = resolved;
+    }
+  }
+
+  if (py !== undefined) {
+    const resolved = resolveSpacingValue(py);
+    if (resolved !== undefined) {
+      (spacingStyles as Record<string, string>).paddingTop = resolved;
+      (spacingStyles as Record<string, string>).paddingBottom = resolved;
+    }
+  }
+
+  setSpacingStyle('paddingTop', pt);
+  setSpacingStyle('paddingRight', pr);
+  setSpacingStyle('paddingBottom', pb);
+  setSpacingStyle('paddingLeft', pl);
+
+  setSpacingStyle('margin', m, { allowAuto: true });
+
+  if (mx !== undefined) {
+    const resolved = resolveSpacingValue(mx, { allowAuto: true });
+    if (resolved !== undefined) {
+      (spacingStyles as Record<string, string>).marginLeft = resolved;
+      (spacingStyles as Record<string, string>).marginRight = resolved;
+    }
+  }
+
+  if (my !== undefined) {
+    const resolved = resolveSpacingValue(my, { allowAuto: true });
+    if (resolved !== undefined) {
+      (spacingStyles as Record<string, string>).marginTop = resolved;
+      (spacingStyles as Record<string, string>).marginBottom = resolved;
+    }
+  }
+
+  setSpacingStyle('marginTop', mt, { allowAuto: true });
+  setSpacingStyle('marginRight', mr, { allowAuto: true });
+  setSpacingStyle('marginBottom', mb, { allowAuto: true });
+  setSpacingStyle('marginLeft', ml, { allowAuto: true });
+
+  setSpacingStyle('gap', gap);
+  setSpacingStyle('rowGap', rowGap);
+  setSpacingStyle('columnGap', columnGap);
+
+  const rootStyle = height
+    ? {
+        height: typeof height === 'number' ? `${height}px` : String(height),
+      }
+    : undefined;
+
+  const combinedStyle = {
+    ...spacingStyles,
+    ...rootStyle,
+    ...(styleProp as React.CSSProperties | undefined),
+  } as React.CSSProperties | undefined;
 
   const allChecked =
     (multiSelect || selectable) &&
     allKeys.length > 0 &&
     allKeys.every((key) => selection.isSelected(key));
 
+  const computedRole = roleProp ?? (interactive ? 'listbox' : 'list');
+  const isListBoxRole = computedRole === 'listbox';
   const computedAriaLabel = ariaLabel ?? (ariaLabelledBy ? undefined : 'List view');
   const selectAllButtonLabel = allChecked ? 'Deselect all items' : 'Select all items';
 
   return (
-    <div
+    <Component
       ref={rootRef}
       id={internalId}
-      role="listbox"
-      aria-multiselectable={multiSelect || selectable || undefined}
+      role={computedRole}
+      aria-multiselectable={
+        isListBoxRole && (multiSelect || selectable) ? true : undefined
+      }
       aria-label={computedAriaLabel}
       aria-labelledby={ariaLabelledBy}
-      aria-activedescendant={listItems[activeIndex] ? itemIds[activeIndex] : undefined}
+      aria-activedescendant={
+        isListBoxRole && listItems[activeIndex] ? itemIds[activeIndex] : undefined
+      }
       className={rootClasses}
       data-testid={dataTestId || 'dyn-listview'}
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      style={rootStyle}
+      style={combinedStyle}
       {...rest}
     >
       {(multiSelect || selectable) && (
@@ -573,8 +727,10 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
             isExpandable && !usesDefaultRenderer && !customHandledExpansion;
           const shouldRenderControls = hasActions || renderSeparateExpandControl;
 
+          const ItemContainer = (isSemanticList ? 'li' : 'div') as React.ElementType;
+
           return (
-            <div
+            <ItemContainer
               key={key}
               className={cn(
                 getStyleClass('option'),
@@ -586,9 +742,9 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
             >
               <div
                 id={itemIds[i]}
-                role="option"
-                aria-selected={selectedState}
-                aria-disabled={item.disabled || undefined}
+                role={isListBoxRole ? 'option' : 'listitem'}
+                aria-selected={isListBoxRole ? selectedState : undefined}
+                aria-disabled={isListBoxRole && item.disabled ? true : undefined}
                 aria-labelledby={optionLabelledBy}
                 aria-describedby={optionDescribedBy}
                 className={getStyleClass('option__main')}
@@ -664,12 +820,21 @@ export const DynListView = forwardRef<DynListViewRef, DynListViewProps>(function
                   ))}
                 </div>
               )}
-            </div>
+            </ItemContainer>
           );
         })
       )}
-    </div>
+    </Component>
   );
-});
+};
 
+const DynListView = forwardRef(DynListViewInner) as <
+  E extends React.ElementType = 'div'
+>(
+  props: DynListViewProps<E> & { ref?: React.Ref<DynListViewRef<E>> }
+) => React.ReactElement | null;
+
+DynListView.displayName = 'DynListView';
+
+export { DynListView };
 export default DynListView;

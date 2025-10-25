@@ -105,7 +105,7 @@ function DynMenuItemInner<E extends React.ElementType = 'button'>(
     ? 'open'
     : active
     ? 'active'
-    : undefined;
+    : 'closed';
 
   const componentProps: Record<string, unknown> = {
     ref,
@@ -124,9 +124,9 @@ function DynMenuItemInner<E extends React.ElementType = 'button'>(
     disabled: isButtonElement ? isDisabled : undefined,
     'data-testid': dataTestId,
     'data-state': dataState,
-    'data-open': open ? '' : undefined,
-    'data-disabled': isDisabled ? '' : undefined,
-    'data-loading': loading ? '' : undefined,
+    'data-open': open ? 'true' : undefined,
+    'data-disabled': isDisabled ? 'true' : undefined,
+    'data-loading': loading ? 'true' : undefined,
     onClick: handleClick,
     onKeyDown: handleKeyDown,
     ...rest,

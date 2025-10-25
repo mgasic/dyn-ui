@@ -4,6 +4,7 @@
  */
 
 import type { AriaRole, ReactNode } from 'react';
+import type { DynThemeTokens } from '../theme/tokens';
 
 export type ThemeName = 'light' | 'dark' | 'high-contrast';
 
@@ -59,10 +60,12 @@ export interface ThemeConfig {
 }
 
 export interface ThemeContextValue {
-  theme: ThemeName;
-  themeConfig: ThemeConfig;
-  setTheme: (theme: ThemeName) => void;
-  toggleTheme: () => void;
+  theme: ThemeName | (string & Record<never, never>);
+  tokens: DynThemeTokens;
+  cssText: string;
+  availableThemes: Array<ThemeName | (string & Record<never, never>)>;
+  isLoading: boolean;
+  setTheme: (theme: ThemeName | (string & Record<never, never>)) => void;
 }
 
 // ===== STANDARDIZED COMPONENT PROP TYPES =====

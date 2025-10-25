@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useMemo } from 'react';
 import { cn } from '../../utils/classNames';
 import { generateId } from '../../utils/accessibility';
+import { tokens } from '../../tokens';
 import type {
   DynBoxBreakpoint,
   DynBoxProps,
@@ -25,14 +26,7 @@ type BreakpointWithoutBase = Exclude<DynBoxBreakpoint, 'base'>;
 
 const RESPONSIVE_BREAKPOINTS: BreakpointWithoutBase[] = ['sm', 'md', 'lg', 'xl'];
 
-const SPACING_TOKENS: Record<Exclude<SpacingSize, '0' | 'auto'>, string> = {
-  xs: '0.25rem',
-  sm: '0.5rem',
-  md: '1rem',
-  lg: '1.5rem',
-  xl: '2rem',
-  '2xl': '3rem',
-};
+const SPACING_TOKENS = tokens.spacing as Record<string, string>;
 
 type SpacingSlot =
   | 'padding'
@@ -229,7 +223,7 @@ function DynBoxInner<E extends React.ElementType = 'div'>(props: DynBoxProps<E>,
     as, padding, p, px, py, pt, pr, pb, pl,
     m, mx, my, mt, mr, mb, ml,
     radius = 'md', borderRadius, customBorderRadius,
-    shadow = 'none', border = 'default',
+    shadow = 'none', border = 'default', borderTop, borderRight, borderBottom, borderLeft,
     background = 'surface', bg, backgroundColor, color,
     align, justify,
     direction = 'column', flexDirection, wrap,
@@ -311,6 +305,10 @@ function DynBoxInner<E extends React.ElementType = 'div'>(props: DynBoxProps<E>,
     textAlign && getStyleClass(`box--text-${textAlign}`),
     overflow && getStyleClass(`box--overflow-${overflow}`),
     border === 'default' && getStyleClass('box--border'),
+    borderTop && getStyleClass('box--border-top'),
+    borderRight && getStyleClass('box--border-right'),
+    borderBottom && getStyleClass('box--border-bottom'),
+    borderLeft && getStyleClass('box--border-left'),
     interactive && getStyleClass('box--interactive'),
     hideOnMobile && getStyleClass('box--mobile-hidden'),
     hideOnTablet && getStyleClass('box--tablet-hidden'),

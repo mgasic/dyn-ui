@@ -14,6 +14,10 @@ export {
 export { ThemeProvider, useTheme } from './theme/ThemeProvider';
 export type { ThemeProviderProps, ThemeContextValue, Theme } from './theme/ThemeProvider';
 
+// Internationalization
+export { I18nProvider, useI18n } from './i18n';
+export type { I18nProviderProps, I18nContextValue, MessageDescriptor } from './i18n';
+
 // Providers
 export { IconDictionaryProvider } from './providers';
 
@@ -32,6 +36,9 @@ export {
   isThemeColor,
   processIconString,
 } from './utils/dynFormatters';
+
+// Design tokens
+export * from './tokens';
 
 // Testing utilities
 export { axe, testA11y } from './testing';

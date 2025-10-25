@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import { DynToolbar } from './DynToolbar';
@@ -195,6 +195,47 @@ describe('DynToolbar', () => {
     expect(searchInput).toHaveAttribute('placeholder', 'Search placeholder');
   });
 
+  it('keeps focus on the search input when navigating with arrow keys', async () => {
+    const user = userEvent.setup();
+    const searchAndActionItems: ToolbarItem[] = [
+      {
+        id: 'search1',
+        type: 'search',
+        label: 'Search placeholder'
+      },
+      {
+        id: 'bold',
+        label: 'Bold',
+        action: jest.fn()
+      }
+    ];
+
+    render(
+      <DynToolbar
+        items={searchAndActionItems}
+        responsive={false}
+        overflowMenu={false}
+        showLabels
+      />
+    );
+
+    const searchInput = screen.getByRole('searchbox');
+    const boldButton = screen.getByRole('button', { name: 'Bold' });
+
+    searchInput.focus();
+    expect(searchInput).toHaveFocus();
+    expect(searchInput).toHaveAttribute('tabindex', '0');
+    expect(boldButton).toHaveAttribute('tabindex', '-1');
+
+    await user.keyboard('{ArrowRight}');
+
+    await waitFor(() => {
+      expect(searchInput).toHaveFocus();
+      expect(searchInput).toHaveAttribute('tabindex', '0');
+      expect(boldButton).toHaveAttribute('tabindex', '-1');
+    });
+  });
+
   it('renders custom components', () => {
     const customItems: ToolbarItem[] = [
       {
@@ -210,11 +251,88 @@ describe('DynToolbar', () => {
     expect(screen.getByText('Custom Content')).toBeInTheDocument();
   });
 
+  it('supports polymorphic rendering and orientation', () => {
+    render(
+      <DynToolbar
+        as="nav"
+        items={[]}
+        responsive={false}
+        overflowMenu={false}
+        orientation="vertical"
+      />
+    );
+
+    const toolbar = screen.getByRole('toolbar');
+    expect(toolbar.tagName).toBe('NAV');
+    expect(toolbar).toHaveAttribute('aria-orientation', 'vertical');
+    expect(toolbar).toHaveAttribute('data-orientation', 'vertical');
+  });
+
+  it('applies state props to toolbar items', () => {
+    const toggleItems: ToolbarItem[] = [
+      { id: 'bold', label: 'Bold', state: 'on', action: jest.fn() },
+      { id: 'italic', label: 'Italic', state: 'off', action: jest.fn() }
+    ];
+
+    render(<DynToolbar items={toggleItems} responsive={false} overflowMenu={false} />);
+
+    const boldButton = screen.getByRole('button', { name: 'Bold' });
+    const italicButton = screen.getByRole('button', { name: 'Italic' });
+
+    expect(boldButton).toHaveAttribute('data-state', 'on');
+    expect(boldButton).toHaveAttribute('aria-pressed', 'true');
+    expect(italicButton).toHaveAttribute('data-state', 'off');
+    expect(italicButton).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('manages roving focus between toolbar controls', async () => {
+    const user = userEvent.setup();
+    const focusItems: ToolbarItem[] = [
+      { id: 'bold', label: 'Bold', action: jest.fn() },
+      { id: 'italic', label: 'Italic', action: jest.fn() },
+      { id: 'underline', label: 'Underline', action: jest.fn() }
+    ];
+
+    render(
+      <DynToolbar
+        items={focusItems}
+        responsive={false}
+        overflowMenu={false}
+        showLabels
+        orientation="horizontal"
+      />
+    );
+
+    const boldButton = screen.getByRole('button', { name: 'Bold' });
+    const italicButton = screen.getByRole('button', { name: 'Italic' });
+    const underlineButton = screen.getByRole('button', { name: 'Underline' });
+
+    boldButton.focus();
+    expect(boldButton).toHaveAttribute('tabindex', '0');
+    expect(italicButton).toHaveAttribute('tabindex', '-1');
+
+    await user.keyboard('{ArrowRight}');
+    expect(italicButton).toHaveFocus();
+    expect(italicButton).toHaveAttribute('tabindex', '0');
+    expect(boldButton).toHaveAttribute('tabindex', '-1');
+
+    await user.keyboard('{End}');
+    expect(underlineButton).toHaveFocus();
+    expect(underlineButton).toHaveAttribute('tabindex', '0');
+
+    await user.keyboard('{ArrowRight}');
+    expect(boldButton).toHaveFocus();
+    expect(boldButton).toHaveAttribute('tabindex', '0');
+
+    await user.keyboard('{Home}');
+    expect(boldButton).toHaveFocus();
+  });
+
   it('handles dropdown items', async () => {
     const user = userEvent.setup();
     render(<DynToolbar items={dropdownItems} />);
 
-    const dropdownButton = screen.getByText('Dropdown');
+    const dropdownButton = screen.getByRole('button', { name: 'Dropdown' });
     expect(dropdownButton).toHaveAttribute('aria-haspopup', 'menu');
     expect(dropdownButton).toHaveAttribute('aria-expanded', 'false');
 
@@ -231,7 +349,7 @@ describe('DynToolbar', () => {
     render(<DynToolbar items={dropdownItems} />);
 
     // Open dropdown
-    const dropdownButton = screen.getByText('Dropdown');
+    const dropdownButton = screen.getByRole('button', { name: 'Dropdown' });
     await user.click(dropdownButton);
 
     // Click sub-item
@@ -410,12 +528,47 @@ describe('DynToolbar', () => {
     expect(onOverflowToggle).toHaveBeenCalledWith(false);
   });
 
+  it('returns focus to the overflow toggle when the menu closes with Escape', async () => {
+    const user = userEvent.setup();
+    const manyItems: ToolbarItem[] = Array.from({ length: 8 }, (_, i) => ({
+      id: `action-${i}`,
+      label: `Action ${i}`,
+      action: jest.fn()
+    }));
+
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 320
+    });
+
+    render(
+      <DynToolbar
+        items={manyItems}
+        responsive={true}
+        overflowMenu={true}
+        overflowThreshold={3}
+      />
+    );
+
+    const overflowButton = await screen.findByLabelText('More actions');
+    await user.click(overflowButton);
+
+    const overflowMenu = await screen.findByRole('menu');
+    const firstOverflowItem = within(overflowMenu).getAllByRole('button')[0];
+    firstOverflowItem.focus();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    expect(overflowButton).toHaveFocus();
+  });
+
   it('closes dropdown and overflow menus when clicking outside', async () => {
     const user = userEvent.setup();
     render(<DynToolbar items={dropdownItems} />);
 
     // Open dropdown
-    const dropdownButton = screen.getByText('Dropdown');
+    const dropdownButton = screen.getByRole('button', { name: 'Dropdown' });
     await user.click(dropdownButton);
 
     expect(screen.getByRole('menu')).toBeInTheDocument();
@@ -428,19 +581,41 @@ describe('DynToolbar', () => {
     });
   });
 
+  it('returns focus to the dropdown trigger when closing with Escape', async () => {
+    const user = userEvent.setup();
+    render(<DynToolbar items={dropdownItems} />);
+
+    const dropdownButton = screen.getByRole('button', { name: 'Dropdown' });
+    await user.click(dropdownButton);
+
+    const dropdownMenu = await screen.findByRole('menu');
+    const firstSubItem = within(dropdownMenu).getByRole('menuitem', { name: 'Sub Item 1' });
+    firstSubItem.focus();
+
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    expect(dropdownButton).toHaveFocus();
+  });
+
   it('handles keyboard navigation', async () => {
     const user = userEvent.setup();
     render(<DynToolbar {...defaultProps} />);
 
-    const firstButton = screen.getByText('Item 1');
+    const firstButton = screen.getByRole('button', { name: 'Item 1' });
+
+    await waitFor(() => {
+      expect(firstButton).toHaveAttribute('tabindex', '0');
+    });
+
     firstButton.focus();
 
-    await user.keyboard('{Enter}');
+    await user.type(firstButton, '{enter}');
     expect(basicItems[0].action).toHaveBeenCalled();
 
     jest.clearAllMocks();
 
-    await user.keyboard(' ');
+    await user.type(firstButton, '{space}');
     expect(basicItems[0].action).toHaveBeenCalled();
   });
 

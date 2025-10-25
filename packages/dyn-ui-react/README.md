@@ -17,6 +17,8 @@ A modern React component library built with TypeScript, optimized CSS Modules, a
 - 📱 **Responsive** - Mobile-first design with responsive utilities
 - ♿ **Accessible** - WCAG compliant components with ARIA support
 - 🧪 **Test Ready** - Built-in test utilities and data attributes
+- 🌗 **Runtime Themes** - Light, dark, and high-contrast themes with dynamic switching
+- 🌍 **Internationalization** - Global i18n provider with pluralization, formatting, and RTL mirroring
 
 ## 🚀 Quick Start
 
@@ -46,6 +48,53 @@ function App() {
     </DynButton>
   );
 }
+```
+
+## 🧩 Global Providers
+
+Wrap your application with the shared providers to enable design tokens, theme switching, and localized messaging.
+
+```tsx
+import { ThemeProvider, I18nProvider } from '@dyn-ui/react';
+
+const messages = {
+  'en-US': {
+    'app.greeting': 'Hello {name}!'
+  },
+  'sr-RS': {
+    'app.greeting': 'Zdravo {name}!'
+  },
+};
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <I18nProvider initialLocale="en-US" messages={messages}>
+      <ThemeProvider initialTheme="light">
+        {children}
+      </ThemeProvider>
+    </I18nProvider>
+  );
+}
+```
+
+### ThemeProvider
+
+- Loads design tokens at runtime (light, dark, and high-contrast themes by default)
+- Applies CSS custom properties to the document root and exposes `availableThemes`
+- Persists theme selection via `localStorage` (configurable)
+
+```tsx
+const { theme, setTheme, availableThemes } = useTheme();
+```
+
+### I18nProvider
+
+- Provides `t`, `formatNumber`, and `formatDate` helpers with pluralization support
+- Mirrors the layout for RTL locales and updates `lang`/`dir` attributes automatically
+
+```tsx
+const { t, setLocale } = useI18n();
+const message = t({ id: 'app.greeting', values: { name: 'Alex' } });
 ```
 
 ## 📦 Available Components
